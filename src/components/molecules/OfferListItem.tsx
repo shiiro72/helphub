@@ -1,7 +1,8 @@
 import React from 'react';
-import { Calendar, User, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { Calendar, User, MessageSquare } from 'lucide-react';
 import { HelpOffer } from '@/lib/types';
 import Link from 'next/link';
+import { VerificationBadge } from '../atoms/VerificationBadge';
 
 interface OfferListItemProps {
   offer: HelpOffer;
@@ -36,9 +37,7 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({ offer }) => {
             <span className="font-medium mr-1 text-zinc-700 dark:text-zinc-300 truncate max-w-[100px]">
               {offer.profiles?.username || 'Anonymous'}
             </span>
-            {offer.profiles?.is_verified && (
-              <CheckCircle2 size={10} className="text-blue-500" />
-            )}
+            <VerificationBadge isVerified={offer.profiles?.is_verified} size={10} className="text-blue-500" />
           </div>
 
           <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">

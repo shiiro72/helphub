@@ -1,7 +1,8 @@
 import React from 'react';
-import { Calendar, User, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { Calendar, User, MessageSquare } from 'lucide-react';
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
+import { VerificationBadge } from '../atoms/VerificationBadge';
 
 interface RequestListItemProps {
   request: HelpRequest;
@@ -36,9 +37,7 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({ request }) => 
             <span className="font-medium mr-1 text-zinc-700 dark:text-zinc-300 truncate max-w-[100px]">
               {request.profiles?.username || 'Anonymous'}
             </span>
-            {request.profiles?.is_verified && (
-              <CheckCircle2 size={10} className="text-blue-500" />
-            )}
+            <VerificationBadge isVerified={request.profiles?.is_verified} size={10} className="text-blue-500" />
           </div>
 
           <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">

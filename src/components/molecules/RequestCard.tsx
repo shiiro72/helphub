@@ -1,7 +1,8 @@
 import React from 'react';
-import { MapPin, Calendar, User, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { MapPin, Calendar, User, MessageSquare } from 'lucide-react';
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
+import { VerificationBadge } from '../atoms/VerificationBadge';
 
 interface RequestCardProps {
   request: HelpRequest;
@@ -39,9 +40,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request }) => {
           <span className="font-medium mr-1 text-zinc-700 dark:text-zinc-300">
             {request.profiles?.username || 'Anonymous'}
           </span>
-          {request.profiles?.is_verified && (
-            <CheckCircle2 size={12} className="text-blue-500 ml-1" />
-          )}
+          <VerificationBadge isVerified={request.profiles?.is_verified} size={12} className="text-blue-500 ml-1" />
         </div>
 
         <div className="flex items-center justify-between">

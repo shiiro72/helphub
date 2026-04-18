@@ -1,6 +1,7 @@
 import React from 'react';
 import { Conversation } from '@/lib/types';
 import { User } from 'lucide-react';
+import { VerificationBadge } from '../atoms/VerificationBadge';
 
 interface ChatListProps {
   conversations: Conversation[];
@@ -45,9 +46,12 @@ export const ChatList: React.FC<ChatListProps> = ({
               </div>
               <div className="flex-grow text-left overflow-hidden">
                 <div className="flex justify-between items-center mb-1">
-                  <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                    {conv.profiles?.username || 'User'}
-                  </h3>
+                  <div className="flex items-center gap-1 min-w-0">
+                    <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                      {conv.profiles?.username || 'User'}
+                    </h3>
+                    <VerificationBadge isVerified={conv.profiles?.is_verified} size={14} />
+                  </div>
                   <span className="text-xs text-zinc-500">
                     {new Date(conv.last_message_at).toLocaleDateString([], {
                       month: 'short',

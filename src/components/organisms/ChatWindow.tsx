@@ -4,6 +4,7 @@ import { MessageBubble } from '../molecules/MessageBubble';
 import { ChatInput } from '../molecules/ChatInput';
 import { User, MoreVertical, Flag, Ban } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { VerificationBadge } from '../atoms/VerificationBadge';
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -143,9 +144,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             )}
           </div>
           <div>
-            <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-              {conversation.profiles?.username || 'User'}
-            </h3>
+            <div className="flex items-center gap-1">
+              <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+                {conversation.profiles?.username || 'User'}
+              </h3>
+              <VerificationBadge isVerified={conversation.profiles?.is_verified} size={14} />
+            </div>
             <p className="text-[10px] text-zinc-500">online</p>
           </div>
         </div>
