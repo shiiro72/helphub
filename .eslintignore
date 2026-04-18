@@ -1,0 +1,7 @@
+.next
+out
+nbuild
+ncoverage
+nnode_modules
+npackage-lock.json
+n**/*.d.ts

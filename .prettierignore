@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+build
+dist
+coverage
+public
+.DS_Store
+package-lock.json
