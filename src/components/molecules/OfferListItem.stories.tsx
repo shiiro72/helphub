@@ -4,9 +4,6 @@ import { OfferListItem } from './OfferListItem';
 const meta: Meta<typeof OfferListItem> = {
   title: 'Molecules/OfferListItem',
   component: OfferListItem,
-  parameters: {
-    layout: 'padded',
-  },
   tags: ['autodocs'],
 };
 

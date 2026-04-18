@@ -6,14 +6,14 @@ import { VerificationBadge } from '../atoms/VerificationBadge';
 import { StarRating } from '../atoms/StarRating';
 import { translateText } from '@/lib/translate';
 import { useRouter } from 'next/router';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 interface OfferCardProps {
   offer: HelpOffer;
 }
 
 export const OfferCard: React.FC<OfferCardProps> = ({ offer }) => {
-  const { t } = useTranslation('common');
+  const t = useTranslations();
   const { locale } = useRouter();
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);

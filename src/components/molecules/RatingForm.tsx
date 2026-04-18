@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
 import { Button } from '../atoms/Button';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 interface RatingFormProps {
   onSubmit: (rating: number, tags: string[], comment: string) => void;
@@ -23,7 +23,7 @@ export const RatingForm: React.FC<RatingFormProps> = ({
   onCancel,
   isSubmitting = false,
 }) => {
-  const { t } = useTranslation('common');
+  const t = useTranslations();
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);

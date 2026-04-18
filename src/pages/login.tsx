@@ -1,7 +1,6 @@
 import { AuthForm } from '@/components/organisms/AuthForm';
 import { Navbar } from '@/components/organisms/Navbar';
 import Head from 'next/head';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { GetStaticProps } from 'next';
 
 export default function LoginPage() {
@@ -20,6 +19,6 @@ export default function LoginPage() {
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => ({
   props: {
-    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+    messages: (await import(`../../messages/${locale ?? 'en'}.json`)).default,
   },
 });

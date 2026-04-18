@@ -6,8 +6,7 @@ import { Button } from "@/components/atoms/Button";
 import Link from "next/link";
 import { Heart, HandHelping } from "lucide-react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslations } from 'next-intl';
 import { GetStaticProps } from 'next';
 
 const geistSans = Geist({
@@ -21,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export default function Home() {
-  const { t } = useTranslation('common');
+  const t = useTranslations();
   const [user, setUser] = useState<SupabaseUser | null>(null);
 
   useEffect(() => {
@@ -103,6 +102,6 @@ export default function Home() {
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => ({
   props: {
-    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+    messages: (await import(`../../messages/${locale ?? 'en'}.json`)).default,
   },
 });

@@ -7,7 +7,6 @@ import { createClient } from '@/lib/supabase/client';
 import { Conversation } from '@/lib/types';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useRouter } from 'next/router';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { GetStaticProps } from 'next';
 
 export default function MessagesPage() {
@@ -168,7 +167,6 @@ export default function MessagesPage() {
         <div className="w-full md:w-1/3 border-r border-zinc-200 dark:border-zinc-800">
           <ChatList
             conversations={conversations}
-            currentUserId={user?.id || ''}
             activeId={activeConversation?.id}
             onSelect={setActiveConversation}
           />
@@ -227,6 +225,6 @@ export default function MessagesPage() {
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => ({
   props: {
-    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+    messages: (await import(`../../messages/${locale ?? 'en'}.json`)).default,
   },
 });
