@@ -60,12 +60,6 @@ CREATE POLICY "Participants can view messages in their conversations." ON messag
       WHERE conversations.id = messages.conversation_id
       AND (auth.uid() = conversations.participant_1 OR auth.uid() = conversations.participant_2)
     )
-  )
-  WITH CHECK (
-    -- Only allow updating the is_read column
-    (is_read IS DISTINCT FROM (SELECT is_read FROM messages WHERE id = id))
-    -- AND only by the recipient (not the sender)
-    AND auth.uid() <> sender_id
   );
 
 CREATE POLICY "Participants can insert messages in their conversations." ON messages
@@ -85,6 +79,12 @@ CREATE POLICY "Participants can update message read status." ON messages
       WHERE conversations.id = messages.conversation_id
       AND (auth.uid() = conversations.participant_1 OR auth.uid() = conversations.participant_2)
     )
+  )
+  WITH CHECK (
+    -- Only allow updating the is_read column
+    (is_read IS DISTINCT FROM (SELECT is_read FROM messages WHERE id = id))
+    -- AND only by the recipient (not the sender)
+    AND auth.uid() <> sender_id
   );
 
 -- 8. Policies for Blocks
