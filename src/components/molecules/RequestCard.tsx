@@ -1,6 +1,7 @@
 import React from 'react';
 import { MapPin, Calendar, User, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { HelpRequest } from '@/lib/types';
+import Link from 'next/link';
 
 interface RequestCardProps {
   request: HelpRequest;
@@ -19,12 +20,13 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request }) => {
         <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">
           {request.title}
         </h3>
-        <button
+        <Link
+          href={`/messages?userId=${request.user_id}`}
           className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
           aria-label="Message requester"
         >
           <MessageSquare size={20} />
-        </button>
+        </Link>
       </div>
 
       <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-6 line-clamp-3 flex-grow">
