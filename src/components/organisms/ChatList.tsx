@@ -14,8 +14,8 @@ export const ChatList: React.FC<ChatListProps> = ({
   onSelect,
 }) => {
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-[#111b21] overflow-y-auto border-r border-zinc-200 dark:border-zinc-800">
-      <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-[#f0f2f5] dark:bg-[#202c33]">
+    <div className="flex flex-col h-full bg-chat-sidebar overflow-y-auto border-r border-zinc-200 dark:border-zinc-800">
+      <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-chat-header">
         <h2 className="text-xl font-bold">Chats</h2>
       </div>
       <div className="flex-grow overflow-y-auto">
@@ -28,8 +28,8 @@ export const ChatList: React.FC<ChatListProps> = ({
             <button
               key={conv.id}
               onClick={() => onSelect(conv)}
-              className={`w-full flex items-center p-4 border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-[#f5f6f6] dark:hover:bg-[#202c33] transition-colors ${
-                activeId === conv.id ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : ''
+              className={`w-full flex items-center p-4 border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-chat-item-hover transition-colors ${
+                activeId === conv.id ? 'bg-chat-item-active' : ''
               }`}
             >
               <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center mr-4 shrink-0">

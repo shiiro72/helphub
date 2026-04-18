@@ -127,9 +127,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       : conversation.participant_1;
 
   return (
-    <div className="flex flex-col h-full bg-[#efeae2] dark:bg-[#0b141a]">
+    <div className="flex flex-col h-full bg-chat-bg">
       {/* Header */}
-      <div className="bg-[#f0f2f5] dark:bg-[#202c33] p-3 flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800">
+      <div className="bg-chat-header p-3 flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
             {conversation.profiles?.image_url ? (
@@ -157,13 +157,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             <MoreVertical size={20} />
           </button>
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#233138] shadow-lg rounded-md overflow-hidden z-10 border border-zinc-200 dark:border-zinc-800">
+            <div className="absolute right-0 mt-2 w-48 bg-chat-menu-bg shadow-lg rounded-md overflow-hidden z-10 border border-zinc-200 dark:border-zinc-800">
               <button
                 onClick={() => {
                   onBlock(otherParticipantId);
                   setShowMenu(false);
                 }}
-                className="w-full px-4 py-3 text-left text-sm hover:bg-zinc-50 dark:hover:bg-[#182229] flex items-center gap-2 text-red-500"
+                className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-red-500"
               >
                 <Ban size={16} /> Block User
               </button>
@@ -172,7 +172,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   onReport(otherParticipantId);
                   setShowMenu(false);
                 }}
-                className="w-full px-4 py-3 text-left text-sm hover:bg-zinc-50 dark:hover:bg-[#182229] flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+                className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
               >
                 <Flag size={16} /> Report User
               </button>
