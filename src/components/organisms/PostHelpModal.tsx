@@ -3,15 +3,18 @@ import { X } from 'lucide-react';
 import { Button } from '../atoms/Button';
 import { Input } from '../atoms/Input';
 import { Label } from '../atoms/Label';
+import { Textarea } from '../atoms/Textarea';
+import { ErrorBanner } from '../molecules/ErrorBanner';
 import { createClient } from '@/lib/supabase/client';
 
-interface PostRequestModalProps {
+interface PostHelpModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  type: 'request' | 'offer';
 }
 
-export const PostRequestModal: React.FC<PostRequestModalProps> = ({ isOpen, onClose, onSuccess }) => {
+export const PostHelpModal: React.FC<PostHelpModalProps> = ({ isOpen, onClose, onSuccess, type }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [location, setLocation] = useState('');
@@ -20,6 +23,8 @@ export const PostRequestModal: React.FC<PostRequestModalProps> = ({ isOpen, onCl
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const isRequest = type === 'request';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,20 +35,28 @@ export const PostRequestModal: React.FC<PostRequestModalProps> = ({ isOpen, onCl
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      setError('You must be logged in to post a request.');
+      setError(`You must be logged in to post a ${type}.`);
       setLoading(false);
       return;
     }
 
+    const table = isRequest ? 'help_requests' : 'help_offers';
+    const payload: Record<string, string | null> = {
+      user_id: user.id,
+      title,
+      content,
+    };
+
+    if (isRequest) {
+      payload.request_location = location || 'Remote';
+      payload.reward_offer = reward || null;
+    } else {
+      payload.offer_location = location || 'Remote';
+    }
+
     const { error: insertError } = await supabase
-      .from('help_requests')
-      .insert({
-        user_id: user.id,
-        title,
-        content,
-        request_location: location || 'Remote',
-        reward_offer: reward || null,
-      });
+      .from(table)
+      .insert(payload);
 
     if (insertError) {
       setError(insertError.message);
@@ -60,27 +73,33 @@ export const PostRequestModal: React.FC<PostRequestModalProps> = ({ isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Post a Request</h2>
-          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+            {isRequest ? 'Post a Request' : 'Post an Offer'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+            aria-label="Close modal"
+          >
             <X size={24} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
-              {error}
-            </div>
-          )}
+          <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
 
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input
               id="title"
-              placeholder="What do you need help with?"
+              placeholder={isRequest ? "What do you need help with?" : "What can you help with?"}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
@@ -89,17 +108,16 @@ export const PostRequestModal: React.FC<PostRequestModalProps> = ({ isOpen, onCl
 
           <div className="space-y-2">
             <Label htmlFor="content">Description</Label>
-            <textarea
+            <Textarea
               id="content"
-              className="flex min-h-[120px] w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:ring-offset-zinc-950 dark:placeholder:text-zinc-400 dark:focus-visible:ring-zinc-300"
-              placeholder="Describe your request in detail..."
+              placeholder={isRequest ? "Describe your request in detail..." : "Describe your offer in detail..."}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               required
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className={`grid ${isRequest ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
             <div className="space-y-2">
               <Label htmlFor="location">Location (Optional)</Label>
               <Input
@@ -109,15 +127,17 @@ export const PostRequestModal: React.FC<PostRequestModalProps> = ({ isOpen, onCl
                 onChange={(e) => setLocation(e.target.value)}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="reward">Reward (Optional)</Label>
-              <Input
-                id="reward"
-                placeholder="e.g. Coffee, $20"
-                value={reward}
-                onChange={(e) => setReward(e.target.value)}
-              />
-            </div>
+            {isRequest && (
+              <div className="space-y-2">
+                <Label htmlFor="reward">Reward (Optional)</Label>
+                <Input
+                  id="reward"
+                  placeholder="e.g. Coffee, $20"
+                  value={reward}
+                  onChange={(e) => setReward(e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3 pt-4">
@@ -125,7 +145,7 @@ export const PostRequestModal: React.FC<PostRequestModalProps> = ({ isOpen, onCl
               Cancel
             </Button>
             <Button type="submit" className="flex-1" disabled={loading}>
-              {loading ? 'Posting...' : 'Post Request'}
+              {loading ? 'Posting...' : (isRequest ? 'Post Request' : 'Post Offer')}
             </Button>
           </div>
         </form>
