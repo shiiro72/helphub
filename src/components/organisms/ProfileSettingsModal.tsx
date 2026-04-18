@@ -9,7 +9,7 @@ import { Profile } from '@/lib/types';
 import { ConfirmationModal } from '../molecules/ConfirmationModal';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { ErrorBanner } from '../molecules/ErrorBanner';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 interface ProfileSettingsModalProps {
   isOpen: boolean;
@@ -17,7 +17,7 @@ interface ProfileSettingsModalProps {
 }
 
 export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOpen, onClose }) => {
-  const { t } = useTranslation('common');
+  const t = useTranslations();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [username, setUsername] = useState('');
   const [imageUrl, setImageUrl] = useState('');

@@ -4,14 +4,14 @@ import { Button } from '../atoms/Button';
 import { FormField } from '../molecules/FormField';
 import { createClient } from '@/lib/supabase/client';
 import { LogIn, UserPlus } from 'lucide-react';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 interface AuthFormProps {
   mode: 'login' | 'register';
 }
 
 export function AuthForm({ mode }: AuthFormProps) {
-  const { t } = useTranslation('common');
+  const t = useTranslations();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

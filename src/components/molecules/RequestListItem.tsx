@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { translateText } from '@/lib/translate';
 import { useRouter } from 'next/router';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 
 interface RequestListItemProps {
   request: HelpRequest;
 }
 
 export const RequestListItem: React.FC<RequestListItemProps> = ({ request }) => {
-  const { t } = useTranslation('common');
+  const t = useTranslations();
   const { locale } = useRouter();
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);

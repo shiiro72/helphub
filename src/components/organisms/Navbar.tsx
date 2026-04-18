@@ -8,11 +8,11 @@ import { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supaba
 import { ProfileSettingsModal } from './ProfileSettingsModal';
 import { Profile } from '@/lib/types';
 import { VerificationBadge } from '../atoms/VerificationBadge';
-import { useTranslation } from 'next-i18next';
+import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '../molecules/LanguageSwitcher';
 
 export function Navbar() {
-  const { t } = useTranslation('common');
+  const t = useTranslations();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);

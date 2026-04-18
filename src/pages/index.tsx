@@ -1,40 +1,42 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import { Navbar } from "@/components/organisms/Navbar";
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/atoms/Button";
-import Link from "next/link";
-import { Heart, HandHelping } from "lucide-react";
-import { User as SupabaseUser } from "@supabase/supabase-js";
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { GetStaticProps } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import { Navbar } from '@/components/organisms/Navbar';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { Button } from '@/components/atoms/Button';
+import Link from 'next/link';
+import { Heart, HandHelping } from 'lucide-react';
+import { User as SupabaseUser } from '@supabase/supabase-js';
+import { useTranslations } from 'next-intl';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export default function Home() {
-  const { t } = useTranslation('common');
+  const t = useTranslations();
   const [user, setUser] = useState<SupabaseUser | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setUser(user);
     };
     getUser();
   }, []);
 
   return (
-    <div className={`${geistSans.className} ${geistMono.className} min-h-screen bg-zinc-50 dark:bg-black font-sans`}>
+    <div
+      className={`${geistSans.className} ${geistMono.className} min-h-screen bg-zinc-50 dark:bg-black font-sans`}
+    >
       <Navbar />
 
       <main className="max-w-4xl mx-auto px-6 py-20">
@@ -66,10 +68,14 @@ export default function Home() {
             ) : (
               <>
                 <Link href="/register">
-                  <Button size="lg" className="w-full sm:w-auto">{t('get_started')}</Button>
+                  <Button size="lg" className="w-full sm:w-auto">
+                    {t('get_started')}
+                  </Button>
                 </Link>
                 <Link href="/login">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto">{t('learn_more')}</Button>
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                    {t('learn_more')}
+                  </Button>
                 </Link>
               </>
             )}
@@ -79,21 +85,15 @@ export default function Home() {
         <div className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
             <h3 className="text-lg font-bold mb-2">{t('request_help_title')}</h3>
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm">
-              {t('request_help_desc')}
-            </p>
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm">{t('request_help_desc')}</p>
           </div>
           <div className="p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
             <h3 className="text-lg font-bold mb-2">{t('offer_skills_title')}</h3>
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm">
-              {t('offer_skills_desc')}
-            </p>
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm">{t('offer_skills_desc')}</p>
           </div>
           <div className="p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
             <h3 className="text-lg font-bold mb-2">{t('build_community_title')}</h3>
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm">
-              {t('build_community_desc')}
-            </p>
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm">{t('build_community_desc')}</p>
           </div>
         </div>
       </main>
@@ -101,8 +101,10 @@ export default function Home() {
   );
 }
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => ({
-  props: {
-    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
-  },
-});
+export const getStaticProps = async ({ locale }: { locale?: string }) => {
+  return {
+    props: {
+      messages: (await import(`../../messages/${locale || 'en'}.json`)).default,
+    },
+  };
+};

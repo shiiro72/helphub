@@ -1,8 +1,7 @@
 import { Navbar } from "@/components/organisms/Navbar";
 import { RequestBoard } from "@/components/organisms/RequestBoard";
 import { Geist, Geist_Mono } from "next/font/google";
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslations } from 'next-intl';
 import { GetStaticProps } from 'next';
 
 const geistSans = Geist({
@@ -16,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export default function RequestsPage() {
-  const { t } = useTranslation('common');
+  const t = useTranslations();
 
   return (
     <div className={`${geistSans.className} ${geistMono.className} min-h-screen bg-zinc-50 dark:bg-black font-sans`}>
@@ -40,6 +39,6 @@ export default function RequestsPage() {
 
 export const getStaticProps: GetStaticProps = async ({ locale }) => ({
   props: {
-    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+    messages: (await import(`../../messages/${locale ?? 'en'}.json`)).default,
   },
 });

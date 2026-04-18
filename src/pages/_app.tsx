@@ -1,9 +1,17 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { appWithTranslation } from 'next-i18next';
+import { NextIntlClientProvider } from 'next-intl';
+import { useRouter } from 'next/router';
 
-function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+
+  return (
+    <NextIntlClientProvider
+      locale={router.locale || 'en'}
+      messages={pageProps.messages}
+    >
+      <Component {...pageProps} />
+    </NextIntlClientProvider>
+  );
 }
-
-export default appWithTranslation(App);
