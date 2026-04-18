@@ -53,5 +53,12 @@
   "delete_profile_message": "Your profile, all your help requests, offers, and messages will be permanently deleted.",
   "confirm_delete_button": "Yes, Delete My Profile",
   "update_profile_button": "Update Profile",
-  "check_email": "Check your email for the confirmation link!"
+  "check_email": "Check your email for the confirmation link!",
+  "rate_your_experience": "Rate your experience",
+  "add_tags": "Add tags",
+  "comment_optional": "Comment (optional)",
+  "tell_us_more": "Tell us more about your experience...",
+  "submitting": "Submitting...",
+  "submit_rating": "Submit Rating",
+  "rate_user": "Rate User"
 }

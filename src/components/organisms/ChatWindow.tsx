@@ -2,9 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Conversation, Message } from '@/lib/types';
 import { MessageBubble } from '../molecules/MessageBubble';
 import { ChatInput } from '../molecules/ChatInput';
-import { User, MoreVertical, Flag, Ban } from 'lucide-react';
+import { User, MoreVertical, Flag, Ban, Star } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VerificationBadge } from '../atoms/VerificationBadge';
+import { StarRating } from '../atoms/StarRating';
+import { RatingModal } from '../molecules/RatingModal';
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -24,8 +26,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
+
+  const markAsRead = async (messageId: string) => {
+    await supabase
+      .from('messages')
+      .update({ is_read: true })
+      .eq('id', messageId);
+  };
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -95,13 +106,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   }, [messages]);
 
-  const markAsRead = async (messageId: string) => {
-    await supabase
-      .from('messages')
-      .update({ is_read: true })
-      .eq('id', messageId);
-  };
-
   useEffect(() => {
     // Mark all existing unread messages from the other person as read
     const markAllRead = async () => {
@@ -127,6 +131,27 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       ? conversation.participant_2
       : conversation.participant_1;
 
+  const handleRateUser = async (rating: number, tags: string[], comment: string) => {
+    setIsSubmittingRating(true);
+    try {
+      const { error } = await supabase.from('ratings').upsert({
+        rater_id: currentUserId,
+        rated_id: otherParticipantId,
+        rating,
+        tags,
+        comment,
+      });
+
+      if (error) throw error;
+      setShowRatingModal(false);
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      alert('Failed to submit rating. Please try again.');
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-chat-bg">
       {/* Header */}
@@ -150,7 +175,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               </h3>
               <VerificationBadge isVerified={conversation.profiles?.is_verified} size={14} />
             </div>
-            <p className="text-[10px] text-zinc-500">online</p>
+            <div className="flex items-center gap-2">
+              <StarRating
+                rating={conversation.profiles?.trust_rank || 0}
+                totalRatings={conversation.profiles?.total_ratings || 0}
+                size={12}
+                showCount
+              />
+              <span className="text-[10px] text-zinc-500">• online</span>
+            </div>
           </div>
         </div>
         <div className="relative">
@@ -170,6 +203,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-red-500"
               >
                 <Ban size={16} /> Block User
+              </button>
+              <button
+                onClick={() => {
+                  setShowRatingModal(true);
+                  setShowMenu(false);
+                }}
+                className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+              >
+                <Star size={16} /> Rate User
               </button>
               <button
                 onClick={() => {
@@ -213,6 +255,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* Input */}
       <ChatInput onSendMessage={onSendMessage} />
+
+      {/* Rating Modal */}
+      <RatingModal
+        isOpen={showRatingModal}
+        onClose={() => setShowRatingModal(false)}
+        onSubmit={handleRateUser}
+        userName={conversation.profiles?.username || 'User'}
+        isSubmitting={isSubmittingRating}
+      />
     </div>
   );
 };
