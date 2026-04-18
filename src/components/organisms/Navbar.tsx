@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '../atoms/Button';
 import { createClient } from '@/lib/supabase/client';
-import { LogOut, User, Menu, X } from 'lucide-react';
+import { LogOut, User, Menu, X, Settings } from 'lucide-react';
 import { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { ProfileSettingsModal } from './ProfileSettingsModal';
 
 export function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -57,6 +59,10 @@ export function Navbar() {
                   <User size={18} />
                   <span>{user.email}</span>
                 </div>
+                <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
+                  <Settings size={16} className="mr-2" />
+                  Settings
+                </Button>
                 <Button variant="outline" size="sm" onClick={handleLogout}>
                   <LogOut size={16} className="mr-2" />
                   Logout
@@ -111,6 +117,10 @@ export function Navbar() {
                 <User size={18} />
                 <span>{user.email}</span>
               </div>
+              <Button variant="outline" size="full" onClick={() => { setIsSettingsOpen(true); setIsMenuOpen(false); }}>
+                <Settings size={16} className="mr-2" />
+                Settings
+              </Button>
               <Button variant="outline" size="full" onClick={handleLogout}>
                 <LogOut size={16} className="mr-2" />
                 Logout
@@ -128,6 +138,11 @@ export function Navbar() {
           )}
         </div>
       )}
+
+      <ProfileSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </nav>
   );
 }
