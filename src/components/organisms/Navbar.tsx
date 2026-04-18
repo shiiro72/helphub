@@ -43,6 +43,9 @@ export function Navbar() {
               <Link href="/requests" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors">
                 Browse Requests
               </Link>
+              <Link href="/offers" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors">
+                Browse Offers
+              </Link>
             </div>
           </div>
 
@@ -92,6 +95,14 @@ export function Navbar() {
             onClick={() => setIsMenuOpen(false)}
           >
             Browse Requests
+          </Link>
+
+          <Link
+            href="/offers"
+            className="block px-2 py-1 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Browse Offers
           </Link>
 
           {user ? (

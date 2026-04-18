@@ -46,14 +46,18 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
             {user ? (
               <>
-                <Button size="lg" className="gap-2">
-                  <HandHelping size={20} />
-                  Ask for Help
-                </Button>
-                <Button variant="outline" size="lg" className="gap-2">
-                  <Heart size={20} />
-                  Offer Help
-                </Button>
+                <Link href="/requests">
+                  <Button size="lg" className="gap-2 w-full sm:w-auto">
+                    <HandHelping size={20} />
+                    Ask for Help
+                  </Button>
+                </Link>
+                <Link href="/offers">
+                  <Button variant="outline" size="lg" className="gap-2 w-full sm:w-auto">
+                    <Heart size={20} />
+                    Offer Help
+                  </Button>
+                </Link>
               </>
             ) : (
               <>
