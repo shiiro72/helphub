@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Head from 'next/head';
 import { Navbar } from '@/components/organisms/Navbar';
 import { ChatList } from '@/components/organisms/ChatList';
 import { ChatWindow } from '@/components/organisms/ChatWindow';
 import { createClient } from '@/lib/supabase/client';
-import { Conversation, Profile } from '@/lib/types';
+import { Conversation } from '@/lib/types';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -14,68 +14,11 @@ export default function MessagesPage() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { userId } = router.query;
   const [supabase] = useState(() => createClient());
 
-  const fetchConversations = async (currentUserId: string) => {
-    setLoading(true);
-    // Fetch conversations where user is participant 1 or 2
-    const { data, error } = await supabase
-      .from('conversations')
-      .select(`
-        *,
-        participant_1_profile:profiles!participant_1(*),
-        participant_2_profile:profiles!participant_2(*)
-      `)
-      .or(`participant_1.eq.${currentUserId},participant_2.eq.${currentUserId}`)
-      .order('last_message_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching conversations:', error);
-    } else {
-      const processed = (data || []).map((conv: any) => {
-        const otherProfile = conv.participant_1 === currentUserId
-          ? conv.participant_2_profile
-          : conv.participant_1_profile;
-        return {
-          ...conv,
-          profiles: otherProfile
-        } as Conversation;
-      });
-      setConversations(processed);
-
-      // If userId in query, find or create conversation
-      if (userId && typeof userId === 'string') {
-        const existing = processed.find(c =>
-          c.participant_1 === userId || c.participant_2 === userId
-        );
-        if (existing) {
-          setActiveConversation(existing);
-        } else {
-          // Create new conversation
-          startNewConversation(currentUserId, userId);
-        }
-      }
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/login');
-      } else {
-        setUser(user);
-        fetchConversations(user.id);
-      }
-    };
-    checkUser();
-  }, []);
-
-  const startNewConversation = async (currentUserId: string, otherUserId: string) => {
+  const startNewConversation = useCallback(async (currentUserId: string, otherUserId: string) => {
     // Check if other user exists
     const { data: profile } = await supabase
       .from('profiles')
@@ -108,7 +51,61 @@ export default function MessagesPage() {
       setConversations(prev => [newConv, ...prev]);
       setActiveConversation(newConv);
     }
-  };
+  }, [supabase]);
+
+  const fetchConversations = useCallback(async (currentUserId: string) => {
+    // Fetch conversations where user is participant 1 or 2
+    const { data, error } = await supabase
+      .from('conversations')
+      .select(`
+        *,
+        participant_1_profile:profiles!participant_1(*),
+        participant_2_profile:profiles!participant_2(*)
+      `)
+      .or(`participant_1.eq.${currentUserId},participant_2.eq.${currentUserId}`)
+      .order('last_message_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching conversations:', error);
+    } else {
+      const processed = (data || []).map((conv) => {
+        const otherProfile = conv.participant_1 === currentUserId
+          ? conv.participant_2_profile
+          : conv.participant_1_profile;
+        return {
+          ...conv,
+          profiles: otherProfile
+        } as Conversation;
+      });
+      setConversations(processed);
+
+      // If userId in query, find or create conversation
+      if (userId && typeof userId === 'string') {
+        const existing = processed.find(c =>
+          c.participant_1 === userId || c.participant_2 === userId
+        );
+        if (existing) {
+          setActiveConversation(existing);
+        } else {
+          // Create new conversation
+          startNewConversation(currentUserId, userId);
+        }
+      }
+    }
+  }, [supabase, userId, startNewConversation]);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login');
+      } else {
+        setUser(user);
+        fetchConversations(user.id);
+      }
+    };
+    checkUser();
+  }, [supabase, router, fetchConversations]);
 
   const handleSendMessage = async (content: string) => {
     if (!activeConversation || !user) return;
@@ -171,6 +168,7 @@ export default function MessagesPage() {
         <div className="w-full md:w-1/3 border-r border-zinc-200 dark:border-zinc-800">
           <ChatList
             conversations={conversations}
+            currentUserId={user?.id || ''}
             activeId={activeConversation?.id}
             onSelect={setActiveConversation}
           />

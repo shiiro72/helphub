@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Profile } from '@/lib/types';
 import { ConfirmationModal } from '../molecules/ConfirmationModal';
 import { VerificationBadge } from '../atoms/VerificationBadge';
+import { ErrorBanner } from '../molecules/ErrorBanner';
 import { useTranslation } from 'next-i18next';
 
 interface ProfileSettingsModalProps {
@@ -107,24 +108,29 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="profile-settings-modal-title"
+      >
         <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
           <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t('profile_settings')}</h2>
+              <h2 id="profile-settings-modal-title" className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t('profile_settings')}</h2>
               <VerificationBadge isVerified={profile?.is_verified} size={20} />
             </div>
-            <button onClick={onClose} className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+            <button
+              onClick={onClose}
+              className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+              aria-label="Close modal"
+            >
               <X size={24} />
             </button>
           </div>
 
           <form onSubmit={handleUpdateClick} className="p-6 space-y-6">
-            {error && (
-              <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
-                {error}
-              </div>
-            )}
+            <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
 
             <div className="flex flex-col items-center gap-4 mb-6">
               <div className="w-24 h-24 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border-2 border-zinc-200 dark:border-zinc-700">
