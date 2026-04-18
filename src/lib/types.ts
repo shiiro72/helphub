@@ -3,6 +3,18 @@ export interface Profile {
   username: string;
   is_verified: boolean;
   image_url: string | null;
+  trust_rank: number;
+  total_ratings: number;
+  created_at: string;
+}
+
+export interface Rating {
+  id: string;
+  rater_id: string;
+  rated_id: string;
+  rating: number;
+  tags: string[];
+  comment: string | null;
   created_at: string;
 }
 

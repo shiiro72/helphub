@@ -3,6 +3,7 @@ import { MapPin, Calendar, User, MessageSquare, Languages, Loader2 } from 'lucid
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
+import { StarRating } from '../atoms/StarRating';
 import { translateText } from '@/lib/translate';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
@@ -73,12 +74,20 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request }) => {
       </div>
 
       <div className="space-y-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
-          <User size={14} className="mr-2" />
-          <span className="font-medium mr-1 text-zinc-700 dark:text-zinc-300">
-            {request.profiles?.username || 'Anonymous'}
-          </span>
-          <VerificationBadge isVerified={request.profiles?.is_verified} size={12} className="text-blue-500 ml-1" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
+            <User size={14} className="mr-2" />
+            <span className="font-medium mr-1 text-zinc-700 dark:text-zinc-300">
+              {request.profiles?.username || 'Anonymous'}
+            </span>
+            <VerificationBadge isVerified={request.profiles?.is_verified} size={12} className="text-blue-500 ml-1" />
+          </div>
+          <StarRating
+            rating={request.profiles?.trust_rank || 0}
+            totalRatings={request.profiles?.total_ratings || 0}
+            size={12}
+            showCount
+          />
         </div>
 
         <div className="flex items-center justify-between">

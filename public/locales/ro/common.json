@@ -53,5 +53,12 @@
   "delete_profile_message": "Profilul tău, toate cererile de ajutor, ofertele și mesajele vor fi șterse definitiv.",
   "confirm_delete_button": "Da, Șterge Profilul Meu",
   "update_profile_button": "Actualizează Profilul",
-  "check_email": "Verifică-ți email-ul pentru link-ul de confirmare!"
+  "check_email": "Verifică-ți email-ul pentru link-ul de confirmare!",
+  "rate_your_experience": "Evaluează experiența ta",
+  "add_tags": "Adaugă etichete",
+  "comment_optional": "Comentariu (opțional)",
+  "tell_us_more": "Spune-ne mai multe despre experiența ta...",
+  "submitting": "Se trimite...",
+  "submit_rating": "Trimite Evaluarea",
+  "rate_user": "Evaluează Utilizatorul"
 }
