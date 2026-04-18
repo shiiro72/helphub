@@ -18,6 +18,17 @@ export interface HelpRequest {
   profiles?: Profile;
 }
 
+export interface HelpOffer {
+  id: string;
+  user_id: string;
+  title: string;
+  content: string;
+  image_url: string | null;
+  offer_location: string | null;
+  date_posted: string;
+  profiles?: Profile;
+}
+
 export interface Conversation {
   id: string;
   participant_1: string;

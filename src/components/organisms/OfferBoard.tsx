@@ -1,45 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutGrid, List, Search } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { HelpRequest } from '@/lib/types';
-import { RequestCard } from '../molecules/RequestCard';
-import { RequestListItem } from '../molecules/RequestListItem';
+import { HelpOffer } from '@/lib/types';
+import { OfferCard } from '../molecules/OfferCard';
+import { OfferListItem } from '../molecules/OfferListItem';
 import { Input } from '../atoms/Input';
 import { Button } from '../atoms/Button';
-import { PostRequestModal } from './PostRequestModal';
+import { PostOfferModal } from './PostOfferModal';
 import { Plus } from 'lucide-react';
 
-export const RequestBoard: React.FC = () => {
+export const OfferBoard: React.FC = () => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
-  const [requests, setRequests] = useState<HelpRequest[]>([]);
+  const [offers, setOffers] = useState<HelpOffer[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
-  const fetchRequests = async () => {
+  const fetchOffers = async () => {
     setLoading(true);
     const supabase = createClient();
     const { data, error } = await supabase
-      .from('help_requests')
+      .from('help_offers')
       .select('*, profiles(*)')
       .order('date_posted', { ascending: false });
 
     if (error) {
-      console.error('Error fetching help requests:', error);
+      console.error('Error fetching help offers:', error);
     } else {
-      setRequests(data as HelpRequest[]);
+      setOffers(data as HelpOffer[]);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchRequests();
+    fetchOffers();
   }, []);
 
-  const filteredRequests = requests.filter(req =>
-    req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    req.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (req.request_location || '').toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredOffers = offers.filter(offer =>
+    offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    offer.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (offer.offer_location || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -48,7 +48,7 @@ export const RequestBoard: React.FC = () => {
         <div className="relative flex-grow max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
           <Input
-            placeholder="Search requests..."
+            placeholder="Search offers..."
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -62,7 +62,7 @@ export const RequestBoard: React.FC = () => {
             onClick={() => setIsPostModalOpen(true)}
           >
             <Plus size={18} />
-            Post Request
+            Post Offer
           </Button>
 
           <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
@@ -92,10 +92,10 @@ export const RequestBoard: React.FC = () => {
         </div>
       </div>
 
-      <PostRequestModal
+      <PostOfferModal
         isOpen={isPostModalOpen}
         onClose={() => setIsPostModalOpen(false)}
-        onSuccess={fetchRequests}
+        onSuccess={fetchOffers}
       />
 
       {loading ? (
@@ -104,21 +104,21 @@ export const RequestBoard: React.FC = () => {
             <div key={i} className="h-48 rounded-xl bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
           ))}
         </div>
-      ) : filteredRequests.length > 0 ? (
+      ) : filteredOffers.length > 0 ? (
         <div className={
           view === 'grid'
             ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             : "flex flex-col gap-4"
         }>
-          {filteredRequests.map((request) => (
+          {filteredOffers.map((offer) => (
             view === 'grid'
-              ? <RequestCard key={request.id} request={request} />
-              : <RequestListItem key={request.id} request={request} />
+              ? <OfferCard key={offer.id} offer={offer} />
+              : <OfferListItem key={offer.id} offer={offer} />
           ))}
         </div>
       ) : (
         <div className="text-center py-20 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
-          <p className="text-zinc-500 dark:text-zinc-400">No help requests found.</p>
+          <p className="text-zinc-500 dark:text-zinc-400">No help offers found.</p>
         </div>
       )}
     </div>
