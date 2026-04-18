@@ -1,6 +1,9 @@
 import { Navbar } from "@/components/organisms/Navbar";
 import { OfferBoard } from "@/components/organisms/OfferBoard";
 import { Geist, Geist_Mono } from "next/font/google";
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { GetStaticProps } from 'next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,6 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export default function OffersPage() {
+  const { t } = useTranslation('common');
+
   return (
     <div className={`${geistSans.className} ${geistMono.className} min-h-screen bg-zinc-50 dark:bg-black font-sans`}>
       <Navbar />
@@ -20,7 +25,7 @@ export default function OffersPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-10">
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
-            Browse Offers
+            {t('browse_offers')}
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-2">
             Explore what others are offering and find the help you need.
@@ -32,3 +37,9 @@ export default function OffersPage() {
     </div>
   );
 }
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});
