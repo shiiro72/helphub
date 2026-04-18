@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '../atoms/Button';
+import { NavLink } from '../molecules/NavLink';
 import { createClient } from '@/lib/supabase/client';
 import { LogOut, User, Menu, X, Settings } from 'lucide-react';
 import { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supabase-js';
@@ -42,12 +43,9 @@ export function Navbar() {
             </Link>
 
             <div className="hidden md:flex items-center gap-6">
-              <Link href="/requests" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors">
-                Browse Requests
-              </Link>
-              <Link href="/offers" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors">
-                Browse Offers
-              </Link>
+              <NavLink href="/requests">Browse Requests</NavLink>
+              <NavLink href="/offers">Browse Offers</NavLink>
+              {user && <NavLink href="/messages">Messages</NavLink>}
             </div>
           </div>
 
@@ -95,21 +93,19 @@ export function Navbar() {
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden border-t border-zinc-200 dark:border-zinc-800 p-4 space-y-3 bg-white dark:bg-black">
-          <Link
-            href="/requests"
-            className="block px-2 py-1 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
-            onClick={() => setIsMenuOpen(false)}
-          >
+          <NavLink href="/requests" mobile onClick={() => setIsMenuOpen(false)}>
             Browse Requests
-          </Link>
+          </NavLink>
 
-          <Link
-            href="/offers"
-            className="block px-2 py-1 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
-            onClick={() => setIsMenuOpen(false)}
-          >
+          <NavLink href="/offers" mobile onClick={() => setIsMenuOpen(false)}>
             Browse Offers
-          </Link>
+          </NavLink>
+
+          {user && (
+            <NavLink href="/messages" mobile onClick={() => setIsMenuOpen(false)}>
+              Messages
+            </NavLink>
+          )}
 
           {user ? (
             <>
