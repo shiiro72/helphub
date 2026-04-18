@@ -7,6 +7,8 @@ import { createClient } from '@/lib/supabase/client';
 import { Conversation, Profile } from '@/lib/types';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useRouter } from 'next/router';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { GetStaticProps } from 'next';
 
 export default function MessagesPage() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -224,3 +226,9 @@ export default function MessagesPage() {
     </div>
   );
 }
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

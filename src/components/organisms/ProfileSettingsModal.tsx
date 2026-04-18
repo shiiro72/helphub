@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Profile } from '@/lib/types';
 import { ConfirmationModal } from '../molecules/ConfirmationModal';
 import { VerificationBadge } from '../atoms/VerificationBadge';
+import { useTranslation } from 'next-i18next';
 
 interface ProfileSettingsModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface ProfileSettingsModalProps {
 }
 
 export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation('common');
   const [profile, setProfile] = useState<Profile | null>(null);
   const [username, setUsername] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -109,7 +111,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
         <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
           <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Profile Settings</h2>
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t('profile_settings')}</h2>
               <VerificationBadge isVerified={profile?.is_verified} size={20} />
             </div>
             <button onClick={onClose} className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
@@ -140,15 +142,15 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                   <User size={48} className="text-zinc-400" />
                 )}
               </div>
-              <p className="text-xs text-zinc-500">Preview of your profile picture</p>
+              <p className="text-xs text-zinc-500">{t('image_preview')}</p>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username">{t('username')}</Label>
                 <Input
                   id="username"
-                  placeholder="Your username"
+                  placeholder={t('username_placeholder')}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
@@ -156,7 +158,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="imageUrl">Profile Image URL (Optional)</Label>
+                <Label htmlFor="imageUrl">{t('image_url')}</Label>
                 <Input
                   id="imageUrl"
                   placeholder="https://example.com/image.jpg"
@@ -169,11 +171,11 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
             <div className="flex flex-col gap-3 pt-4">
               <div className="flex gap-3">
                 <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button type="submit" className="flex-1 gap-2" disabled={loading}>
                   <Save size={18} />
-                  Save Changes
+                  {t('save_changes')}
                 </Button>
               </div>
 
@@ -186,7 +188,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                   disabled={loading}
                 >
                   <Trash2 size={18} />
-                  Delete My Profile
+                  {t('delete_profile')}
                 </Button>
               </div>
             </div>
@@ -198,17 +200,17 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
         isOpen={isUpdateConfirmOpen}
         onClose={() => setIsUpdateConfirmOpen(false)}
         onConfirm={handleUpdateConfirm}
-        title="Confirm Profile Update"
+        title={t('confirm_update_title')}
         message={
           <div className="space-y-2">
-            <p>Are you sure you want to update your profile with these changes?</p>
+            <p>{t('confirm_update_message')}</p>
             <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-sm">
-              <p><strong>Username:</strong> {username}</p>
-              {imageUrl && <p className="truncate"><strong>Image URL:</strong> {imageUrl}</p>}
+              <p><strong>{t('username')}:</strong> {username}</p>
+              {imageUrl && <p className="truncate"><strong>{t('image_url')}:</strong> {imageUrl}</p>}
             </div>
           </div>
         }
-        confirmText="Update Profile"
+        confirmText={t('update_profile_button')}
         isLoading={loading}
       />
 
@@ -216,14 +218,14 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
         isOpen={isDeleteConfirmOpen}
         onClose={() => setIsDeleteConfirmOpen(false)}
         onConfirm={handleDeleteConfirm}
-        title="Delete Profile"
+        title={t('delete_profile_title')}
         message={
           <div className="space-y-3">
-            <p className="font-semibold text-red-600">This action is permanent and cannot be undone.</p>
-            <p>Your profile, all your help requests, offers, and messages will be permanently deleted.</p>
+            <p className="font-semibold text-red-600">{t('delete_profile_warning')}</p>
+            <p>{t('delete_profile_message')}</p>
           </div>
         }
-        confirmText="Yes, Delete My Profile"
+        confirmText={t('confirm_delete_button')}
         variant="danger"
         isLoading={loading}
       />

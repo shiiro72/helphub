@@ -8,8 +8,11 @@ import { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supaba
 import { ProfileSettingsModal } from './ProfileSettingsModal';
 import { Profile } from '@/lib/types';
 import { VerificationBadge } from '../atoms/VerificationBadge';
+import { useTranslation } from 'next-i18next';
+import { LanguageSwitcher } from '../molecules/LanguageSwitcher';
 
 export function Navbar() {
+  const { t } = useTranslation('common');
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -67,14 +70,15 @@ export function Navbar() {
             </Link>
 
             <div className="hidden md:flex items-center gap-6">
-              <NavLink href="/requests">Browse Requests</NavLink>
-              <NavLink href="/offers">Browse Offers</NavLink>
-              {user && <NavLink href="/messages">Messages</NavLink>}
+              <NavLink href="/requests">{t('browse_requests')}</NavLink>
+              <NavLink href="/offers">{t('browse_offers')}</NavLink>
+              {user && <NavLink href="/messages">{t('messages')}</NavLink>}
             </div>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
+            <LanguageSwitcher variant="desktop" />
             {user ? (
               <>
                 <div className="flex items-center gap-2 mr-4 text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -86,20 +90,20 @@ export function Navbar() {
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
                   <Settings size={16} className="mr-2" />
-                  Settings
+                  {t('settings')}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleLogout}>
                   <LogOut size={16} className="mr-2" />
-                  Logout
+                  {t('logout')}
                 </Button>
               </>
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="ghost" size="sm">Login</Button>
+                  <Button variant="ghost" size="sm">{t('login')}</Button>
                 </Link>
                 <Link href="/register">
-                  <Button variant="primary" size="sm">Sign Up</Button>
+                  <Button variant="primary" size="sm">{t('signup')}</Button>
                 </Link>
               </>
             )}
@@ -121,18 +125,20 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden border-t border-zinc-200 dark:border-zinc-800 p-4 space-y-3 bg-white dark:bg-black">
           <NavLink href="/requests" mobile onClick={() => setIsMenuOpen(false)}>
-            Browse Requests
+            {t('browse_requests')}
           </NavLink>
 
           <NavLink href="/offers" mobile onClick={() => setIsMenuOpen(false)}>
-            Browse Offers
+            {t('browse_offers')}
           </NavLink>
 
           {user && (
             <NavLink href="/messages" mobile onClick={() => setIsMenuOpen(false)}>
-              Messages
+              {t('messages')}
             </NavLink>
           )}
+
+          <LanguageSwitcher variant="mobile" onLanguageChange={() => setIsMenuOpen(false)} />
 
           {user ? (
             <>
@@ -145,20 +151,20 @@ export function Navbar() {
               </div>
               <Button variant="outline" size="full" onClick={() => { setIsSettingsOpen(true); setIsMenuOpen(false); }}>
                 <Settings size={16} className="mr-2" />
-                Settings
+                {t('settings')}
               </Button>
               <Button variant="outline" size="full" onClick={handleLogout}>
                 <LogOut size={16} className="mr-2" />
-                Logout
+                {t('logout')}
               </Button>
             </>
           ) : (
             <div className="flex flex-col gap-2">
               <Link href="/login" className="w-full">
-                <Button variant="outline" size="full">Login</Button>
+                <Button variant="outline" size="full">{t('login')}</Button>
               </Link>
               <Link href="/register" className="w-full">
-                <Button variant="primary" size="full">Sign Up</Button>
+                <Button variant="primary" size="full">{t('signup')}</Button>
               </Link>
             </div>
           )}

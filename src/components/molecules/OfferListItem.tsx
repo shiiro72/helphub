@@ -1,14 +1,39 @@
-import React from 'react';
-import { Calendar, User, MessageSquare } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, User, MessageSquare, Languages, Loader2 } from 'lucide-react';
 import { HelpOffer } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
+import { translateText } from '@/lib/translate';
+import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
 
 interface OfferListItemProps {
   offer: HelpOffer;
 }
 
 export const OfferListItem: React.FC<OfferListItemProps> = ({ offer }) => {
+  const { t } = useTranslation('common');
+  const { locale } = useRouter();
+  const [translatedContent, setTranslatedContent] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  const handleTranslate = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (translatedContent) {
+      setTranslatedContent(null);
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const translated = await translateText(offer.content, locale || 'en');
+      setTranslatedContent(translated);
+    } catch (error) {
+      console.error('Translation failed:', error);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
   const date = new Date(offer.date_posted).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -27,9 +52,23 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({ offer }) => {
           </span>
         </div>
 
-        <p className="text-zinc-600 dark:text-zinc-400 text-sm line-clamp-1 mb-2">
-          {offer.content}
-        </p>
+        <div className="flex items-center gap-2 mb-2">
+          <p className="text-zinc-600 dark:text-zinc-400 text-sm line-clamp-1">
+            {translatedContent || offer.content}
+          </p>
+          <button
+            onClick={handleTranslate}
+            disabled={isTranslating}
+            className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 flex-shrink-0"
+          >
+            {isTranslating ? (
+              <Loader2 size={10} className="animate-spin" />
+            ) : (
+              <Languages size={10} />
+            )}
+            {translatedContent ? t('show_original') : t('translate')}
+          </button>
+        </div>
 
         <div className="flex items-center gap-4">
           <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">

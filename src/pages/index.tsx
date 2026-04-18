@@ -6,6 +6,9 @@ import { Button } from "@/components/atoms/Button";
 import Link from "next/link";
 import { Heart, HandHelping } from "lucide-react";
 import { User as SupabaseUser } from "@supabase/supabase-js";
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { GetStaticProps } from 'next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,6 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export default function Home() {
+  const { t } = useTranslation('common');
   const [user, setUser] = useState<SupabaseUser | null>(null);
 
   useEffect(() => {
@@ -36,11 +40,11 @@ export default function Home() {
       <main className="max-w-4xl mx-auto px-6 py-20">
         <div className="text-center space-y-6">
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-black dark:text-white">
-            Where helping <br />
-            <span className="text-zinc-500">meets community.</span>
+            {t('welcome_main')} <br />
+            <span className="text-zinc-500">{t('welcome_meets')}</span>
           </h1>
           <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
-            HelpHub is a platform where you can ask for assistance or offer your skills to those in need. Simple, direct, and community-driven.
+            {t('hero_description')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
@@ -49,23 +53,23 @@ export default function Home() {
                 <Link href="/requests">
                   <Button size="lg" className="gap-2 w-full sm:w-auto">
                     <HandHelping size={20} />
-                    Ask for Help
+                    {t('ask_for_help')}
                   </Button>
                 </Link>
                 <Link href="/offers">
                   <Button variant="outline" size="lg" className="gap-2 w-full sm:w-auto">
                     <Heart size={20} />
-                    Offer Help
+                    {t('offer_help')}
                   </Button>
                 </Link>
               </>
             ) : (
               <>
                 <Link href="/register">
-                  <Button size="lg" className="w-full sm:w-auto">Get Started</Button>
+                  <Button size="lg" className="w-full sm:w-auto">{t('get_started')}</Button>
                 </Link>
                 <Link href="/login">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto">Learn More</Button>
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto">{t('learn_more')}</Button>
                 </Link>
               </>
             )}
@@ -74,21 +78,21 @@ export default function Home() {
 
         <div className="mt-32 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-            <h3 className="text-lg font-bold mb-2">Request Help</h3>
+            <h3 className="text-lg font-bold mb-2">{t('request_help_title')}</h3>
             <p className="text-zinc-500 dark:text-zinc-400 text-sm">
-              Post what you need, from moving furniture to technical advice.
+              {t('request_help_desc')}
             </p>
           </div>
           <div className="p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-            <h3 className="text-lg font-bold mb-2">Offer Skills</h3>
+            <h3 className="text-lg font-bold mb-2">{t('offer_skills_title')}</h3>
             <p className="text-zinc-500 dark:text-zinc-400 text-sm">
-              Browse requests and contribute your time or expertise to help others.
+              {t('offer_skills_desc')}
             </p>
           </div>
           <div className="p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-            <h3 className="text-lg font-bold mb-2">Build Community</h3>
+            <h3 className="text-lg font-bold mb-2">{t('build_community_title')}</h3>
             <p className="text-zinc-500 dark:text-zinc-400 text-sm">
-              Connect with people in your neighborhood and grow together.
+              {t('build_community_desc')}
             </p>
           </div>
         </div>
@@ -96,3 +100,9 @@ export default function Home() {
     </div>
   );
 }
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

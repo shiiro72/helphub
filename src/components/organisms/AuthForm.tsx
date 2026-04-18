@@ -4,12 +4,14 @@ import { Button } from '../atoms/Button';
 import { FormField } from '../molecules/FormField';
 import { createClient } from '@/lib/supabase/client';
 import { LogIn, UserPlus } from 'lucide-react';
+import { useTranslation } from 'next-i18next';
 
 interface AuthFormProps {
   mode: 'login' | 'register';
 }
 
 export function AuthForm({ mode }: AuthFormProps) {
+  const { t } = useTranslation('common');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     if (error) {
       setError(error.message);
     } else if (mode === 'register') {
-      alert('Check your email for the confirmation link!');
+      alert(t('check_email'));
     } else {
       window.location.href = '/';
     }
@@ -55,19 +57,19 @@ export function AuthForm({ mode }: AuthFormProps) {
     <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800">
       <div className="text-center space-y-2">
         <h1 className="text-2xl font-bold tracking-tight">
-          {mode === 'login' ? 'Welcome back' : 'Create an account'}
+          {mode === 'login' ? t('welcome_back') : t('create_account')}
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           {mode === 'login'
-            ? 'Enter your credentials to access your account'
-            : 'Fill in the details below to get started'}
+            ? t('login_description')
+            : t('register_description')}
         </p>
       </div>
 
       <form onSubmit={handleEmailAuth} className="space-y-4">
         <FormField
           id="email"
-          label="Email address"
+          label={t('email_label')}
           type="email"
           placeholder="name@example.com"
           value={email}
@@ -76,7 +78,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         />
         <FormField
           id="password"
-          label="Password"
+          label={t('password_label')}
           type="password"
           placeholder="••••••••"
           value={password}
@@ -87,10 +89,10 @@ export function AuthForm({ mode }: AuthFormProps) {
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         <Button type="submit" size="full" disabled={loading}>
-          {loading ? 'Processing...' : (
+          {loading ? t('processing') : (
             <span className="flex items-center gap-2">
               {mode === 'login' ? <LogIn size={18} /> : <UserPlus size={18} />}
-              {mode === 'login' ? 'Sign In' : 'Sign Up'}
+              {mode === 'login' ? t('sign_in') : t('sign_up')}
             </span>
           )}
         </Button>
@@ -101,7 +103,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           <span className="w-full border-t border-zinc-200 dark:border-zinc-800" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white dark:bg-zinc-900 px-2 text-zinc-500">Or continue with</span>
+          <span className="bg-white dark:bg-zinc-900 px-2 text-zinc-500">{t('or_continue_with')}</span>
         </div>
       </div>
 
@@ -130,16 +132,16 @@ export function AuthForm({ mode }: AuthFormProps) {
       <div className="text-center text-sm">
         {mode === 'login' ? (
           <p className="text-zinc-500">
-            Don&apos;t have an account?{' '}
+            {t('no_account')}{' '}
             <Link href="/register" className="text-black dark:text-white font-semibold hover:underline">
-              Sign up
+              {t('sign_up')}
             </Link>
           </p>
         ) : (
           <p className="text-zinc-500">
-            Already have an account?{' '}
+            {t('have_account')}{' '}
             <Link href="/login" className="text-black dark:text-white font-semibold hover:underline">
-              Sign in
+              {t('sign_in')}
             </Link>
           </p>
         )}

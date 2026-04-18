@@ -1,14 +1,38 @@
-import React from 'react';
-import { MapPin, Calendar, User, MessageSquare } from 'lucide-react';
+import React, { useState } from 'react';
+import { MapPin, Calendar, User, MessageSquare, Languages, Loader2 } from 'lucide-react';
 import { HelpOffer } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
+import { translateText } from '@/lib/translate';
+import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
 
 interface OfferCardProps {
   offer: HelpOffer;
 }
 
 export const OfferCard: React.FC<OfferCardProps> = ({ offer }) => {
+  const { t } = useTranslation('common');
+  const { locale } = useRouter();
+  const [translatedContent, setTranslatedContent] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  const handleTranslate = async () => {
+    if (translatedContent) {
+      setTranslatedContent(null);
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const translated = await translateText(offer.content, locale || 'en');
+      setTranslatedContent(translated);
+    } catch (error) {
+      console.error('Translation failed:', error);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
   const date = new Date(offer.date_posted).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -30,9 +54,23 @@ export const OfferCard: React.FC<OfferCardProps> = ({ offer }) => {
         </Link>
       </div>
 
-      <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-6 line-clamp-3 flex-grow">
-        {offer.content}
-      </p>
+      <div className="flex-grow mb-6">
+        <p className="text-zinc-600 dark:text-zinc-400 text-sm line-clamp-3">
+          {translatedContent || offer.content}
+        </p>
+        <button
+          onClick={handleTranslate}
+          disabled={isTranslating}
+          className="mt-2 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+        >
+          {isTranslating ? (
+            <Loader2 size={12} className="animate-spin" />
+          ) : (
+            <Languages size={12} />
+          )}
+          {translatedContent ? t('show_original') : t('translate')}
+        </button>
+      </div>
 
       <div className="space-y-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
