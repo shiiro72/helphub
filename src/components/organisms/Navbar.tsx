@@ -34,10 +34,16 @@ export function Navbar() {
     <nav className="border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-black/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          <div className="flex items-center">
+          <div className="flex items-center gap-8">
             <Link href="/" className="text-xl font-bold tracking-tighter">
               HelpHub
             </Link>
+
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/requests" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors">
+                Browse Requests
+              </Link>
+            </div>
           </div>
 
           {/* Desktop Navigation */}
@@ -80,6 +86,14 @@ export function Navbar() {
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden border-t border-zinc-200 dark:border-zinc-800 p-4 space-y-3 bg-white dark:bg-black">
+          <Link
+            href="/requests"
+            className="block px-2 py-1 text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Browse Requests
+          </Link>
+
           {user ? (
             <>
               <div className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
