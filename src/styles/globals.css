@@ -3,11 +3,44 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --link: #2563eb;
+  --link-hover: #1d4ed8;
+
+  --brand-success: #00a884;
+  --brand-info: #34b7f1;
+
+  --chat-bg: #efeae2;
+  --chat-header: #f0f2f5;
+  --chat-sidebar: #ffffff;
+  --chat-input: #ffffff;
+  --chat-bubble-sent: #dcf8c6;
+  --chat-bubble-received: #ffffff;
+  --chat-item-hover: #f5f6f6;
+  --chat-item-active: #f0f2f5;
+  --chat-menu-bg: #ffffff;
+  --chat-menu-hover: #f9fafb;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-link: var(--link);
+  --color-link-hover: var(--link-hover);
+  --color-brand-success: var(--brand-success);
+  --color-brand-info: var(--brand-info);
+
+  --color-chat-bg: var(--chat-bg);
+  --color-chat-header: var(--chat-header);
+  --color-chat-sidebar: var(--chat-sidebar);
+  --color-chat-input: var(--chat-input);
+  --color-chat-bubble-sent: var(--chat-bubble-sent);
+  --color-chat-bubble-received: var(--chat-bubble-received);
+  --color-chat-item-hover: var(--chat-item-hover);
+  --color-chat-item-active: var(--chat-item-active);
+  --color-chat-menu-bg: var(--chat-menu-bg);
+  --color-chat-menu-hover: var(--chat-menu-hover);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -16,6 +49,20 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    --link: #60a5fa;
+    --link-hover: #93c5fd;
+
+    --chat-bg: #0b141a;
+    --chat-header: #202c33;
+    --chat-sidebar: #111b21;
+    --chat-input: #2a3942;
+    --chat-bubble-sent: #056162;
+    --chat-bubble-received: #202c33;
+    --chat-item-hover: #202c33;
+    --chat-item-active: #2a3942;
+    --chat-menu-bg: #233138;
+    --chat-menu-hover: #182229;
   }
 }
 
@@ -23,4 +70,13 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: var(--link);
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--link-hover);
 }

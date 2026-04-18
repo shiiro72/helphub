@@ -17,19 +17,6 @@ export default function MessagesPage() {
   const { userId } = router.query;
   const [supabase] = useState(() => createClient());
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/login');
-      } else {
-        setUser(user);
-        fetchConversations(user.id);
-      }
-    };
-    checkUser();
-  }, []);
-
   const fetchConversations = async (currentUserId: string) => {
     setLoading(true);
     // Fetch conversations where user is participant 1 or 2
@@ -46,7 +33,7 @@ export default function MessagesPage() {
     if (error) {
       console.error('Error fetching conversations:', error);
     } else {
-      const processed = data.map((conv: any) => {
+      const processed = (data || []).map((conv: any) => {
         const otherProfile = conv.participant_1 === currentUserId
           ? conv.participant_2_profile
           : conv.participant_1_profile;
@@ -72,6 +59,19 @@ export default function MessagesPage() {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login');
+      } else {
+        setUser(user);
+        fetchConversations(user.id);
+      }
+    };
+    checkUser();
+  }, []);
 
   const startNewConversation = async (currentUserId: string, otherUserId: string) => {
     // Check if other user exists
@@ -173,7 +173,7 @@ export default function MessagesPage() {
             onSelect={setActiveConversation}
           />
         </div>
-        <div className="hidden md:flex flex-grow bg-[#efeae2] dark:bg-[#0b141a]">
+        <div className="hidden md:flex flex-grow bg-chat-bg">
           {activeConversation && user ? (
             <ChatWindow
               conversation={activeConversation}
@@ -184,7 +184,7 @@ export default function MessagesPage() {
             />
           ) : (
             <div className="flex flex-col items-center justify-center w-full text-center p-8">
-              <div className="w-24 h-24 rounded-full bg-[#00a884] flex items-center justify-center mb-6">
+              <div className="w-24 h-24 rounded-full bg-brand-success flex items-center justify-center mb-6">
                 <span className="text-white text-4xl font-bold">HH</span>
               </div>
               <h2 className="text-2xl font-light text-zinc-900 dark:text-zinc-100 mb-2">
