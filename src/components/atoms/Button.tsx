@@ -2,7 +2,7 @@ import { ButtonHTMLAttributes, forwardRef } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'sm' | 'md' | 'lg' | 'full';
+  size?: 'sm' | 'md' | 'lg' | 'full' | 'icon';
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -21,6 +21,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       md: 'h-10 px-4 py-2 text-sm',
       lg: 'h-12 px-8 text-base',
       full: 'h-10 w-full px-4 py-2 text-sm',
+      icon: 'h-10 w-10',
     };
 
     const combinedClassName = `${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`;
