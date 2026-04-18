@@ -6,22 +6,46 @@ import { createClient } from '@/lib/supabase/client';
 import { LogOut, User, Menu, X, Settings } from 'lucide-react';
 import { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { ProfileSettingsModal } from './ProfileSettingsModal';
+import { Profile } from '@/lib/types';
+import { VerificationBadge } from '../atoms/VerificationBadge';
 
 export function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
-    const getUser = async () => {
+    const getUserAndProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
-    };
-    getUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        setProfile(profile);
+      } else {
+        setProfile(null);
+      }
+    };
+    getUserAndProfile();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        setProfile(profile);
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -55,7 +79,10 @@ export function Navbar() {
               <>
                 <div className="flex items-center gap-2 mr-4 text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   <User size={18} />
-                  <span>{user.email}</span>
+                  <span className="flex items-center gap-1">
+                    {profile?.username || user.email}
+                    <VerificationBadge isVerified={profile?.is_verified} size={14} />
+                  </span>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
                   <Settings size={16} className="mr-2" />
@@ -111,7 +138,10 @@ export function Navbar() {
             <>
               <div className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 <User size={18} />
-                <span>{user.email}</span>
+                <span className="flex items-center gap-1">
+                  {profile?.username || user.email}
+                  <VerificationBadge isVerified={profile?.is_verified} size={14} />
+                </span>
               </div>
               <Button variant="outline" size="full" onClick={() => { setIsSettingsOpen(true); setIsMenuOpen(false); }}>
                 <Settings size={16} className="mr-2" />
