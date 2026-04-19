@@ -7,6 +7,9 @@ const mockConversations: Conversation[] = [
     id: '1',
     participant_1: 'me',
     participant_2: 'user1',
+    is_group: false,
+    title: null,
+    request_id: null,
     last_message_at: new Date().toISOString(),
     created_at: new Date().toISOString(),
     profiles: {
@@ -17,12 +20,17 @@ const mockConversations: Conversation[] = [
       trust_rank: 4.5,
       total_ratings: 10,
       created_at: new Date().toISOString(),
+      role: 'user' as const,
+      is_restricted: false,
     },
   },
   {
     id: '2',
     participant_1: 'me',
     participant_2: 'user2',
+    is_group: false,
+    title: null,
+    request_id: null,
     last_message_at: new Date(Date.now() - 3600000).toISOString(),
     created_at: new Date(Date.now() - 7200000).toISOString(),
     profiles: {
@@ -33,6 +41,8 @@ const mockConversations: Conversation[] = [
       trust_rank: 0,
       total_ratings: 0,
       created_at: new Date().toISOString(),
+      role: 'user' as const,
+      is_restricted: false,
     },
   },
 ];

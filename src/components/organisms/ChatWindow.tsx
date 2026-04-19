@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Conversation, Message } from '@/lib/types';
+import { Conversation, Message, Profile } from '@/lib/types';
 import { MessageBubble } from '../molecules/MessageBubble';
 import { ChatInput } from '../molecules/ChatInput';
 import { User, MoreVertical, Flag, Ban, Star, Users } from 'lucide-react';
@@ -35,19 +35,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const supabase = createClient();
 
   const markAsRead = async (messageId: string) => {
-    await supabase
-      .from('messages')
-      .update({ is_read: true })
-      .eq('id', messageId);
+    await supabase.from('messages').update({ is_read: true }).eq('id', messageId);
   };
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUserId)
-        .single();
+      const { data } = await supabase.from('profiles').select('*').eq('id', currentUserId).single();
       setCurrentUserProfile(data);
     };
     fetchProfile();
@@ -89,7 +82,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           if (newMessage.sender_id !== currentUserId) {
             markAsRead(newMessage.id);
           }
-        }
+        },
       )
       .on(
         'postgres_changes',
@@ -101,10 +94,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         },
         (payload) => {
           const updatedMessage = payload.new as Message;
-          setMessages((prev) =>
-            prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m))
-          );
-        }
+          setMessages((prev) => prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m)));
+        },
       )
       .subscribe();
 
@@ -127,10 +118,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         .map((m) => m.id);
 
       if (unreadIds.length > 0) {
-        await supabase
-          .from('messages')
-          .update({ is_read: true })
-          .in('id', unreadIds);
+        await supabase.from('messages').update({ is_read: true }).in('id', unreadIds);
       }
     };
 
@@ -141,9 +129,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   const otherParticipantId = conversation.is_group
     ? null
-    : (conversation.participant_1 === currentUserId
-        ? conversation.participant_2
-        : conversation.participant_1);
+    : conversation.participant_1 === currentUserId
+      ? conversation.participant_2
+      : conversation.participant_1;
 
   const handleRateUser = async (rating: number, tags: string[], comment: string) => {
     setIsSubmittingRating(true);
@@ -187,9 +175,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           <div>
             <div className="flex items-center gap-1">
               <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-                {conversation.is_group ? conversation.title : (conversation.profiles?.username || 'User')}
+                {conversation.is_group
+                  ? conversation.title
+                  : conversation.profiles?.username || 'User'}
               </h3>
-              {!conversation.is_group && <VerificationBadge isVerified={conversation.profiles?.is_verified} size={14} />}
+              {!conversation.is_group && (
+                <VerificationBadge isVerified={conversation.profiles?.is_verified} size={14} />
+              )}
             </div>
             {conversation.is_group ? (
               <div className="flex items-center gap-1">
@@ -223,7 +215,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 <>
                   <button
                     onClick={() => {
-                      onBlock(otherParticipantId);
+                      if (otherParticipantId) onBlock(otherParticipantId);
                       setShowMenu(false);
                     }}
                     className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-red-500"
@@ -256,10 +248,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {/* Messages */}
-      <div
-        ref={scrollRef}
-        className="flex-grow overflow-y-auto p-4 md:p-8 space-y-1"
-      >
+      <div ref={scrollRef} className="flex-grow overflow-y-auto p-4 md:p-8 space-y-1">
         {loading ? (
           <div className="flex justify-center items-center h-full">
             <p className="text-zinc-500">Loading messages...</p>

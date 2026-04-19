@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Heart, HandHelping } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -20,18 +21,7 @@ const geistMono = Geist_Mono({
 
 export default function Home() {
   const t = useTranslations();
-  const [user, setUser] = useState<SupabaseUser | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    getUser();
-  }, []);
+  const { user } = useAuth();
 
   return (
     <div
