@@ -205,6 +205,11 @@ export function Navbar() {
         </div>
       )}
 
+      {profile?.is_restricted && (
+        <div className="bg-red-600 text-white text-center py-2 text-sm font-medium">
+          {t('restricted_account_warning')}
+        </div>
+      )}
       <ProfileSettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}

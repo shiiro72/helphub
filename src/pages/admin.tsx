@@ -15,8 +15,9 @@ export default function AdminPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
+  const [flaggedUsers, setFlaggedUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'reports' | 'tickets' | 'banned'>('reports');
+  const [activeTab, setActiveTab] = useState<'reports' | 'tickets' | 'banned' | 'flagged'>('reports');
   const [supabase] = useState(() => createClient());
 
   const fetchData = useCallback(async () => {
@@ -65,9 +66,17 @@ export default function AdminPage() {
       .select('*')
       .order('banned_at', { ascending: false });
 
+    // Fetch flagged (restricted) users
+    const { data: flaggedData } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('is_restricted', true)
+      .order('created_at', { ascending: false });
+
     setReports(reportsData || []);
     setTickets(ticketsData || []);
     setBannedUsers(bannedData || []);
+    setFlaggedUsers(flaggedData || []);
     setLoading(false);
   }, [supabase, router]);
 
@@ -88,6 +97,20 @@ export default function AdminPage() {
       console.error(error);
     } else {
       alert(t('user_banned_success'));
+      fetchData();
+    }
+  };
+
+  const handleUnrestrictUser = async (userId: string) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_restricted: false })
+      .eq('id', userId);
+
+    if (error) {
+      alert(t('error_unrestricting_user'));
+    } else {
+      alert(t('user_unrestricted_success'));
       fetchData();
     }
   };
@@ -177,6 +200,25 @@ export default function AdminPage() {
               </span>
             </div>
             {activeTab === 'banned' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('flagged')}
+            className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
+              activeTab === 'flagged'
+                ? 'text-brand-success'
+                : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Flag size={18} />
+              {t('flagged_users')}
+              <span className="ml-1 px-2 py-0.5 text-xs bg-zinc-100 dark:bg-zinc-800 rounded-full">
+                {flaggedUsers.length}
+              </span>
+            </div>
+            {activeTab === 'flagged' && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
             )}
           </button>
@@ -304,7 +346,7 @@ export default function AdminPage() {
               ))
             )}
           </div>
-        ) : (
+        ) : activeTab === 'banned' ? (
           <div className="space-y-4">
             {bannedUsers.length === 0 ? (
               <div className="text-center py-12 text-zinc-500">
@@ -335,6 +377,57 @@ export default function AdminPage() {
                             <Clock size={14} />
                             {new Date(user.banned_at).toLocaleString()}
                          </div>
+                      </div>
+                   </div>
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {flaggedUsers.length === 0 ? (
+              <div className="text-center py-12 text-zinc-500">
+                {t('no_flagged_users')}
+              </div>
+            ) : (
+              flaggedUsers.map((user) => (
+                <div key={user.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm">
+                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
+                          {user.image_url ? (
+                            <img src={user.image_url} alt={user.username} className="w-full h-full object-cover" />
+                          ) : (
+                            <User size={24} className="text-zinc-500" />
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                           <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                             {user.username}
+                           </span>
+                           <span className="text-xs text-red-500 font-medium uppercase tracking-wider">
+                             {t('automatically_restricted')}
+                           </span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUnrestrictUser(user.id)}
+                        >
+                          <CheckCircle size={16} className="mr-2" />
+                          {t('unrestrict_user')}
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="bg-red-50 text-red-600 border-red-100"
+                          onClick={() => handleBanUser(user.id, 'Repeatedly reported & flagged')}
+                        >
+                          <Ban size={16} className="mr-2" />
+                          {t('ban_user')}
+                        </Button>
                       </div>
                    </div>
                 </div>

@@ -94,5 +94,13 @@
   "error_banning_user": "An error occurred while banning the user.",
   "no_banned_users": "No banned users found.",
   "no_reason_provided": "No reason provided.",
-  "error_updating_ticket": "Error updating ticket status."
+  "error_updating_ticket": "Error updating ticket status.",
+  "restricted_account_warning": "Your account is restricted due to multiple reports. Messaging is disabled.",
+  "messaging_restricted": "Messaging is restricted for your account.",
+  "flagged_users": "Flagged Users",
+  "no_flagged_users": "No flagged users found.",
+  "automatically_restricted": "Automatically Restricted (3+ Reports)",
+  "unrestrict_user": "Unrestrict User",
+  "user_unrestricted_success": "User has been unrestricted.",
+  "error_unrestricting_user": "Error unrestricting user."
 }

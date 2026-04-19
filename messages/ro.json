@@ -94,5 +94,13 @@
   "error_banning_user": "A apărut o eroare la banarea utilizatorului.",
   "no_banned_users": "Nu s-au găsit utilizatori banați.",
   "no_reason_provided": "Niciun motiv furnizat.",
-  "error_updating_ticket": "Eroare la actualizarea stării tichetului."
+  "error_updating_ticket": "Eroare la actualizarea stării tichetului.",
+  "restricted_account_warning": "Contul tău este restricționat din cauza multiplelor raportări. Mesageria este dezactivată.",
+  "messaging_restricted": "Mesageria este restricționată pentru contul tău.",
+  "flagged_users": "Utilizatori Marcați",
+  "no_flagged_users": "Nu s-au găsit utilizatori marcați.",
+  "automatically_restricted": "Restricționat Automat (3+ Raportări)",
+  "unrestrict_user": "Anulează Restricția",
+  "user_unrestricted_success": "Restricția utilizatorului a fost anulată.",
+  "error_unrestricting_user": "Eroare la anularea restricției utilizatorului."
 }

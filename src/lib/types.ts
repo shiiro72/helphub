@@ -4,6 +4,7 @@ export interface Profile {
   is_verified: boolean;
   image_url: string | null;
   role: 'user' | 'admin';
+  is_restricted: boolean;
   trust_rank: number;
   total_ratings: number;
   created_at: string;
