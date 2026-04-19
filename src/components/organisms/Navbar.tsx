@@ -4,29 +4,26 @@ import { Button } from '../atoms/Button';
 import { NavLink } from '../molecules/NavLink';
 import { createClient } from '@/lib/supabase/client';
 import { LogOut, User, Menu, X, Settings, Shield, MessageCircle } from 'lucide-react';
-import { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { ProfileSettingsModal } from './ProfileSettingsModal';
 import { SupportTicketModal } from './SupportTicketModal';
 import { Profile } from '@/lib/types';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '../molecules/LanguageSwitcher';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 export function Navbar() {
   const t = useTranslations();
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
-    const getUserAndProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-
+    const fetchProfile = async () => {
       if (user) {
+        const supabase = createClient();
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
@@ -37,24 +34,11 @@ export function Navbar() {
         setProfile(null);
       }
     };
-    getUserAndProfile();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-        setProfile(profile);
-      } else {
-        setProfile(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    if (!authLoading) {
+      fetchProfile();
+    }
+  }, [user, authLoading]);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -115,10 +99,14 @@ export function Navbar() {
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="ghost" size="sm">{t('login')}</Button>
+                  <Button variant="ghost" size="sm">
+                    {t('login')}
+                  </Button>
                 </Link>
                 <Link href="/register">
-                  <Button variant="primary" size="sm">{t('signup')}</Button>
+                  <Button variant="primary" size="sm">
+                    {t('signup')}
+                  </Button>
                 </Link>
               </>
             )}
@@ -179,11 +167,25 @@ export function Navbar() {
                   <VerificationBadge isVerified={profile?.is_verified} size={14} />
                 </span>
               </div>
-              <Button variant="outline" size="full" onClick={() => { setIsSupportOpen(true); setIsMenuOpen(false); }}>
+              <Button
+                variant="outline"
+                size="full"
+                onClick={() => {
+                  setIsSupportOpen(true);
+                  setIsMenuOpen(false);
+                }}
+              >
                 <MessageCircle size={16} className="mr-2" />
                 {t('support')}
               </Button>
-              <Button variant="outline" size="full" onClick={() => { setIsSettingsOpen(true); setIsMenuOpen(false); }}>
+              <Button
+                variant="outline"
+                size="full"
+                onClick={() => {
+                  setIsSettingsOpen(true);
+                  setIsMenuOpen(false);
+                }}
+              >
                 <Settings size={16} className="mr-2" />
                 {t('settings')}
               </Button>
@@ -195,10 +197,14 @@ export function Navbar() {
           ) : (
             <div className="flex flex-col gap-2">
               <Link href="/login" className="w-full">
-                <Button variant="outline" size="full">{t('login')}</Button>
+                <Button variant="outline" size="full">
+                  {t('login')}
+                </Button>
               </Link>
               <Link href="/register" className="w-full">
-                <Button variant="primary" size="full">{t('signup')}</Button>
+                <Button variant="primary" size="full">
+                  {t('signup')}
+                </Button>
               </Link>
             </div>
           )}
@@ -210,10 +216,7 @@ export function Navbar() {
           {t('restricted_account_warning')}
         </div>
       )}
-      <ProfileSettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
+      <ProfileSettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
       {user && (
         <SupportTicketModal
           isOpen={isSupportOpen}
