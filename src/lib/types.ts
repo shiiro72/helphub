@@ -33,8 +33,12 @@ export interface HelpRequest {
   address?: string | null;
   start_datetime?: string | null;
   end_datetime?: string | null;
+  max_volunteers?: number | null;
   date_posted: string;
   profiles?: Profile;
+  volunteer_count?: number;
+  confirmed_count?: number;
+  waitlist_count?: number;
 }
 
 export interface BannedUser {
@@ -64,11 +68,48 @@ export interface HelpOffer {
 
 export interface Conversation {
   id: string;
-  participant_1: string;
-  participant_2: string;
+  participant_1: string | null;
+  participant_2: string | null;
+  is_group: boolean;
+  title: string | null;
+  request_id: string | null;
   last_message_at: string;
   created_at: string;
-  profiles?: Profile; // Other participant's profile
+  profiles?: Profile; // Other participant's profile (for 1-on-1)
+  members?: Profile[]; // All members (for groups)
+}
+
+export interface ConversationMember {
+  id: string;
+  conversation_id: string;
+  user_id: string;
+  created_at: string;
+  profiles?: Profile;
+}
+
+export type InvitationStatus = 'pending' | 'accepted' | 'rejected';
+
+export interface ConversationInvitation {
+  id: string;
+  conversation_id: string;
+  inviter_id: string;
+  invitee_id: string;
+  status: InvitationStatus;
+  created_at: string;
+  conversations?: Conversation;
+  inviter?: Profile;
+  invitee?: Profile;
+}
+
+export type VolunteerStatus = 'confirmed' | 'waitlisted';
+
+export interface Volunteer {
+  id: string;
+  request_id: string;
+  user_id: string;
+  status: VolunteerStatus;
+  created_at: string;
+  profiles?: Profile;
 }
 
 export interface Message {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Conversation } from '@/lib/types';
-import { User } from 'lucide-react';
+import { User, Users } from 'lucide-react';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 
 interface ChatListProps {
@@ -33,8 +33,10 @@ export const ChatList: React.FC<ChatListProps> = ({
                 activeId === conv.id ? 'bg-chat-item-active' : ''
               }`}
             >
-              <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center mr-4 shrink-0">
-                {conv.profiles?.image_url ? (
+              <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center mr-4 shrink-0 overflow-hidden">
+                {conv.is_group ? (
+                   <Users size={24} className="text-zinc-500" />
+                ) : conv.profiles?.image_url ? (
                   <img
                     src={conv.profiles.image_url}
                     alt={conv.profiles.username}
@@ -48,9 +50,9 @@ export const ChatList: React.FC<ChatListProps> = ({
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1 min-w-0">
                     <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                      {conv.profiles?.username || 'User'}
+                      {conv.is_group ? conv.title : (conv.profiles?.username || 'User')}
                     </h3>
-                    <VerificationBadge isVerified={conv.profiles?.is_verified} size={14} />
+                    {!conv.is_group && <VerificationBadge isVerified={conv.profiles?.is_verified} size={14} />}
                   </div>
                   <span className="text-xs text-zinc-500">
                     {new Date(conv.last_message_at).toLocaleDateString([], {

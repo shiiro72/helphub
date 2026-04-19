@@ -4,21 +4,25 @@ import { Navbar } from '@/components/organisms/Navbar';
 import { ChatList } from '@/components/organisms/ChatList';
 import { ChatWindow } from '@/components/organisms/ChatWindow';
 import { createClient } from '@/lib/supabase/client';
-import { Conversation } from '@/lib/types';
+import { Conversation, ConversationInvitation, Profile } from '@/lib/types';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { useRouter } from 'next/router';
 import { GetStaticProps } from 'next';
+import { useTranslations } from 'next-intl';
+import { Button } from '@/components/atoms/Button';
+import { User, Check, X } from 'lucide-react';
 
 export default function MessagesPage() {
+  const t = useTranslations();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [invitations, setInvitations] = useState<ConversationInvitation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const router = useRouter();
-  const { userId } = router.query;
+  const { userId, conversationId } = router.query;
   const [supabase] = useState(() => createClient());
 
   const startNewConversation = useCallback(async (currentUserId: string, otherUserId: string) => {
-    // Check if other user exists
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
@@ -27,12 +31,11 @@ export default function MessagesPage() {
 
     if (!profile) return;
 
-    // Sort IDs to maintain uniqueness constraint
     const [p1, p2] = [currentUserId, otherUserId].sort();
 
     const { data, error } = await supabase
       .from('conversations')
-      .insert({ participant_1: p1, participant_2: p2 })
+      .insert({ participant_1: p1, participant_2: p2, is_group: false })
       .select(`
         *,
         participant_1_profile:profiles!participant_1(*),
@@ -53,8 +56,8 @@ export default function MessagesPage() {
   }, [supabase]);
 
   const fetchConversations = useCallback(async (currentUserId: string) => {
-    // Fetch conversations where user is participant 1 or 2
-    const { data, error } = await supabase
+    // 1. Fetch direct conversations
+    const { data: directData, error: directError } = await supabase
       .from('conversations')
       .select(`
         *,
@@ -62,12 +65,41 @@ export default function MessagesPage() {
         participant_2_profile:profiles!participant_2(*)
       `)
       .or(`participant_1.eq.${currentUserId},participant_2.eq.${currentUserId}`)
-      .order('last_message_at', { ascending: false });
+      .eq('is_group', false);
 
-    if (error) {
-      console.error('Error fetching conversations:', error);
+    // 2. Fetch group conversations via members table
+    const { data: memberData, error: memberError } = await supabase
+      .from('conversation_members')
+      .select(`
+        conversation:conversations (
+          *,
+          members:conversation_members (
+            profiles (*)
+          )
+        )
+      `)
+      .eq('user_id', currentUserId);
+
+    if (directError || memberError) {
+      console.error('Error fetching conversations:', directError || memberError);
     } else {
-      const processed = (data || []).map((conv) => {
+      const groupConversations = (memberData || [])
+        .map(m => m.conversation)
+        .filter((c): c is Conversation | null => c !== null && c.is_group) as Conversation[];
+
+      const allConversations = [
+        ...(directData || []),
+        ...groupConversations
+      ].sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
+
+      const processed = allConversations.map((conv) => {
+        if (conv.is_group) {
+          const membersData = (conv as unknown as { members: { profiles: Profile }[] }).members;
+          return {
+            ...conv,
+            members: (membersData || []).map((m) => m.profiles)
+          } as Conversation;
+        }
         const otherProfile = conv.participant_1 === currentUserId
           ? conv.participant_2_profile
           : conv.participant_1_profile;
@@ -78,20 +110,39 @@ export default function MessagesPage() {
       });
       setConversations(processed);
 
-      // If userId in query, find or create conversation
-      if (userId && typeof userId === 'string') {
+      // Fetch invitations
+      const { data: invData } = await supabase
+        .from('conversation_invitations')
+        .select(`
+          *,
+          conversations (*),
+          inviter:profiles!inviter_id (*)
+        `)
+        .eq('invitee_id', currentUserId)
+        .eq('status', 'pending');
+
+      if (invData) {
+        setInvitations(invData as unknown as ConversationInvitation[]);
+      }
+
+      // If conversationId in query, set active
+      if (conversationId && typeof conversationId === 'string') {
+        const existing = processed.find(c => c.id === conversationId);
+        if (existing) {
+          setActiveConversation(existing);
+        }
+      } else if (userId && typeof userId === 'string') {
         const existing = processed.find(c =>
-          c.participant_1 === userId || c.participant_2 === userId
+          !c.is_group && (c.participant_1 === userId || c.participant_2 === userId)
         );
         if (existing) {
           setActiveConversation(existing);
         } else {
-          // Create new conversation
           startNewConversation(currentUserId, userId);
         }
       }
     }
-  }, [supabase, userId, startNewConversation]);
+  }, [supabase, userId, conversationId, startNewConversation]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -104,7 +155,18 @@ export default function MessagesPage() {
       }
     };
     checkUser();
-  }, [supabase, router, fetchConversations]);
+
+    const invChannel = supabase
+      .channel('invitations')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversation_invitations' }, () => {
+        if (user) fetchConversations(user.id);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(invChannel);
+    };
+  }, [supabase, router, fetchConversations, user]);
 
   const handleSendMessage = async (content: string) => {
     if (!activeConversation || !user) return;
@@ -157,6 +219,34 @@ export default function MessagesPage() {
     }
   };
 
+  const handleAcceptInvitation = async (inv: ConversationInvitation) => {
+    if (!user) return;
+    await supabase
+      .from('conversation_invitations')
+      .update({ status: 'accepted' })
+      .eq('id', inv.id);
+
+    await supabase
+      .from('conversation_members')
+      .insert({
+        conversation_id: inv.conversation_id,
+        user_id: user.id
+      });
+
+    fetchConversations(user.id);
+    router.push(`/messages?conversationId=${inv.conversation_id}`);
+  };
+
+  const handleRejectInvitation = async (inv: ConversationInvitation) => {
+    if (!user) return;
+    await supabase
+      .from('conversation_invitations')
+      .update({ status: 'rejected' })
+      .eq('id', inv.id);
+
+    fetchConversations(user.id);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-zinc-50 dark:bg-black overflow-hidden">
       <Head>
@@ -164,12 +254,47 @@ export default function MessagesPage() {
       </Head>
       <Navbar />
       <main className="flex-grow flex overflow-hidden">
-        <div className="w-full md:w-1/3 border-r border-zinc-200 dark:border-zinc-800">
-          <ChatList
-            conversations={conversations}
-            activeId={activeConversation?.id}
-            onSelect={setActiveConversation}
-          />
+        <div className="w-full md:w-1/3 border-r border-zinc-200 dark:border-zinc-800 flex flex-col">
+          {invitations.length > 0 && (
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/50">
+              <h3 className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-3">
+                {t('invitations')} ({invitations.length})
+              </h3>
+              <div className="space-y-3">
+                {invitations.map(inv => (
+                  <div key={inv.id} className="bg-white dark:bg-zinc-900 p-3 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800">
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden">
+                        {inv.inviter?.image_url ? (
+                          <img src={inv.inviter.image_url} alt={inv.inviter.username} className="w-full h-full object-cover" />
+                        ) : (
+                          <User size={16} className="text-zinc-500" />
+                        )}
+                      </div>
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-tight">
+                        <span className="font-bold text-zinc-900 dark:text-zinc-100">{inv.inviter?.username}</span> {t('group_chat_invitation')} <span className="font-semibold text-blue-600 dark:text-blue-400">&quot;{inv.conversations?.title}&quot;</span>
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" className="flex-1 h-8 text-[10px]" onClick={() => handleAcceptInvitation(inv)}>
+                        <Check size={12} className="mr-1" /> {t('accept')}
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1 h-8 text-[10px]" onClick={() => handleRejectInvitation(inv)}>
+                        <X size={12} className="mr-1" /> {t('reject')}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="flex-grow overflow-hidden">
+            <ChatList
+              conversations={conversations}
+              activeId={activeConversation?.id}
+              onSelect={setActiveConversation}
+            />
+          </div>
         </div>
         <div className="hidden md:flex flex-grow bg-chat-bg">
           {activeConversation && user ? (
@@ -196,7 +321,6 @@ export default function MessagesPage() {
           )}
         </div>
 
-        {/* Mobile View: Overlay or separate screen needed, simplified here */}
         {activeConversation && user && (
            <div className="fixed inset-0 z-[60] md:hidden bg-white dark:bg-black">
               <div className="h-full flex flex-col">

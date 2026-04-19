@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Calendar, User, MessageSquare, Languages, Loader2, Clock, Edit2, Trash2 } from 'lucide-react';
+import { MapPin, Calendar, User, MessageSquare, Languages, Loader2, Clock, Edit2, Trash2, UserPlus, Users } from 'lucide-react';
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
@@ -9,6 +9,8 @@ import { translateText } from '@/lib/translate';
 import { useRouter } from 'next/router';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { VolunteerList } from './VolunteerList';
+import { useVolunteer } from '@/lib/hooks/useVolunteer';
 
 interface RequestCardProps {
   request: HelpRequest;
@@ -28,8 +30,17 @@ export const RequestCard: React.FC<RequestCardProps> = ({
   const { user } = useAuth();
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [showVolunteerModal, setShowVolunteerModal] = useState(false);
 
   const isOwner = user?.id === request.user_id;
+
+  const {
+    isVolunteering,
+    volunteerStatus,
+    confirmedCount,
+    isLoading: isVolunteerLoading,
+    toggleVolunteer: handleVolunteerToggle
+  } = useVolunteer(request.id);
 
   const handleTranslate = async () => {
     if (translatedContent) {
@@ -102,13 +113,38 @@ export const RequestCard: React.FC<RequestCardProps> = ({
               </button>
             </>
           ) : (
-            <Link
-              href={`/messages?userId=${request.user_id}`}
-              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-              aria-label="Message requester"
-            >
-              <MessageSquare size={20} />
-            </Link>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleVolunteerToggle(request.max_volunteers || null)}
+                disabled={isVolunteerLoading}
+                className={`transition-colors flex items-center gap-1 ${
+                  isVolunteering
+                    ? volunteerStatus === 'waitlisted' ? 'text-orange-500 hover:text-orange-600' : 'text-green-500 hover:text-green-600'
+                    : confirmedCount >= (request.max_volunteers || Infinity)
+                      ? 'text-orange-400 hover:text-orange-500'
+                      : 'text-zinc-400 hover:text-blue-500'
+                }`}
+                title={isVolunteering ? t('unvolunteer') : confirmedCount >= (request.max_volunteers || Infinity) ? t('join_waitlist') : t('volunteer')}
+              >
+                {isVolunteerLoading ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <UserPlus size={18} />
+                )}
+                <span className="text-xs font-bold">
+                  {confirmedCount}{request.max_volunteers ? `/${request.max_volunteers}` : ''}
+                  {isVolunteering && volunteerStatus === 'waitlisted' && ` (${t('waitlisted')})`}
+                  {!isVolunteering && confirmedCount >= (request.max_volunteers || Infinity) && ` (${t('waitlist')})`}
+                </span>
+              </button>
+              <Link
+                href={`/messages?userId=${request.user_id}`}
+                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                aria-label="Message requester"
+              >
+                <MessageSquare size={20} />
+              </Link>
+            </div>
           )}
         </div>
       </div>
@@ -173,7 +209,25 @@ export const RequestCard: React.FC<RequestCardProps> = ({
             <span>{date}</span>
           </div>
         </div>
+
+        {isOwner && (
+          <button
+            onClick={() => setShowVolunteerModal(true)}
+            className="w-full mt-2 py-2 flex items-center justify-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors border border-blue-200 dark:border-blue-800"
+          >
+            <Users size={14} />
+            {t('manage_volunteers')} ({confirmedCount})
+          </button>
+        )}
       </div>
+
+      {showVolunteerModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" role="dialog" aria-modal="true">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md shadow-2xl p-6">
+            <VolunteerList request={{ ...request, confirmed_count: confirmedCount }} onClose={() => setShowVolunteerModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
