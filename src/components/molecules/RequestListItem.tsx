@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, User, MessageSquare, Languages, Loader2, Clock } from 'lucide-react';
+import { Calendar, User, MessageSquare, Languages, Loader2, Clock, Edit2, Trash2 } from 'lucide-react';
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
@@ -7,17 +7,28 @@ import { Highlight } from '../atoms/Highlight';
 import { translateText } from '@/lib/translate';
 import { useRouter } from 'next/router';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface RequestListItemProps {
   request: HelpRequest;
   searchQuery?: string;
+  onEdit?: (request: HelpRequest) => void;
+  onDelete?: (request: HelpRequest) => void;
 }
 
-export const RequestListItem: React.FC<RequestListItemProps> = ({ request, searchQuery = '' }) => {
+export const RequestListItem: React.FC<RequestListItemProps> = ({
+  request,
+  searchQuery = '',
+  onEdit,
+  onDelete
+}) => {
   const t = useTranslations();
   const { locale } = useRouter();
+  const { user } = useAuth();
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
+
+  const isOwner = user?.id === request.user_id;
 
   const handleTranslate = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -123,13 +134,34 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({ request, searc
         </div>
       </div>
 
-      <Link
-        href={`/messages?userId=${request.user_id}`}
-        className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors flex-shrink-0"
-        aria-label="Message requester"
-      >
-        <MessageSquare size={20} />
-      </Link>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {isOwner ? (
+          <>
+            <button
+              onClick={() => onEdit?.(request)}
+              className="p-2 text-zinc-400 hover:text-blue-500 transition-colors"
+              aria-label="Edit request"
+            >
+              <Edit2 size={20} />
+            </button>
+            <button
+              onClick={() => onDelete?.(request)}
+              className="p-2 text-zinc-400 hover:text-red-500 transition-colors"
+              aria-label="Delete request"
+            >
+              <Trash2 size={20} />
+            </button>
+          </>
+        ) : (
+          <Link
+            href={`/messages?userId=${request.user_id}`}
+            className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+            aria-label="Message requester"
+          >
+            <MessageSquare size={20} />
+          </Link>
+        )}
+      </div>
     </div>
   );
 };

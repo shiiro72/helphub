@@ -7,6 +7,7 @@ import { OfferListItem } from '../molecules/OfferListItem';
 import { PostHelpModal } from './PostHelpModal';
 import { BaseBoard } from './BaseBoard';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { createClient } from '@/lib/supabase/client';
 import { ConfirmationModal } from '../molecules/ConfirmationModal';
 
 export const OfferBoard: React.FC = () => {
@@ -16,13 +17,44 @@ export const OfferBoard: React.FC = () => {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [editingOffer, setEditingOffer] = useState<HelpOffer | null>(null);
+  const [deletingOffer, setDeletingOffer] = useState<HelpOffer | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handlePostClick = () => {
+    setEditingOffer(null);
     if (user) {
       setIsPostModalOpen(true);
     } else {
       setIsLoginPromptOpen(true);
     }
+  };
+
+  const handleEditClick = (offer: HelpOffer) => {
+    setEditingOffer(offer);
+    setIsPostModalOpen(true);
+  };
+
+  const handleDeleteClick = (offer: HelpOffer) => {
+    setDeletingOffer(offer);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingOffer) return;
+    setIsDeleting(true);
+    const supabase = createClient();
+    const { error } = await supabase
+      .from('help_offers')
+      .delete()
+      .eq('id', deletingOffer.id);
+
+    if (error) {
+      console.error('Error deleting offer:', error);
+    } else {
+      setRefreshTrigger(prev => prev + 1);
+      setDeletingOffer(null);
+    }
+    setIsDeleting(false);
   };
 
   const filterFn = (offer: HelpOffer, filters: { query: string; city: string; country: string; dateRange: string; startDate: string }) => {
@@ -64,7 +96,15 @@ export const OfferBoard: React.FC = () => {
       matchesStartDate = offerStartDate >= filterDate;
     }
 
-    return matchesSearch && matchesCity && matchesCountry && matchesDate && matchesStartDate;
+    // Exclude expired posts
+    let isNotExpired = true;
+    if (offer.end_datetime) {
+      const endDateTime = new Date(offer.end_datetime);
+      const now = new Date();
+      isNotExpired = endDateTime > now;
+    }
+
+    return matchesSearch && matchesCity && matchesCountry && matchesDate && matchesStartDate && isNotExpired;
   };
 
   return (
@@ -76,8 +116,22 @@ export const OfferBoard: React.FC = () => {
         postButtonText="Post Offer"
         emptyMessage="No help offers found."
         onPostClick={handlePostClick}
-        renderGridItem={(offer, query) => <OfferCard offer={offer} searchQuery={query} />}
-        renderListItem={(offer, query) => <OfferListItem offer={offer} searchQuery={query} />}
+        renderGridItem={(offer, query) => (
+          <OfferCard
+            offer={offer}
+            searchQuery={query}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteClick}
+          />
+        )}
+        renderListItem={(offer, query) => (
+          <OfferListItem
+            offer={offer}
+            searchQuery={query}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteClick}
+          />
+        )}
         filterFn={filterFn}
         refreshTrigger={refreshTrigger}
       />
@@ -92,10 +146,25 @@ export const OfferBoard: React.FC = () => {
         cancelText={t('cancel')}
       />
 
+      <ConfirmationModal
+        isOpen={!!deletingOffer}
+        onClose={() => setDeletingOffer(null)}
+        onConfirm={confirmDelete}
+        title="Delete Offer"
+        message="Are you sure you want to delete this help offer? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        isLoading={isDeleting}
+      />
+
       <PostHelpModal
         type="offer"
         isOpen={isPostModalOpen}
-        onClose={() => setIsPostModalOpen(false)}
+        initialData={editingOffer}
+        onClose={() => {
+          setIsPostModalOpen(false);
+          setEditingOffer(null);
+        }}
         onSuccess={() => setRefreshTrigger(prev => prev + 1)}
       />
     </>

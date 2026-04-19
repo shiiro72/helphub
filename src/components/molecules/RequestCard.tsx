@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Calendar, User, MessageSquare, Languages, Loader2, Clock } from 'lucide-react';
+import { MapPin, Calendar, User, MessageSquare, Languages, Loader2, Clock, Edit2, Trash2 } from 'lucide-react';
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
@@ -8,17 +8,28 @@ import { Highlight } from '../atoms/Highlight';
 import { translateText } from '@/lib/translate';
 import { useRouter } from 'next/router';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface RequestCardProps {
   request: HelpRequest;
   searchQuery?: string;
+  onEdit?: (request: HelpRequest) => void;
+  onDelete?: (request: HelpRequest) => void;
 }
 
-export const RequestCard: React.FC<RequestCardProps> = ({ request, searchQuery = '' }) => {
+export const RequestCard: React.FC<RequestCardProps> = ({
+  request,
+  searchQuery = '',
+  onEdit,
+  onDelete
+}) => {
   const t = useTranslations();
   const { locale } = useRouter();
+  const { user } = useAuth();
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
+
+  const isOwner = user?.id === request.user_id;
 
   const handleTranslate = async () => {
     if (translatedContent) {
@@ -67,16 +78,39 @@ export const RequestCard: React.FC<RequestCardProps> = ({ request, searchQuery =
         : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
     }`}>
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">
-          <Highlight text={request.title} query={searchQuery} />
-        </h3>
-        <Link
-          href={`/messages?userId=${request.user_id}`}
-          className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-          aria-label="Message requester"
-        >
-          <MessageSquare size={20} />
-        </Link>
+        <div className="flex-grow min-w-0">
+          <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">
+            <Highlight text={request.title} query={searchQuery} />
+          </h3>
+        </div>
+        <div className="flex items-center gap-2 ml-2">
+          {isOwner ? (
+            <>
+              <button
+                onClick={() => onEdit?.(request)}
+                className="text-zinc-400 hover:text-blue-500 transition-colors"
+                aria-label="Edit request"
+              >
+                <Edit2 size={18} />
+              </button>
+              <button
+                onClick={() => onDelete?.(request)}
+                className="text-zinc-400 hover:text-red-500 transition-colors"
+                aria-label="Delete request"
+              >
+                <Trash2 size={18} />
+              </button>
+            </>
+          ) : (
+            <Link
+              href={`/messages?userId=${request.user_id}`}
+              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+              aria-label="Message requester"
+            >
+              <MessageSquare size={20} />
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="flex-grow mb-6">
