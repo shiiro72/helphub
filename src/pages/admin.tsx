@@ -2,11 +2,11 @@ import { useEffect, useState, useCallback } from 'react';
 import Head from 'next/head';
 import { Navbar } from '@/components/organisms/Navbar';
 import { createClient } from '@/lib/supabase/client';
-import { Report, SupportTicket, Profile } from '@/lib/types';
+import { Report, SupportTicket, Profile, BannedUser } from '@/lib/types';
 import { useRouter } from 'next/router';
 import { GetStaticProps } from 'next';
 import { useTranslations } from 'next-intl';
-import { User, Flag, MessageSquare, Clock, CheckCircle, Shield } from 'lucide-react';
+import { User, Flag, MessageSquare, Clock, CheckCircle, Shield, Ban, Mail } from 'lucide-react';
 import { Button } from '@/components/atoms/Button';
 
 export default function AdminPage() {
@@ -14,8 +14,9 @@ export default function AdminPage() {
   const router = useRouter();
   const [reports, setReports] = useState<Report[]>([]);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
+  const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'reports' | 'tickets'>('reports');
+  const [activeTab, setActiveTab] = useState<'reports' | 'tickets' | 'banned'>('reports');
   const [supabase] = useState(() => createClient());
 
   const fetchData = useCallback(async () => {
@@ -58,14 +59,38 @@ export default function AdminPage() {
       `)
       .order('created_at', { ascending: false });
 
+    // Fetch banned users
+    const { data: bannedData } = await supabase
+      .from('archived_users')
+      .select('*')
+      .order('banned_at', { ascending: false });
+
     setReports(reportsData || []);
     setTickets(ticketsData || []);
+    setBannedUsers(bannedData || []);
     setLoading(false);
   }, [supabase, router]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const handleBanUser = async (userId: string, reason: string) => {
+    if (!confirm(t('confirm_ban_user'))) return;
+
+    const { error } = await supabase.rpc('ban_user', {
+      target_user_id: userId,
+      ban_reason: reason
+    });
+
+    if (error) {
+      alert(t('error_banning_user'));
+      console.error(error);
+    } else {
+      alert(t('user_banned_success'));
+      fetchData();
+    }
+  };
 
   const handleUpdateTicketStatus = async (ticketId: string, newStatus: 'open' | 'closed') => {
     const { error } = await supabase
@@ -74,7 +99,7 @@ export default function AdminPage() {
       .eq('id', ticketId);
 
     if (error) {
-      alert('Error updating ticket status');
+      alert(t('error_updating_ticket'));
     } else {
       setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: newStatus } : t));
     }
@@ -136,6 +161,25 @@ export default function AdminPage() {
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
             )}
           </button>
+          <button
+            onClick={() => setActiveTab('banned')}
+            className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
+              activeTab === 'banned'
+                ? 'text-brand-success'
+                : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Ban size={18} />
+              {t('banned_users')}
+              <span className="ml-1 px-2 py-0.5 text-xs bg-zinc-100 dark:bg-zinc-800 rounded-full">
+                {bannedUsers.length}
+              </span>
+            </div>
+            {activeTab === 'banned' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
+            )}
+          </button>
         </div>
 
         {loading ? (
@@ -178,7 +222,16 @@ export default function AdminPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end shrink-0">
+                    <div className="flex flex-col items-end shrink-0 gap-3">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 border-red-100 dark:border-red-900"
+                        onClick={() => handleBanUser(report.reported_id, report.reason)}
+                      >
+                        <Ban size={16} className="mr-2" />
+                        {t('ban_user')}
+                      </Button>
                       <div className="flex items-center gap-1 text-xs text-zinc-500 mb-2">
                         <Clock size={14} />
                         {new Date(report.created_at).toLocaleString()}
@@ -189,7 +242,7 @@ export default function AdminPage() {
               ))
             )}
           </div>
-        ) : (
+        ) : activeTab === 'tickets' ? (
           <div className="space-y-4">
             {tickets.length === 0 ? (
               <div className="text-center py-12 text-zinc-500">
@@ -247,6 +300,43 @@ export default function AdminPage() {
                       )}
                     </div>
                   </div>
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {bannedUsers.length === 0 ? (
+              <div className="text-center py-12 text-zinc-500">
+                {t('no_banned_users')}
+              </div>
+            ) : (
+              bannedUsers.map((user) => (
+                <div key={user.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm">
+                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                           <Ban className="text-red-500" size={18} />
+                           <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                             {user.username || 'Anonymous'}
+                           </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-zinc-500">
+                           <Mail size={14} />
+                           {user.email}
+                        </div>
+                        <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-950 p-3 rounded border border-zinc-100 dark:border-zinc-800">
+                           <span className="font-medium mr-1">{t('reason')}:</span>
+                           {user.reason || t('no_reason_provided')}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end text-xs text-zinc-500">
+                         <div className="flex items-center gap-1">
+                            <Clock size={14} />
+                            {new Date(user.banned_at).toLocaleString()}
+                         </div>
+                      </div>
+                   </div>
                 </div>
               ))
             )}

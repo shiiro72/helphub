@@ -36,6 +36,14 @@ export interface HelpRequest {
   profiles?: Profile;
 }
 
+export interface BannedUser {
+  id: string;
+  email: string;
+  username: string | null;
+  reason: string | null;
+  banned_at: string;
+}
+
 export interface HelpOffer {
   id: string;
   user_id: string;
