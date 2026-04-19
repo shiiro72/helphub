@@ -79,7 +79,8 @@ export function BaseBoard<T extends { id: string }>({
         <div className="flex items-center gap-4 self-end md:self-auto">
           <Button
             className="gap-2"
-            size="sm"
+            size="md"
+            variant="primary"
             onClick={onPostClick}
           >
             <Plus size={18} />
