@@ -14,7 +14,7 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const router = useRouter();
-  const { userId } = router.query;
+  const { userId, conversationId } = router.query;
   const [supabase] = useState(() => createClient());
 
   const startNewConversation = useCallback(async (currentUserId: string, otherUserId: string) => {
@@ -53,21 +53,30 @@ export default function MessagesPage() {
   }, [supabase]);
 
   const fetchConversations = useCallback(async (currentUserId: string) => {
-    // Fetch conversations where user is participant 1 or 2
+    // Fetch conversations where user is participant 1, 2 or a member of a group
     const { data, error } = await supabase
       .from('conversations')
       .select(`
         *,
         participant_1_profile:profiles!participant_1(*),
-        participant_2_profile:profiles!participant_2(*)
+        participant_2_profile:profiles!participant_2(*),
+        members:conversation_members(
+          profiles(*)
+        )
       `)
-      .or(`participant_1.eq.${currentUserId},participant_2.eq.${currentUserId}`)
+      .or(`participant_1.eq.${currentUserId},participant_2.eq.${currentUserId},conversation_members.user_id.eq.${currentUserId}`)
       .order('last_message_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching conversations:', error);
     } else {
       const processed = (data || []).map((conv) => {
+        if (conv.is_group) {
+          return {
+            ...conv,
+            members: (conv.members as unknown as { profiles: Profile }[] || []).map((m) => m.profiles)
+          } as Conversation;
+        }
         const otherProfile = conv.participant_1 === currentUserId
           ? conv.participant_2_profile
           : conv.participant_1_profile;
@@ -78,10 +87,16 @@ export default function MessagesPage() {
       });
       setConversations(processed);
 
-      // If userId in query, find or create conversation
-      if (userId && typeof userId === 'string') {
+      // If conversationId in query, set active
+      if (conversationId && typeof conversationId === 'string') {
+        const existing = processed.find(c => c.id === conversationId);
+        if (existing) {
+          setActiveConversation(existing);
+        }
+      } else if (userId && typeof userId === 'string') {
+        // If userId in query, find or create conversation
         const existing = processed.find(c =>
-          c.participant_1 === userId || c.participant_2 === userId
+          !c.is_group && (c.participant_1 === userId || c.participant_2 === userId)
         );
         if (existing) {
           setActiveConversation(existing);
@@ -91,7 +106,7 @@ export default function MessagesPage() {
         }
       }
     }
-  }, [supabase, userId, startNewConversation]);
+  }, [supabase, userId, conversationId, startNewConversation]);
 
   useEffect(() => {
     const checkUser = async () => {

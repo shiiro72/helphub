@@ -31,6 +31,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
   const [reward, setReward] = useState('');
   const [startDatetime, setStartDatetime] = useState('');
   const [endDatetime, setEndDatetime] = useState('');
+  const [maxVolunteers, setMaxVolunteers] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,6 +48,9 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
       setReward(initialData.reward_offer || '');
       setStartDatetime(initialData.start_datetime ? initialData.start_datetime.substring(0, 16) : '');
       setEndDatetime(initialData.end_datetime ? initialData.end_datetime.substring(0, 16) : '');
+      if ('max_volunteers' in initialData) {
+        setMaxVolunteers(initialData.max_volunteers?.toString() || '');
+      }
     } else if (!isOpen) {
       // Clear form when closed
       setTitle('');
@@ -57,6 +61,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
       setReward('');
       setStartDatetime('');
       setEndDatetime('');
+      setMaxVolunteers('');
     }
   }, [initialData, isOpen]);
 
@@ -79,7 +84,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
     }
 
     const table = isRequest ? 'help_requests' : 'help_offers';
-    const payload: Record<string, string | null> = {
+    const payload: Partial<HelpRequest & HelpOffer> = {
       user_id: user.id,
       title,
       content,
@@ -93,6 +98,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
 
     if (isRequest) {
       payload.request_location = city ? `${city}, ${country}` : 'Remote';
+      payload.max_volunteers = maxVolunteers ? parseInt(maxVolunteers) : null;
     } else {
       payload.offer_location = city ? `${city}, ${country}` : 'Remote';
     }
@@ -125,6 +131,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
       setReward('');
       setStartDatetime('');
       setEndDatetime('');
+      setMaxVolunteers('');
     }
     setLoading(false);
   };
@@ -208,14 +215,29 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="reward">Reward (Optional)</Label>
-            <Input
-              id="reward"
-              placeholder="e.g. Coffee, $20, Nothing"
-              value={reward}
-              onChange={(e) => setReward(e.target.value)}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="reward">Reward (Optional)</Label>
+              <Input
+                id="reward"
+                placeholder="e.g. Coffee, $20, Nothing"
+                value={reward}
+                onChange={(e) => setReward(e.target.value)}
+              />
+            </div>
+            {isRequest && (
+              <div className="space-y-2">
+                <Label htmlFor="maxVolunteers">Max Volunteers (Optional)</Label>
+                <Input
+                  id="maxVolunteers"
+                  type="number"
+                  min="1"
+                  placeholder="e.g. 5"
+                  value={maxVolunteers}
+                  onChange={(e) => setMaxVolunteers(e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

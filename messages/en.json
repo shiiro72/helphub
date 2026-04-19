@@ -68,5 +68,15 @@
   "archive_title": "My Archived Posts",
   "archive_description": "Your historical help requests and offers that have passed their end date.",
   "search_archive": "Search archive...",
-  "no_archived_items": "No archived items found."
+  "no_archived_items": "No archived items found.",
+  "max_volunteers": "Maximum Volunteers",
+  "volunteers": "Volunteers",
+  "volunteer": "Volunteer",
+  "unvolunteer": "Remove Volunteer",
+  "manage_volunteers": "Manage Volunteers",
+  "create_group_chat": "Create Group Chat",
+  "group_chat": "Group Chat",
+  "message_volunteer": "Message Volunteer",
+  "no_volunteers": "No volunteers yet.",
+  "limit_reached": "Limit Reached"
 }

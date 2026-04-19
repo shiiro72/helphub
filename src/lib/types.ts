@@ -31,8 +31,10 @@ export interface HelpRequest {
   address?: string | null;
   start_datetime?: string | null;
   end_datetime?: string | null;
+  max_volunteers?: number | null;
   date_posted: string;
   profiles?: Profile;
+  volunteer_count?: number;
 }
 
 export interface HelpOffer {
@@ -54,11 +56,23 @@ export interface HelpOffer {
 
 export interface Conversation {
   id: string;
-  participant_1: string;
-  participant_2: string;
+  participant_1: string | null;
+  participant_2: string | null;
+  is_group: boolean;
+  title: string | null;
+  request_id: string | null;
   last_message_at: string;
   created_at: string;
-  profiles?: Profile; // Other participant's profile
+  profiles?: Profile; // Other participant's profile (for 1-on-1)
+  members?: Profile[]; // All members (for groups)
+}
+
+export interface ConversationMember {
+  id: string;
+  conversation_id: string;
+  user_id: string;
+  created_at: string;
+  profiles?: Profile;
 }
 
 export interface Message {

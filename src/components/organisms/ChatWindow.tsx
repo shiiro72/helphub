@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Conversation, Message } from '@/lib/types';
 import { MessageBubble } from '../molecules/MessageBubble';
 import { ChatInput } from '../molecules/ChatInput';
-import { User, MoreVertical, Flag, Ban, Star } from 'lucide-react';
+import { User, MoreVertical, Flag, Ban, Star, Users } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { StarRating } from '../atoms/StarRating';
@@ -158,7 +158,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       <div className="bg-chat-header p-3 flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
-            {conversation.profiles?.image_url ? (
+            {conversation.is_group ? (
+              <Users size={20} className="text-zinc-500" />
+            ) : conversation.profiles?.image_url ? (
               <img
                 src={conversation.profiles.image_url}
                 alt={conversation.profiles.username}
@@ -171,19 +173,27 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           <div>
             <div className="flex items-center gap-1">
               <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-                {conversation.profiles?.username || 'User'}
+                {conversation.is_group ? conversation.title : (conversation.profiles?.username || 'User')}
               </h3>
-              <VerificationBadge isVerified={conversation.profiles?.is_verified} size={14} />
+              {!conversation.is_group && <VerificationBadge isVerified={conversation.profiles?.is_verified} size={14} />}
             </div>
-            <div className="flex items-center gap-2">
-              <StarRating
-                rating={conversation.profiles?.trust_rank || 0}
-                totalRatings={conversation.profiles?.total_ratings || 0}
-                size={12}
-                showCount
-              />
-              <span className="text-[10px] text-zinc-500">• online</span>
-            </div>
+            {conversation.is_group ? (
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] text-zinc-500">
+                  {conversation.members?.length || 0} members
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <StarRating
+                  rating={conversation.profiles?.trust_rank || 0}
+                  totalRatings={conversation.profiles?.total_ratings || 0}
+                  size={12}
+                  showCount
+                />
+                <span className="text-[10px] text-zinc-500">• online</span>
+              </div>
+            )}
           </div>
         </div>
         <div className="relative">
@@ -195,24 +205,28 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           </button>
           {showMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-chat-menu-bg shadow-lg rounded-md overflow-hidden z-10 border border-zinc-200 dark:border-zinc-800">
-              <button
-                onClick={() => {
-                  onBlock(otherParticipantId);
-                  setShowMenu(false);
-                }}
-                className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-red-500"
-              >
-                <Ban size={16} /> Block User
-              </button>
-              <button
-                onClick={() => {
-                  setShowRatingModal(true);
-                  setShowMenu(false);
-                }}
-                className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
-              >
-                <Star size={16} /> Rate User
-              </button>
+              {!conversation.is_group ? (
+                <>
+                  <button
+                    onClick={() => {
+                      onBlock(otherParticipantId);
+                      setShowMenu(false);
+                    }}
+                    className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-red-500"
+                  >
+                    <Ban size={16} /> Block User
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowRatingModal(true);
+                      setShowMenu(false);
+                    }}
+                    className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+                  >
+                    <Star size={16} /> Rate User
+                  </button>
+                </>
+              ) : null}
               <button
                 onClick={() => {
                   onReport(otherParticipantId);
