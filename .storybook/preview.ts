@@ -1,4 +1,7 @@
+import React from 'react';
 import type { Preview } from '@storybook/nextjs-vite';
+import { NextIntlClientProvider } from 'next-intl';
+import messages from '../messages/en.json';
 import '../src/styles/globals.css';
 
 const preview: Preview = {
@@ -17,6 +20,14 @@ const preview: Preview = {
       test: 'todo',
     },
   },
+  decorators: [
+    (Story) =>
+      React.createElement(NextIntlClientProvider, {
+        locale: 'en',
+        messages,
+        children: React.createElement(Story),
+      }),
+  ],
 };
 
 export default preview;
