@@ -17,7 +17,8 @@ const mockRequest = {
   id: '1',
   user_id: 'user1',
   title: 'Need help moving a sofa',
-  content: 'I recently bought a sofa and need help moving it to my apartment on the 3rd floor. It is quite heavy, so I need someone with strength.',
+  content:
+    'I recently bought a sofa and need help moving it to my apartment on the 3rd floor. It is quite heavy, so I need someone with strength.',
   image_url: null,
   reward_offer: 'Pizza and drinks',
   request_location: 'Downtown Brooklyn',
@@ -30,6 +31,8 @@ const mockRequest = {
     trust_rank: 4.5,
     total_ratings: 10,
     created_at: new Date().toISOString(),
+    role: 'user' as const,
+    is_restricted: false,
   },
 };
 

@@ -22,131 +22,150 @@ export default function MessagesPage() {
   const { userId, conversationId } = router.query;
   const [supabase] = useState(() => createClient());
 
-  const startNewConversation = useCallback(async (currentUserId: string, otherUserId: string) => {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', otherUserId)
-      .single();
+  const startNewConversation = useCallback(
+    async (currentUserId: string, otherUserId: string) => {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', otherUserId)
+        .single();
 
-    if (!profile) return;
+      if (!profile) return;
 
-    const [p1, p2] = [currentUserId, otherUserId].sort();
+      const [p1, p2] = [currentUserId, otherUserId].sort();
 
-    const { data, error } = await supabase
-      .from('conversations')
-      .insert({ participant_1: p1, participant_2: p2, is_group: false })
-      .select(`
+      const { data, error } = await supabase
+        .from('conversations')
+        .insert({ participant_1: p1, participant_2: p2, is_group: false })
+        .select(
+          `
         *,
         participant_1_profile:profiles!participant_1(*),
         participant_2_profile:profiles!participant_2(*)
-      `)
-      .single();
+      `,
+        )
+        .single();
 
-    if (error) {
-      console.error('Error starting conversation:', error);
-    } else if (data) {
-      const otherProfile = data.participant_1 === currentUserId
-          ? data.participant_2_profile
-          : data.participant_1_profile;
-      const newConv = { ...data, profiles: otherProfile } as Conversation;
-      setConversations(prev => [newConv, ...prev]);
-      setActiveConversation(newConv);
-    }
-  }, [supabase]);
+      if (error) {
+        console.error('Error starting conversation:', error);
+      } else if (data) {
+        const otherProfile =
+          data.participant_1 === currentUserId
+            ? data.participant_2_profile
+            : data.participant_1_profile;
+        const newConv = { ...data, profiles: otherProfile } as Conversation;
+        setConversations((prev) => [newConv, ...prev]);
+        setActiveConversation(newConv);
+      }
+    },
+    [supabase],
+  );
 
-  const fetchConversations = useCallback(async (currentUserId: string) => {
-    // 1. Fetch direct conversations
-    const { data: directData, error: directError } = await supabase
-      .from('conversations')
-      .select(`
+  const fetchConversations = useCallback(
+    async (currentUserId: string) => {
+      // 1. Fetch direct conversations
+      const { data: directData, error: directError } = await supabase
+        .from('conversations')
+        .select(
+          `
         *,
         participant_1_profile:profiles!participant_1(*),
         participant_2_profile:profiles!participant_2(*)
-      `)
-      .or(`participant_1.eq.${currentUserId},participant_2.eq.${currentUserId}`)
-      .eq('is_group', false);
+      `,
+        )
+        .or(`participant_1.eq.${currentUserId},participant_2.eq.${currentUserId}`)
+        .eq('is_group', false);
 
-    // 2. Fetch group conversations via members table
-    const { data: memberData, error: memberError } = await supabase
-      .from('conversation_members')
-      .select(`
+      // 2. Fetch group conversations via members table
+      const { data: memberData, error: memberError } = await supabase
+        .from('conversation_members')
+        .select(
+          `
         conversation:conversations (
           *,
           members:conversation_members (
             profiles (*)
           )
         )
-      `)
-      .eq('user_id', currentUserId);
+      `,
+        )
+        .eq('user_id', currentUserId);
 
-    if (directError || memberError) {
-      console.error('Error fetching conversations:', directError || memberError);
-    } else {
-      const groupConversations = (memberData || [])
-        .map(m => m.conversation)
-        .filter((c): c is Conversation | null => c !== null && c.is_group) as Conversation[];
+      if (directError || memberError) {
+        console.error('Error fetching conversations:', directError || memberError);
+      } else {
+        const groupConversations = (
+          (memberData || []) as unknown as Array<{ conversation: Conversation | null }>
+        )
+          .map((m) => m.conversation)
+          .filter((c): c is Conversation => c !== null && c.is_group);
 
-      const allConversations = [
-        ...(directData || []),
-        ...groupConversations
-      ].sort((a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime());
+        const allConversations = [...(directData || []), ...groupConversations].sort(
+          (a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime(),
+        );
 
-      const processed = allConversations.map((conv) => {
-        if (conv.is_group) {
-          const membersData = (conv as unknown as { members: { profiles: Profile }[] }).members;
+        const processed = allConversations.map((conv) => {
+          if (conv.is_group) {
+            const membersData = (conv as unknown as { members: { profiles: Profile }[] }).members;
+            return {
+              ...conv,
+              members: (membersData || []).map((m) => m.profiles),
+            } as Conversation;
+          }
+          const otherProfile =
+            conv.participant_1 === currentUserId
+              ? conv.participant_2_profile
+              : conv.participant_1_profile;
           return {
             ...conv,
-            members: (membersData || []).map((m) => m.profiles)
+            profiles: otherProfile,
           } as Conversation;
-        }
-        const otherProfile = conv.participant_1 === currentUserId
-          ? conv.participant_2_profile
-          : conv.participant_1_profile;
-        return {
-          ...conv,
-          profiles: otherProfile
-        } as Conversation;
-      });
-      setConversations(processed);
+        });
+        setConversations(processed);
 
-      // Fetch invitations
-      const { data: invData } = await supabase
-        .from('conversation_invitations')
-        .select(`
+        // Fetch invitations
+        const { data: invData } = await supabase
+          .from('conversation_invitations')
+          .select(
+            `
           *,
           conversations (*),
           inviter:profiles!inviter_id (*)
-        `)
-        .eq('invitee_id', currentUserId)
-        .eq('status', 'pending');
+        `,
+          )
+          .eq('invitee_id', currentUserId)
+          .eq('status', 'pending');
 
-      if (invData) {
-        setInvitations(invData as unknown as ConversationInvitation[]);
-      }
+        if (invData) {
+          setInvitations(invData as unknown as ConversationInvitation[]);
+        }
 
-      // If conversationId in query, set active
-      if (conversationId && typeof conversationId === 'string') {
-        const existing = processed.find(c => c.id === conversationId);
-        if (existing) {
-          setActiveConversation(existing);
-        }
-      } else if (userId && typeof userId === 'string') {
-        const existing = processed.find(c =>
-          !c.is_group && (c.participant_1 === userId || c.participant_2 === userId)
-        );
-        if (existing) {
-          setActiveConversation(existing);
-        } else {
-          startNewConversation(currentUserId, userId);
+        // If conversationId in query, set active
+        if (conversationId && typeof conversationId === 'string') {
+          const existing = processed.find((c) => c.id === conversationId);
+          if (existing) {
+            setActiveConversation(existing);
+          }
+        } else if (userId && typeof userId === 'string') {
+          const existing = processed.find(
+            (c) => !c.is_group && (c.participant_1 === userId || c.participant_2 === userId),
+          );
+          if (existing) {
+            setActiveConversation(existing);
+          } else {
+            startNewConversation(currentUserId, userId);
+          }
         }
       }
-    }
-  }, [supabase, userId, conversationId, startNewConversation]);
+    },
+    [supabase, userId, conversationId, startNewConversation],
+  );
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         router.push('/login');
       } else {
@@ -158,9 +177,13 @@ export default function MessagesPage() {
 
     const invChannel = supabase
       .channel('invitations')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversation_invitations' }, () => {
-        if (user) fetchConversations(user.id);
-      })
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'conversation_invitations' },
+        () => {
+          if (user) fetchConversations(user.id);
+        },
+      )
       .subscribe();
 
     return () => {
@@ -171,13 +194,11 @@ export default function MessagesPage() {
   const handleSendMessage = async (content: string) => {
     if (!activeConversation || !user) return;
 
-    const { error } = await supabase
-      .from('messages')
-      .insert({
-        conversation_id: activeConversation.id,
-        sender_id: user.id,
-        content: content
-      });
+    const { error } = await supabase.from('messages').insert({
+      conversation_id: activeConversation.id,
+      sender_id: user.id,
+      content: content,
+    });
 
     if (error) {
       console.error('Error sending message:', error);
@@ -204,13 +225,11 @@ export default function MessagesPage() {
     const reason = prompt('Please enter the reason for reporting:');
     if (!reason) return;
 
-    const { error } = await supabase
-      .from('reports')
-      .insert({
-        reporter_id: user.id,
-        reported_id: reportedId,
-        reason: reason
-      });
+    const { error } = await supabase.from('reports').insert({
+      reporter_id: user.id,
+      reported_id: reportedId,
+      reason: reason,
+    });
 
     if (error) {
       alert('Error reporting user');
@@ -221,17 +240,12 @@ export default function MessagesPage() {
 
   const handleAcceptInvitation = async (inv: ConversationInvitation) => {
     if (!user) return;
-    await supabase
-      .from('conversation_invitations')
-      .update({ status: 'accepted' })
-      .eq('id', inv.id);
+    await supabase.from('conversation_invitations').update({ status: 'accepted' }).eq('id', inv.id);
 
-    await supabase
-      .from('conversation_members')
-      .insert({
-        conversation_id: inv.conversation_id,
-        user_id: user.id
-      });
+    await supabase.from('conversation_members').insert({
+      conversation_id: inv.conversation_id,
+      user_id: user.id,
+    });
 
     fetchConversations(user.id);
     router.push(`/messages?conversationId=${inv.conversation_id}`);
@@ -239,10 +253,7 @@ export default function MessagesPage() {
 
   const handleRejectInvitation = async (inv: ConversationInvitation) => {
     if (!user) return;
-    await supabase
-      .from('conversation_invitations')
-      .update({ status: 'rejected' })
-      .eq('id', inv.id);
+    await supabase.from('conversation_invitations').update({ status: 'rejected' }).eq('id', inv.id);
 
     fetchConversations(user.id);
   };
@@ -261,25 +272,47 @@ export default function MessagesPage() {
                 {t('invitations')} ({invitations.length})
               </h3>
               <div className="space-y-3">
-                {invitations.map(inv => (
-                  <div key={inv.id} className="bg-white dark:bg-zinc-900 p-3 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800">
+                {invitations.map((inv) => (
+                  <div
+                    key={inv.id}
+                    className="bg-white dark:bg-zinc-900 p-3 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800"
+                  >
                     <div className="flex items-start gap-3 mb-2">
                       <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden">
                         {inv.inviter?.image_url ? (
-                          <img src={inv.inviter.image_url} alt={inv.inviter.username} className="w-full h-full object-cover" />
+                          <img
+                            src={inv.inviter.image_url}
+                            alt={inv.inviter.username}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <User size={16} className="text-zinc-500" />
                         )}
                       </div>
                       <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-tight">
-                        <span className="font-bold text-zinc-900 dark:text-zinc-100">{inv.inviter?.username}</span> {t('group_chat_invitation')} <span className="font-semibold text-blue-600 dark:text-blue-400">&quot;{inv.conversations?.title}&quot;</span>
+                        <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                          {inv.inviter?.username}
+                        </span>{' '}
+                        {t('group_chat_invitation')}{' '}
+                        <span className="font-semibold text-blue-600 dark:text-blue-400">
+                          &quot;{inv.conversations?.title}&quot;
+                        </span>
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" className="flex-1 h-8 text-[10px]" onClick={() => handleAcceptInvitation(inv)}>
+                      <Button
+                        size="sm"
+                        className="flex-1 h-8 text-[10px]"
+                        onClick={() => handleAcceptInvitation(inv)}
+                      >
                         <Check size={12} className="mr-1" /> {t('accept')}
                       </Button>
-                      <Button size="sm" variant="outline" className="flex-1 h-8 text-[10px]" onClick={() => handleRejectInvitation(inv)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 h-8 text-[10px]"
+                        onClick={() => handleRejectInvitation(inv)}
+                      >
                         <X size={12} className="mr-1" /> {t('reject')}
                       </Button>
                     </div>
@@ -314,33 +347,33 @@ export default function MessagesPage() {
                 HelpHub for Desktop
               </h2>
               <p className="text-zinc-500 max-w-sm">
-                Send and receive messages without keeping your phone online.
-                Use HelpHub on up to 4 linked devices and 1 phone at the same time.
+                Send and receive messages without keeping your phone online. Use HelpHub on up to 4
+                linked devices and 1 phone at the same time.
               </p>
             </div>
           )}
         </div>
 
         {activeConversation && user && (
-           <div className="fixed inset-0 z-[60] md:hidden bg-white dark:bg-black">
-              <div className="h-full flex flex-col">
-                <button
-                  onClick={() => setActiveConversation(null)}
-                  className="p-4 text-sm font-medium text-blue-600 flex items-center"
-                >
-                  ← Back
-                </button>
-                <div className="flex-grow overflow-hidden">
-                   <ChatWindow
-                    conversation={activeConversation}
-                    currentUserId={user.id}
-                    onSendMessage={handleSendMessage}
-                    onBlock={handleBlock}
-                    onReport={handleReport}
-                  />
-                </div>
+          <div className="fixed inset-0 z-[60] md:hidden bg-white dark:bg-black">
+            <div className="h-full flex flex-col">
+              <button
+                onClick={() => setActiveConversation(null)}
+                className="p-4 text-sm font-medium text-blue-600 flex items-center"
+              >
+                ← Back
+              </button>
+              <div className="flex-grow overflow-hidden">
+                <ChatWindow
+                  conversation={activeConversation}
+                  currentUserId={user.id}
+                  onSendMessage={handleSendMessage}
+                  onBlock={handleBlock}
+                  onReport={handleReport}
+                />
               </div>
-           </div>
+            </div>
+          </div>
         )}
       </main>
     </div>

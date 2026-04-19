@@ -17,6 +17,9 @@ const mockConversation = {
   id: '1',
   participant_1: 'me',
   participant_2: 'user1',
+  is_group: false,
+  title: null,
+  request_id: null,
   last_message_at: new Date().toISOString(),
   created_at: new Date().toISOString(),
   profiles: {
@@ -27,6 +30,8 @@ const mockConversation = {
     trust_rank: 4.5,
     total_ratings: 10,
     created_at: new Date().toISOString(),
+    role: 'user' as const,
+    is_restricted: false,
   },
 };
 
