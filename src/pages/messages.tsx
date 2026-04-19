@@ -76,40 +76,47 @@ export default function MessagesPage() {
         .or(`participant_1.eq.${currentUserId},participant_2.eq.${currentUserId}`)
         .eq('is_group', false);
 
-      // 2. Fetch group conversations via members table
+      // 2. Fetch group conversations via members table (avoid circular reference)
       const { data: memberData, error: memberError } = await supabase
         .from('conversation_members')
-        .select(
-          `
-        conversation:conversations (
-          *,
-          members:conversation_members (
-            profiles (*)
-          )
-        )
-      `,
-        )
+        .select('conversation_id')
         .eq('user_id', currentUserId);
+
+      let groupConversations: any[] = [];
+      if (memberData && memberData.length > 0) {
+        const conversationIds = memberData.map((m) => m.conversation_id);
+        const { data: groupData, error: groupError } = await supabase
+          .from('conversations')
+          .select(
+            `
+            *,
+            members:conversation_members!inner(
+              profiles(*)
+            )
+          `,
+          )
+          .in('id', conversationIds)
+          .eq('is_group', true);
+
+        if (groupError) {
+          console.error('Error fetching group conversations:', groupError);
+        } else {
+          groupConversations = groupData || [];
+        }
+      }
 
       if (directError || memberError) {
         console.error('Error fetching conversations:', directError || memberError);
       } else {
-        const groupConversations = (
-          (memberData || []) as unknown as Array<{ conversation: Conversation | null }>
-        )
-          .map((m) => m.conversation)
-          .filter((c): c is Conversation => c !== null && c.is_group);
-
         const allConversations = [...(directData || []), ...groupConversations].sort(
           (a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime(),
         );
 
         const processed = allConversations.map((conv) => {
           if (conv.is_group) {
-            const membersData = (conv as unknown as { members: { profiles: Profile }[] }).members;
             return {
               ...conv,
-              members: (membersData || []).map((m) => m.profiles),
+              members: conv.members?.map((m: any) => m.profiles) || [],
             } as Conversation;
           }
           const otherProfile =
