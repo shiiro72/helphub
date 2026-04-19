@@ -35,7 +35,8 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
 
   const {
     isVolunteering,
-    volunteerCount,
+    volunteerStatus,
+    confirmedCount,
     isLoading: isVolunteerLoading,
     toggleVolunteer: handleVolunteerToggle
   } = useVolunteer(request.id);
@@ -154,9 +155,9 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
               title={t('manage_volunteers')}
             >
               <Users size={20} />
-              {volunteerCount > 0 && (
+              {confirmedCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {volunteerCount}
+                  {confirmedCount}
                 </span>
               )}
             </button>
@@ -178,23 +179,27 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
         ) : (
           <>
             <button
-              onClick={handleVolunteerToggle}
-              disabled={isVolunteerLoading || (!isVolunteering && request.max_volunteers ? volunteerCount >= request.max_volunteers : false)}
+              onClick={() => handleVolunteerToggle(request.max_volunteers || null)}
+              disabled={isVolunteerLoading}
               className={`p-2 transition-colors flex items-center gap-1 ${
                 isVolunteering
-                  ? 'text-green-500 hover:text-green-600'
-                  : volunteerCount >= (request.max_volunteers || Infinity)
-                    ? 'text-zinc-300 cursor-not-allowed'
+                  ? volunteerStatus === 'waitlisted' ? 'text-orange-500 hover:text-orange-600' : 'text-green-500 hover:text-green-600'
+                  : confirmedCount >= (request.max_volunteers || Infinity)
+                    ? 'text-orange-400 hover:text-orange-500'
                     : 'text-zinc-400 hover:text-blue-500'
               }`}
-              title={isVolunteering ? t('unvolunteer') : volunteerCount >= (request.max_volunteers || Infinity) ? t('limit_reached') : t('volunteer')}
+              title={isVolunteering ? t('unvolunteer') : confirmedCount >= (request.max_volunteers || Infinity) ? t('join_waitlist') : t('volunteer')}
             >
               {isVolunteerLoading ? (
                 <Loader2 size={18} className="animate-spin" />
               ) : (
                 <UserPlus size={18} />
               )}
-              <span className="text-[10px] font-bold">{volunteerCount}{request.max_volunteers ? `/${request.max_volunteers}` : ''}</span>
+              <span className="text-[10px] font-bold">
+                {confirmedCount}{request.max_volunteers ? `/${request.max_volunteers}` : ''}
+                {isVolunteering && volunteerStatus === 'waitlisted' && ` (${t('waitlisted')})`}
+                {!isVolunteering && confirmedCount >= (request.max_volunteers || Infinity) && ` (${t('waitlist')})`}
+              </span>
             </button>
             <Link
               href={`/messages?userId=${request.user_id}`}
@@ -210,7 +215,7 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
       {showVolunteerModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" role="dialog" aria-modal="true">
           <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md shadow-2xl p-6">
-            <VolunteerList request={{ ...request, volunteer_count: volunteerCount }} onClose={() => setShowVolunteerModal(false)} />
+            <VolunteerList request={{ ...request, confirmed_count: confirmedCount }} onClose={() => setShowVolunteerModal(false)} />
           </div>
         </div>
       )}

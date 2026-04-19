@@ -35,6 +35,8 @@ export interface HelpRequest {
   date_posted: string;
   profiles?: Profile;
   volunteer_count?: number;
+  confirmed_count?: number;
+  waitlist_count?: number;
 }
 
 export interface HelpOffer {
@@ -71,6 +73,31 @@ export interface ConversationMember {
   id: string;
   conversation_id: string;
   user_id: string;
+  created_at: string;
+  profiles?: Profile;
+}
+
+export type InvitationStatus = 'pending' | 'accepted' | 'rejected';
+
+export interface ConversationInvitation {
+  id: string;
+  conversation_id: string;
+  inviter_id: string;
+  invitee_id: string;
+  status: InvitationStatus;
+  created_at: string;
+  conversations?: Conversation;
+  inviter?: Profile;
+  invitee?: Profile;
+}
+
+export type VolunteerStatus = 'confirmed' | 'waitlisted';
+
+export interface Volunteer {
+  id: string;
+  request_id: string;
+  user_id: string;
+  status: VolunteerStatus;
   created_at: string;
   profiles?: Profile;
 }

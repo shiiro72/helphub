@@ -78,5 +78,16 @@
   "group_chat": "Chat de Grup",
   "message_volunteer": "Trimite Mesaj Voluntarului",
   "no_volunteers": "Niciun voluntar momentan.",
-  "limit_reached": "Limită Atinsă"
+  "limit_reached": "Limită Atinsă",
+  "join_waitlist": "Listă de Așteptare",
+  "waitlisted": "Pe Lista de Așteptare",
+  "waitlist": "Listă de Așteptare",
+  "confirmed": "Confirmat",
+  "promote": "Promovează",
+  "invitation_sent": "Invitație Trimisă",
+  "contact_volunteers": "Contactează Voluntarii",
+  "group_chat_invitation": "vrea să înceapă un chat de grup despre",
+  "accept": "Acceptă",
+  "reject": "Refuză",
+  "invitations": "Invitații"
 }

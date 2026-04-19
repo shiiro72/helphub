@@ -78,5 +78,16 @@
   "group_chat": "Group Chat",
   "message_volunteer": "Message Volunteer",
   "no_volunteers": "No volunteers yet.",
-  "limit_reached": "Limit Reached"
+  "limit_reached": "Limit Reached",
+  "join_waitlist": "Join Waitlist",
+  "waitlisted": "Waitlisted",
+  "waitlist": "Waitlist",
+  "confirmed": "Confirmed",
+  "promote": "Promote",
+  "invitation_sent": "Invitation Sent",
+  "contact_volunteers": "Contact Volunteers",
+  "group_chat_invitation": "wants to start a group chat about",
+  "accept": "Accept",
+  "reject": "Reject",
+  "invitations": "Invitations"
 }

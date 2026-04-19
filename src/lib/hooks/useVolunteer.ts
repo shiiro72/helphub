@@ -2,34 +2,41 @@ import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from './useAuth';
 import { useTranslations } from 'next-intl';
+import { VolunteerStatus } from '../types';
 
 export const useVolunteer = (requestId: string) => {
   const t = useTranslations();
   const { user } = useAuth();
   const [isVolunteering, setIsVolunteering] = useState(false);
+  const [volunteerStatus, setVolunteerStatus] = useState<VolunteerStatus | null>(null);
   const [volunteerCount, setVolunteerCount] = useState(0);
+  const [confirmedCount, setConfirmedCount] = useState(0);
+  const [waitlistCount, setWaitlistCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
 
   const fetchVolunteerStatus = useCallback(async () => {
-    const { count, error } = await supabase
+    const { data: counts, error: countError } = await supabase
       .from('help_request_volunteers')
-      .select('*', { count: 'exact', head: true })
+      .select('status')
       .eq('request_id', requestId);
 
-    if (!error && count !== null) {
-      setVolunteerCount(count);
+    if (!countError && counts) {
+      setVolunteerCount(counts.length);
+      setConfirmedCount(counts.filter(c => c.status === 'confirmed').length);
+      setWaitlistCount(counts.filter(c => c.status === 'waitlisted').length);
     }
 
     if (user) {
       const { data } = await supabase
         .from('help_request_volunteers')
-        .select('id')
+        .select('status')
         .eq('request_id', requestId)
         .eq('user_id', user.id)
         .single();
 
       setIsVolunteering(!!data);
+      setVolunteerStatus(data?.status || null);
     }
   }, [requestId, user, supabase]);
 
@@ -37,7 +44,7 @@ export const useVolunteer = (requestId: string) => {
     fetchVolunteerStatus();
   }, [fetchVolunteerStatus]);
 
-  const toggleVolunteer = async () => {
+  const toggleVolunteer = async (maxVolunteers: number | null) => {
     if (!user) {
       alert(t('login_required'));
       return;
@@ -53,31 +60,54 @@ export const useVolunteer = (requestId: string) => {
 
       if (!error) {
         setIsVolunteering(false);
-        setVolunteerCount(prev => prev - 1);
+        setVolunteerStatus(null);
+        fetchVolunteerStatus();
       }
     } else {
+      const status: VolunteerStatus = (maxVolunteers !== null && confirmedCount >= maxVolunteers) ? 'waitlisted' : 'confirmed';
       const { error } = await supabase
         .from('help_request_volunteers')
         .insert({
           request_id: requestId,
-          user_id: user.id
+          user_id: user.id,
+          status
         });
 
       if (!error) {
         setIsVolunteering(true);
-        setVolunteerCount(prev => prev + 1);
+        setVolunteerStatus(status);
+        fetchVolunteerStatus();
       } else if (error.code === '23505') { // Unique violation
         setIsVolunteering(true);
+        fetchVolunteerStatus();
       }
+    }
+    setIsLoading(false);
+  };
+
+  const promoteVolunteer = async (userId: string) => {
+    setIsLoading(true);
+    const { error } = await supabase
+      .from('help_request_volunteers')
+      .update({ status: 'confirmed' })
+      .eq('request_id', requestId)
+      .eq('user_id', userId);
+
+    if (!error) {
+      fetchVolunteerStatus();
     }
     setIsLoading(false);
   };
 
   return {
     isVolunteering,
+    volunteerStatus,
     volunteerCount,
+    confirmedCount,
+    waitlistCount,
     isLoading,
     toggleVolunteer,
+    promoteVolunteer,
     refresh: fetchVolunteerStatus
   };
 };

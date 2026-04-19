@@ -126,10 +126,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   }, [messages, loading, currentUserId]);
 
-  const otherParticipantId =
-    conversation.participant_1 === currentUserId
-      ? conversation.participant_2
-      : conversation.participant_1;
+  const otherParticipantId = conversation.is_group
+    ? null
+    : (conversation.participant_1 === currentUserId
+        ? conversation.participant_2
+        : conversation.participant_1);
 
   const handleRateUser = async (rating: number, tags: string[], comment: string) => {
     setIsSubmittingRating(true);
@@ -229,7 +230,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               ) : null}
               <button
                 onClick={() => {
-                  onReport(otherParticipantId);
+                  if (otherParticipantId) onReport(otherParticipantId);
                   setShowMenu(false);
                 }}
                 className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-zinc-700 dark:text-zinc-300"

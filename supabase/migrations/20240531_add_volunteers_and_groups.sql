@@ -1,13 +1,16 @@
--- Migration: Add volunteers and group messaging support
+-- Migration: Add volunteers, waitlist, and group messaging invitations support
 
 -- 1. Update help_requests table
 ALTER TABLE help_requests ADD COLUMN max_volunteers INTEGER DEFAULT NULL;
 
 -- 2. Create help_request_volunteers table
+CREATE TYPE volunteer_status AS ENUM ('confirmed', 'waitlisted');
+
 CREATE TABLE IF NOT EXISTS help_request_volunteers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   request_id UUID NOT NULL REFERENCES help_requests(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  status volunteer_status DEFAULT 'confirmed' NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   UNIQUE(request_id, user_id)
 );
@@ -24,6 +27,15 @@ CREATE POLICY "Users can volunteer for help requests." ON help_request_volunteer
 
 CREATE POLICY "Users can remove their volunteering." ON help_request_volunteers
   FOR DELETE USING (auth.uid() = user_id);
+
+CREATE POLICY "Posters can update volunteer status." ON help_request_volunteers
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM help_requests
+      WHERE id = help_request_volunteers.request_id
+      AND user_id = auth.uid()
+    )
+  );
 
 -- 3. Update conversations table for group support
 ALTER TABLE conversations ADD COLUMN is_group BOOLEAN DEFAULT false;
@@ -66,46 +78,48 @@ CREATE POLICY "Members can view co-members." ON conversation_members
     )
   );
 
--- Only conversation creators (implied by participant_1 or by being the poster of the linked request)
--- or members can add others? Simplified for now but more secure than before.
-CREATE POLICY "Users can be added to conversations by existing participants." ON conversation_members
-  FOR INSERT WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM conversations
-      WHERE id = conversation_id
-      AND (participant_1 = auth.uid() OR participant_2 = auth.uid())
-    )
-    OR
-    EXISTS (
-        SELECT 1 FROM conversation_members
-        WHERE conversation_id = conversation_members.conversation_id
-        AND user_id = auth.uid()
-    )
-    -- Allow the first member to be added (usually the creator)
-    OR NOT EXISTS (
-        SELECT 1 FROM conversation_members
-        WHERE conversation_id = conversation_members.conversation_id
-    )
-  );
+CREATE POLICY "Users can be added to conversations." ON conversation_members
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- 5. Update RLS policies for conversations
+-- 5. Create conversation_invitations table
+CREATE TYPE invitation_status AS ENUM ('pending', 'accepted', 'rejected');
+
+CREATE TABLE IF NOT EXISTS conversation_invitations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+  inviter_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  invitee_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  status invitation_status DEFAULT 'pending' NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+  UNIQUE(conversation_id, invitee_id)
+);
+
+ALTER TABLE conversation_invitations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their invitations." ON conversation_invitations
+  FOR SELECT USING (auth.uid() = invitee_id OR auth.uid() = inviter_id);
+
+CREATE POLICY "Users can create invitations." ON conversation_invitations
+  FOR INSERT WITH CHECK (auth.uid() = inviter_id);
+
+CREATE POLICY "Invitees can update invitation status." ON conversation_invitations
+  FOR UPDATE USING (auth.uid() = invitee_id)
+  WITH CHECK (auth.uid() = invitee_id);
+
+-- 6. Update RLS policies for conversations
 DROP POLICY IF EXISTS "Users can view their own conversations." ON conversations;
 CREATE POLICY "Users can view their own conversations." ON conversations
   FOR SELECT USING (
     auth.uid() = participant_1 OR
     auth.uid() = participant_2 OR
     EXISTS (
-      -- Use a direct check on the table to avoid policy recursion if possible
-      -- In Supabase/PostgreSQL, policies on conversation_members won't be re-evaluated
-      -- when used in a subquery of a policy on conversations, UNLESS they are circular.
-      -- To be safe, we can use a join or check the table directly.
       SELECT 1 FROM conversation_members
       WHERE conversation_id = conversations.id
       AND user_id = auth.uid()
     )
   );
 
--- 6. Update RLS policies for messages
+-- 7. Update RLS policies for messages
 DROP POLICY IF EXISTS "Participants can view messages in their conversations." ON messages;
 CREATE POLICY "Participants can view messages in their conversations." ON messages
   FOR SELECT USING (
