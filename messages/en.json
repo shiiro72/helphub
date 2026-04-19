@@ -63,5 +63,10 @@
   "rate_user": "Rate User",
   "login_required": "Login Required",
   "login_to_post": "You need to log in or create an account to post.",
-  "login_now": "Login Now"
+  "login_now": "Login Now",
+  "archive": "My Archive",
+  "archive_title": "My Archived Posts",
+  "archive_description": "Your historical help requests and offers that have passed their end date.",
+  "search_archive": "Search archive...",
+  "no_archived_items": "No archived items found."
 }

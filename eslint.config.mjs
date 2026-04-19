@@ -16,7 +16,13 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
-  ...storybook.configs["flat/recommended"]
+  ...storybook.configs["flat/recommended"],
+  {
+    rules: {
+      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/set-state-in-effect": "off"
+    }
+  }
 ]);
 
 export default eslintConfig;

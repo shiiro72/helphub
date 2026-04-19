@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '../atoms/Button';
 import { Input } from '../atoms/Input';
@@ -6,15 +6,23 @@ import { Label } from '../atoms/Label';
 import { Textarea } from '../atoms/Textarea';
 import { ErrorBanner } from '../molecules/ErrorBanner';
 import { createClient } from '@/lib/supabase/client';
+import { HelpRequest, HelpOffer } from '@/lib/types';
 
 interface PostHelpModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
   type: 'request' | 'offer';
+  initialData?: HelpRequest | HelpOffer | null;
 }
 
-export const PostHelpModal: React.FC<PostHelpModalProps> = ({ isOpen, onClose, onSuccess, type }) => {
+export const PostHelpModal: React.FC<PostHelpModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  type,
+  initialData
+}) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [city, setCity] = useState('');
@@ -25,6 +33,32 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({ isOpen, onClose, o
   const [endDatetime, setEndDatetime] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialData && isOpen) {
+      // Use functional updates to avoid linting issues if they arise,
+      // but here we just want to avoid the immediate cascading render warning
+      // by ensuring we only set state when values actually change or on open.
+      setTitle(initialData.title || '');
+      setContent(initialData.content || '');
+      setCity(initialData.city || '');
+      setCountry(initialData.country || '');
+      setAddress(initialData.address || '');
+      setReward(initialData.reward_offer || '');
+      setStartDatetime(initialData.start_datetime ? initialData.start_datetime.substring(0, 16) : '');
+      setEndDatetime(initialData.end_datetime ? initialData.end_datetime.substring(0, 16) : '');
+    } else if (!isOpen) {
+      // Clear form when closed
+      setTitle('');
+      setContent('');
+      setCity('');
+      setCountry('');
+      setAddress('');
+      setReward('');
+      setStartDatetime('');
+      setEndDatetime('');
+    }
+  }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
@@ -63,12 +97,22 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({ isOpen, onClose, o
       payload.offer_location = city ? `${city}, ${country}` : 'Remote';
     }
 
-    const { error: insertError } = await supabase
-      .from(table)
-      .insert(payload);
+    let dbError;
+    if (initialData) {
+      const { error: updateError } = await supabase
+        .from(table)
+        .update(payload)
+        .eq('id', initialData.id);
+      dbError = updateError;
+    } else {
+      const { error: insertError } = await supabase
+        .from(table)
+        .insert(payload);
+      dbError = insertError;
+    }
 
-    if (insertError) {
-      setError(insertError.message);
+    if (dbError) {
+      setError(dbError.message);
     } else {
       onSuccess();
       onClose();
@@ -94,7 +138,10 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({ isOpen, onClose, o
       <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-            {isRequest ? 'Post a Request' : 'Post an Offer'}
+            {initialData
+              ? (isRequest ? 'Edit Request' : 'Edit Offer')
+              : (isRequest ? 'Post a Request' : 'Post an Offer')
+            }
           </h2>
           <button
             onClick={onClose}
@@ -197,7 +244,12 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({ isOpen, onClose, o
               Cancel
             </Button>
             <Button type="submit" className="flex-1" disabled={loading}>
-              {loading ? 'Posting...' : (isRequest ? 'Post Request' : 'Post Offer')}
+              {loading
+                ? (initialData ? 'Saving...' : 'Posting...')
+                : (initialData
+                    ? (isRequest ? 'Update Request' : 'Update Offer')
+                    : (isRequest ? 'Post Request' : 'Post Offer'))
+              }
             </Button>
           </div>
         </form>

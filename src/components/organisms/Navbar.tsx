@@ -72,6 +72,7 @@ export function Navbar() {
             <div className="hidden md:flex items-center gap-6">
               <NavLink href="/requests">{t('browse_requests')}</NavLink>
               <NavLink href="/offers">{t('browse_offers')}</NavLink>
+              {user && <NavLink href="/archive">{t('archive')}</NavLink>}
               {user && <NavLink href="/messages">{t('messages')}</NavLink>}
             </div>
           </div>
@@ -131,6 +132,12 @@ export function Navbar() {
           <NavLink href="/offers" mobile onClick={() => setIsMenuOpen(false)}>
             {t('browse_offers')}
           </NavLink>
+
+          {user && (
+            <NavLink href="/archive" mobile onClick={() => setIsMenuOpen(false)}>
+              {t('archive')}
+            </NavLink>
+          )}
 
           {user && (
             <NavLink href="/messages" mobile onClick={() => setIsMenuOpen(false)}>

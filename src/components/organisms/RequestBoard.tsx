@@ -7,6 +7,7 @@ import { RequestListItem } from '../molecules/RequestListItem';
 import { PostHelpModal } from './PostHelpModal';
 import { BaseBoard } from './BaseBoard';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { createClient } from '@/lib/supabase/client';
 import { ConfirmationModal } from '../molecules/ConfirmationModal';
 
 export const RequestBoard: React.FC = () => {
@@ -16,13 +17,44 @@ export const RequestBoard: React.FC = () => {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [editingRequest, setEditingRequest] = useState<HelpRequest | null>(null);
+  const [deletingRequest, setDeletingRequest] = useState<HelpRequest | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handlePostClick = () => {
+    setEditingRequest(null);
     if (user) {
       setIsPostModalOpen(true);
     } else {
       setIsLoginPromptOpen(true);
     }
+  };
+
+  const handleEditClick = (req: HelpRequest) => {
+    setEditingRequest(req);
+    setIsPostModalOpen(true);
+  };
+
+  const handleDeleteClick = (req: HelpRequest) => {
+    setDeletingRequest(req);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingRequest) return;
+    setIsDeleting(true);
+    const supabase = createClient();
+    const { error } = await supabase
+      .from('help_requests')
+      .delete()
+      .eq('id', deletingRequest.id);
+
+    if (error) {
+      console.error('Error deleting request:', error);
+    } else {
+      setRefreshTrigger(prev => prev + 1);
+      setDeletingRequest(null);
+    }
+    setIsDeleting(false);
   };
 
   const filterFn = (req: HelpRequest, filters: { query: string; city: string; country: string; dateRange: string; startDate: string }) => {
@@ -64,7 +96,15 @@ export const RequestBoard: React.FC = () => {
       matchesStartDate = reqStartDate >= filterDate;
     }
 
-    return matchesSearch && matchesCity && matchesCountry && matchesDate && matchesStartDate;
+    // Exclude expired posts
+    let isNotExpired = true;
+    if (req.end_datetime) {
+      const endDateTime = new Date(req.end_datetime);
+      const now = new Date();
+      isNotExpired = endDateTime > now;
+    }
+
+    return matchesSearch && matchesCity && matchesCountry && matchesDate && matchesStartDate && isNotExpired;
   };
 
   return (
@@ -76,8 +116,22 @@ export const RequestBoard: React.FC = () => {
         postButtonText="Post Request"
         emptyMessage="No help requests found."
         onPostClick={handlePostClick}
-        renderGridItem={(req, query) => <RequestCard request={req} searchQuery={query} />}
-        renderListItem={(req, query) => <RequestListItem request={req} searchQuery={query} />}
+        renderGridItem={(req, query) => (
+          <RequestCard
+            request={req}
+            searchQuery={query}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteClick}
+          />
+        )}
+        renderListItem={(req, query) => (
+          <RequestListItem
+            request={req}
+            searchQuery={query}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteClick}
+          />
+        )}
         filterFn={filterFn}
         refreshTrigger={refreshTrigger}
       />
@@ -92,10 +146,25 @@ export const RequestBoard: React.FC = () => {
         cancelText={t('cancel')}
       />
 
+      <ConfirmationModal
+        isOpen={!!deletingRequest}
+        onClose={() => setDeletingRequest(null)}
+        onConfirm={confirmDelete}
+        title="Delete Request"
+        message="Are you sure you want to delete this help request? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        isLoading={isDeleting}
+      />
+
       <PostHelpModal
         type="request"
         isOpen={isPostModalOpen}
-        onClose={() => setIsPostModalOpen(false)}
+        initialData={editingRequest}
+        onClose={() => {
+          setIsPostModalOpen(false);
+          setEditingRequest(null);
+        }}
         onSuccess={() => setRefreshTrigger(prev => prev + 1)}
       />
     </>

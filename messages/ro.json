@@ -63,5 +63,10 @@
   "rate_user": "Evaluează Utilizatorul",
   "login_required": "Autentificare Necesară",
   "login_to_post": "Trebuie să te autentifici sau să creezi un cont pentru a posta.",
-  "login_now": "Autentifică-te Acum"
+  "login_now": "Autentifică-te Acum",
+  "archive": "Arhiva Mea",
+  "archive_title": "Postările Mele Arhivate",
+  "archive_description": "Cererile și ofertele tale istorice care au depășit data de încheiere.",
+  "search_archive": "Caută în arhivă...",
+  "no_archived_items": "Nu s-au găsit elemente arhivate."
 }

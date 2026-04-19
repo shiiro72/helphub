@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Calendar, User, MessageSquare, Languages, Loader2, Clock } from 'lucide-react';
+import { MapPin, Calendar, User, MessageSquare, Languages, Loader2, Clock, Edit2, Trash2 } from 'lucide-react';
 import { HelpOffer } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
@@ -8,17 +8,28 @@ import { Highlight } from '../atoms/Highlight';
 import { translateText } from '@/lib/translate';
 import { useRouter } from 'next/router';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface OfferCardProps {
   offer: HelpOffer;
   searchQuery?: string;
+  onEdit?: (offer: HelpOffer) => void;
+  onDelete?: (offer: HelpOffer) => void;
 }
 
-export const OfferCard: React.FC<OfferCardProps> = ({ offer, searchQuery = '' }) => {
+export const OfferCard: React.FC<OfferCardProps> = ({
+  offer,
+  searchQuery = '',
+  onEdit,
+  onDelete
+}) => {
   const t = useTranslations();
   const { locale } = useRouter();
+  const { user } = useAuth();
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
+
+  const isOwner = user?.id === offer.user_id;
 
   const handleTranslate = async () => {
     if (translatedContent) {
@@ -67,16 +78,39 @@ export const OfferCard: React.FC<OfferCardProps> = ({ offer, searchQuery = '' })
         : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
     }`}>
       <div className="flex justify-between items-start mb-4">
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">
-          <Highlight text={offer.title} query={searchQuery} />
-        </h3>
-        <Link
-          href={`/messages?userId=${offer.user_id}`}
-          className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-          aria-label="Message offerer"
-        >
-          <MessageSquare size={20} />
-        </Link>
+        <div className="flex-grow min-w-0">
+          <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">
+            <Highlight text={offer.title} query={searchQuery} />
+          </h3>
+        </div>
+        <div className="flex items-center gap-2 ml-2">
+          {isOwner ? (
+            <>
+              <button
+                onClick={() => onEdit?.(offer)}
+                className="text-zinc-400 hover:text-blue-500 transition-colors"
+                aria-label="Edit offer"
+              >
+                <Edit2 size={18} />
+              </button>
+              <button
+                onClick={() => onDelete?.(offer)}
+                className="text-zinc-400 hover:text-red-500 transition-colors"
+                aria-label="Delete offer"
+              >
+                <Trash2 size={18} />
+              </button>
+            </>
+          ) : (
+            <Link
+              href={`/messages?userId=${offer.user_id}`}
+              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+              aria-label="Message offerer"
+            >
+              <MessageSquare size={20} />
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="flex-grow mb-4">

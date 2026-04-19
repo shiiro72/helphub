@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, User, MessageSquare, Languages, Loader2, Clock } from 'lucide-react';
+import { Calendar, User, MessageSquare, Languages, Loader2, Clock, Edit2, Trash2 } from 'lucide-react';
 import { HelpOffer } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
@@ -7,17 +7,28 @@ import { Highlight } from '../atoms/Highlight';
 import { translateText } from '@/lib/translate';
 import { useRouter } from 'next/router';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface OfferListItemProps {
   offer: HelpOffer;
   searchQuery?: string;
+  onEdit?: (offer: HelpOffer) => void;
+  onDelete?: (offer: HelpOffer) => void;
 }
 
-export const OfferListItem: React.FC<OfferListItemProps> = ({ offer, searchQuery = '' }) => {
+export const OfferListItem: React.FC<OfferListItemProps> = ({
+  offer,
+  searchQuery = '',
+  onEdit,
+  onDelete
+}) => {
   const t = useTranslations();
   const { locale } = useRouter();
+  const { user } = useAuth();
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
+
+  const isOwner = user?.id === offer.user_id;
 
   const handleTranslate = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -130,13 +141,34 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({ offer, searchQuery
         </div>
       </div>
 
-      <Link
-        href={`/messages?userId=${offer.user_id}`}
-        className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors flex-shrink-0"
-        aria-label="Message offerer"
-      >
-        <MessageSquare size={20} />
-      </Link>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {isOwner ? (
+          <>
+            <button
+              onClick={() => onEdit?.(offer)}
+              className="p-2 text-zinc-400 hover:text-blue-500 transition-colors"
+              aria-label="Edit offer"
+            >
+              <Edit2 size={20} />
+            </button>
+            <button
+              onClick={() => onDelete?.(offer)}
+              className="p-2 text-zinc-400 hover:text-red-500 transition-colors"
+              aria-label="Delete offer"
+            >
+              <Trash2 size={20} />
+            </button>
+          </>
+        ) : (
+          <Link
+            href={`/messages?userId=${offer.user_id}`}
+            className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+            aria-label="Message offerer"
+          >
+            <MessageSquare size={20} />
+          </Link>
+        )}
+      </div>
     </div>
   );
 };
