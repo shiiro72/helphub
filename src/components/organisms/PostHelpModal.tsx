@@ -7,6 +7,7 @@ import { Textarea } from '../atoms/Textarea';
 import { ErrorBanner } from '../molecules/ErrorBanner';
 import { createClient } from '@/lib/supabase/client';
 import { HelpRequest, HelpOffer } from '@/lib/types';
+import { useTranslations } from 'next-intl';
 
 interface PostHelpModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
   type,
   initialData
 }) => {
+  const t = useTranslations();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [city, setCity] = useState('');
@@ -78,7 +80,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      setError(`You must be logged in to post a ${type}.`);
+      setError(t('login_to_post'));
       setLoading(false);
       return;
     }
@@ -138,16 +140,16 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto pt-8 md:pt-16"
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden mb-8">
         <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
             {initialData
-              ? (isRequest ? 'Edit Request' : 'Edit Offer')
-              : (isRequest ? 'Post a Request' : 'Post an Offer')
+              ? (isRequest ? t('edit_request') : t('edit_offer'))
+              : (isRequest ? t('post_request') : t('post_offer'))
             }
           </h2>
           <button
@@ -163,10 +165,10 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
           <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
 
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">{t('title')}</Label>
             <Input
               id="title"
-              placeholder={isRequest ? "What do you need help with?" : "What can you help with?"}
+              placeholder={isRequest ? t('request_title_placeholder') : t('offer_title_placeholder')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
@@ -174,10 +176,10 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Description</Label>
+            <Label htmlFor="content">{t('description')}</Label>
             <Textarea
               id="content"
-              placeholder={isRequest ? "Describe your request in detail..." : "Describe your offer in detail..."}
+              placeholder={isRequest ? t('request_desc_placeholder') : t('offer_desc_placeholder')}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               required
@@ -186,7 +188,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="city">City (Optional)</Label>
+              <Label htmlFor="city">{t('city_optional')}</Label>
               <Input
                 id="city"
                 placeholder="e.g. New York"
@@ -195,7 +197,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="country">Country (Optional)</Label>
+              <Label htmlFor="country">{t('country_optional')}</Label>
               <Input
                 id="country"
                 placeholder="e.g. USA"
@@ -206,7 +208,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="address">Address (Optional)</Label>
+            <Label htmlFor="address">{t('address_optional')}</Label>
             <Input
               id="address"
               placeholder="e.g. 123 Main St"
@@ -217,7 +219,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="reward">Reward (Optional)</Label>
+              <Label htmlFor="reward">{t('reward_optional')}</Label>
               <Input
                 id="reward"
                 placeholder="e.g. Coffee, $20, Nothing"
@@ -227,7 +229,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
             </div>
             {isRequest && (
               <div className="space-y-2">
-                <Label htmlFor="maxVolunteers">Max Volunteers (Optional)</Label>
+                <Label htmlFor="maxVolunteers">{t('max_volunteers_optional')}</Label>
                 <Input
                   id="maxVolunteers"
                   type="number"
@@ -242,7 +244,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="start_datetime">Required From (Start)</Label>
+              <Label htmlFor="start_datetime">{t('start_datetime_label')}</Label>
               <Input
                 id="start_datetime"
                 type="datetime-local"
@@ -251,7 +253,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="end_datetime">Required Until (End - Optional)</Label>
+              <Label htmlFor="end_datetime">{t('end_datetime_label_optional')}</Label>
               <Input
                 id="end_datetime"
                 type="datetime-local"
@@ -263,14 +265,14 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
 
           <div className="flex gap-3 pt-4">
             <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" className="flex-1" disabled={loading}>
               {loading
-                ? (initialData ? 'Saving...' : 'Posting...')
+                ? t('processing')
                 : (initialData
-                    ? (isRequest ? 'Update Request' : 'Update Offer')
-                    : (isRequest ? 'Post Request' : 'Post Offer'))
+                    ? (isRequest ? t('update_request') : t('update_offer'))
+                    : (isRequest ? t('post_request_btn') : t('post_offer_btn')))
               }
             </Button>
           </div>

@@ -109,12 +109,12 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
   return (
     <>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto pt-8 md:pt-16"
         role="dialog"
         aria-modal="true"
         aria-labelledby="profile-settings-modal-title"
       >
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden mb-8">
           <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
               <h2 id="profile-settings-modal-title" className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t('profile_settings')}</h2>
