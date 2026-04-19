@@ -25,10 +25,47 @@ export const OfferBoard: React.FC = () => {
     }
   };
 
-  const filterFn = (offer: HelpOffer, query: string) =>
-    offer.title.toLowerCase().includes(query.toLowerCase()) ||
-    offer.content.toLowerCase().includes(query.toLowerCase()) ||
-    (offer.offer_location || '').toLowerCase().includes(query.toLowerCase());
+  const filterFn = (offer: HelpOffer, filters: { query: string; city: string; country: string; dateRange: string; startDate: string }) => {
+    const { query, city, country, dateRange, startDate } = filters;
+
+    // Search filter
+    const matchesSearch =
+      offer.title.toLowerCase().includes(query.toLowerCase()) ||
+      offer.content.toLowerCase().includes(query.toLowerCase());
+
+    // City filter
+    const matchesCity = !city || (offer.city || '').toLowerCase().includes(city.toLowerCase());
+
+    // Country filter
+    const matchesCountry = !country || (offer.country || '').toLowerCase().includes(country.toLowerCase());
+
+    // Date filter (posted)
+    let matchesDate = true;
+    if (dateRange !== 'all') {
+      const postDate = new Date(offer.date_posted);
+      const now = new Date();
+      if (dateRange === 'today') {
+        matchesDate = postDate.toDateString() === now.toDateString();
+      } else if (dateRange === 'week') {
+        const weekAgo = new Date(now.setDate(now.getDate() - 7));
+        matchesDate = postDate >= weekAgo;
+      } else if (dateRange === 'month') {
+        const monthAgo = new Date(now.setMonth(now.getMonth() - 1));
+        matchesDate = postDate >= monthAgo;
+      }
+    }
+
+    // Start date filter (required start)
+    let matchesStartDate = true;
+    if (startDate && offer.start_datetime) {
+      const filterDate = new Date(startDate);
+      const offerStartDate = new Date(offer.start_datetime);
+      // Compare just dates
+      matchesStartDate = offerStartDate >= filterDate;
+    }
+
+    return matchesSearch && matchesCity && matchesCountry && matchesDate && matchesStartDate;
+  };
 
   return (
     <>
@@ -39,8 +76,8 @@ export const OfferBoard: React.FC = () => {
         postButtonText="Post Offer"
         emptyMessage="No help offers found."
         onPostClick={handlePostClick}
-        renderGridItem={(offer) => <OfferCard offer={offer} />}
-        renderListItem={(offer) => <OfferListItem offer={offer} />}
+        renderGridItem={(offer, query) => <OfferCard offer={offer} searchQuery={query} />}
+        renderListItem={(offer, query) => <OfferListItem offer={offer} searchQuery={query} />}
         filterFn={filterFn}
         refreshTrigger={refreshTrigger}
       />

@@ -25,10 +25,47 @@ export const RequestBoard: React.FC = () => {
     }
   };
 
-  const filterFn = (req: HelpRequest, query: string) =>
-    req.title.toLowerCase().includes(query.toLowerCase()) ||
-    req.content.toLowerCase().includes(query.toLowerCase()) ||
-    (req.request_location || '').toLowerCase().includes(query.toLowerCase());
+  const filterFn = (req: HelpRequest, filters: { query: string; city: string; country: string; dateRange: string; startDate: string }) => {
+    const { query, city, country, dateRange, startDate } = filters;
+
+    // Search filter
+    const matchesSearch =
+      req.title.toLowerCase().includes(query.toLowerCase()) ||
+      req.content.toLowerCase().includes(query.toLowerCase());
+
+    // City filter
+    const matchesCity = !city || (req.city || '').toLowerCase().includes(city.toLowerCase());
+
+    // Country filter
+    const matchesCountry = !country || (req.country || '').toLowerCase().includes(country.toLowerCase());
+
+    // Date filter (posted)
+    let matchesDate = true;
+    if (dateRange !== 'all') {
+      const postDate = new Date(req.date_posted);
+      const now = new Date();
+      if (dateRange === 'today') {
+        matchesDate = postDate.toDateString() === now.toDateString();
+      } else if (dateRange === 'week') {
+        const weekAgo = new Date(now.setDate(now.getDate() - 7));
+        matchesDate = postDate >= weekAgo;
+      } else if (dateRange === 'month') {
+        const monthAgo = new Date(now.setMonth(now.getMonth() - 1));
+        matchesDate = postDate >= monthAgo;
+      }
+    }
+
+    // Start date filter (required start)
+    let matchesStartDate = true;
+    if (startDate && req.start_datetime) {
+      const filterDate = new Date(startDate);
+      const reqStartDate = new Date(req.start_datetime);
+      // Compare just dates
+      matchesStartDate = reqStartDate >= filterDate;
+    }
+
+    return matchesSearch && matchesCity && matchesCountry && matchesDate && matchesStartDate;
+  };
 
   return (
     <>
@@ -39,8 +76,8 @@ export const RequestBoard: React.FC = () => {
         postButtonText="Post Request"
         emptyMessage="No help requests found."
         onPostClick={handlePostClick}
-        renderGridItem={(req) => <RequestCard request={req} />}
-        renderListItem={(req) => <RequestListItem request={req} />}
+        renderGridItem={(req, query) => <RequestCard request={req} searchQuery={query} />}
+        renderListItem={(req, query) => <RequestListItem request={req} searchQuery={query} />}
         filterFn={filterFn}
         refreshTrigger={refreshTrigger}
       />

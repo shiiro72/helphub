@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { MapPin, Calendar, User, MessageSquare, Languages, Loader2 } from 'lucide-react';
+import { MapPin, Calendar, User, MessageSquare, Languages, Loader2, Clock } from 'lucide-react';
 import { HelpOffer } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { StarRating } from '../atoms/StarRating';
+import { Highlight } from '../atoms/Highlight';
 import { translateText } from '@/lib/translate';
 import { useRouter } from 'next/router';
 import { useTranslations } from 'next-intl';
 
 interface OfferCardProps {
   offer: HelpOffer;
+  searchQuery?: string;
 }
 
-export const OfferCard: React.FC<OfferCardProps> = ({ offer }) => {
+export const OfferCard: React.FC<OfferCardProps> = ({ offer, searchQuery = '' }) => {
   const t = useTranslations();
   const { locale } = useRouter();
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
@@ -40,11 +42,33 @@ export const OfferCard: React.FC<OfferCardProps> = ({ offer }) => {
     year: 'numeric',
   });
 
+  const formatDatetime = (dt: string | null | undefined) => {
+    if (!dt) return null;
+    return new Date(dt).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const startStr = formatDatetime(offer.start_datetime);
+  const endStr = formatDatetime(offer.end_datetime);
+
+  const isMatch = searchQuery && (
+    offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    offer.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
+    <div className={`rounded-xl border p-5 shadow-sm hover:shadow-md transition-all flex flex-col h-full ${
+      isMatch
+        ? 'bg-yellow-50/50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800'
+        : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
+    }`}>
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">
-          {offer.title}
+          <Highlight text={offer.title} query={searchQuery} />
         </h3>
         <Link
           href={`/messages?userId=${offer.user_id}`}
@@ -55,10 +79,19 @@ export const OfferCard: React.FC<OfferCardProps> = ({ offer }) => {
         </Link>
       </div>
 
-      <div className="flex-grow mb-6">
+      <div className="flex-grow mb-4">
         <p className="text-zinc-600 dark:text-zinc-400 text-sm line-clamp-3">
-          {translatedContent || offer.content}
+          {translatedContent ? (
+            translatedContent
+          ) : (
+            <Highlight text={offer.content} query={searchQuery} />
+          )}
         </p>
+        {offer.reward_offer && (
+          <div className="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded w-fit">
+            Reward: {offer.reward_offer}
+          </div>
+        )}
         <button
           onClick={handleTranslate}
           disabled={isTranslating}
@@ -90,10 +123,21 @@ export const OfferCard: React.FC<OfferCardProps> = ({ offer }) => {
           />
         </div>
 
+        {startStr && (
+          <div className="flex items-center text-[11px] text-zinc-500 dark:text-zinc-400">
+            <Clock size={12} className="mr-1.5" />
+            <span className="font-medium text-zinc-700 dark:text-zinc-300">
+              {startStr} {endStr ? `— ${endStr}` : ''}
+            </span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
             <MapPin size={14} className="mr-1" />
-            <span>{offer.offer_location || 'Remote'}</span>
+            <span className="truncate max-w-[150px]">
+              {offer.city ? `${offer.city}${offer.country ? `, ${offer.country}` : ''}` : (offer.offer_location || 'Remote')}
+            </span>
           </div>
           <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
             <Calendar size={14} className="mr-1" />

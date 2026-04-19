@@ -12,9 +12,9 @@ interface BaseBoardProps<T> {
   postButtonText: string;
   emptyMessage: string;
   onPostClick: () => void;
-  renderGridItem: (item: T) => React.ReactNode;
-  renderListItem: (item: T) => React.ReactNode;
-  filterFn: (item: T, query: string) => boolean;
+  renderGridItem: (item: T, query: string) => React.ReactNode;
+  renderListItem: (item: T, query: string) => React.ReactNode;
+  filterFn: (item: T, filters: { query: string; city: string; country: string; dateRange: string; startDate: string }) => boolean;
   refreshTrigger?: number;
 }
 
@@ -34,6 +34,10 @@ export function BaseBoard<T extends { id: string }>({
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+  const [countryFilter, setCountryFilter] = useState('');
+  const [dateRange, setDateRange] = useState('all'); // 'all', 'today', 'week', 'month'
+  const [startDateFilter, setStartDateFilter] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,7 +61,13 @@ export function BaseBoard<T extends { id: string }>({
     fetchItems();
   }, [table, refreshTrigger]);
 
-  const filteredItems = items.filter(item => filterFn(item, searchQuery));
+  const filteredItems = items.filter(item => filterFn(item, {
+    query: searchQuery,
+    city: cityFilter,
+    country: countryFilter,
+    dateRange,
+    startDate: startDateFilter
+  }));
 
   return (
     <div className="space-y-6">
@@ -65,52 +75,100 @@ export function BaseBoard<T extends { id: string }>({
         <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{title}</h2>
         <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
       </div>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="relative flex-grow max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
-          <Input
-            placeholder={searchPlaceholder}
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="relative flex-grow max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+            <Input
+              placeholder={searchPlaceholder}
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="flex items-center gap-4 self-end md:self-auto">
+            <Button
+              className="gap-2"
+              size="md"
+              variant="primary"
+              onClick={onPostClick}
+            >
+              <Plus size={18} />
+              {postButtonText}
+            </Button>
+
+            <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
+              <button
+                onClick={() => setView('grid')}
+                className={`p-2 rounded-md transition-all ${
+                  view === 'grid'
+                    ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                }`}
+                title="Grid view"
+              >
+                <LayoutGrid size={20} />
+              </button>
+              <button
+                onClick={() => setView('list')}
+                className={`p-2 rounded-md transition-all ${
+                  view === 'list'
+                    ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                }`}
+                title="List view"
+              >
+                <List size={20} />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4 self-end md:self-auto">
-          <Button
-            className="gap-2"
-            size="md"
-            variant="primary"
-            onClick={onPostClick}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
+          <Input
+            placeholder="Filter by city..."
+            value={cityFilter}
+            onChange={(e) => setCityFilter(e.target.value)}
+            className="bg-white dark:bg-zinc-900"
+          />
+          <Input
+            placeholder="Filter by country..."
+            value={countryFilter}
+            onChange={(e) => setCountryFilter(e.target.value)}
+            className="bg-white dark:bg-zinc-900"
+          />
+          <select
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value)}
+            className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition-all"
           >
-            <Plus size={18} />
-            {postButtonText}
+            <option value="all">Posted: All time</option>
+            <option value="today">Posted: Today</option>
+            <option value="week">Posted: Past week</option>
+            <option value="month">Posted: Past month</option>
+          </select>
+          <Input
+            type="date"
+            value={startDateFilter}
+            onChange={(e) => setStartDateFilter(e.target.value)}
+            className="bg-white dark:bg-zinc-900"
+            title="Filter by required start date"
+          />
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSearchQuery('');
+              setCityFilter('');
+              setCountryFilter('');
+              setDateRange('all');
+              setStartDateFilter('');
+            }}
+            className="text-xs"
+          >
+            Clear Filters
           </Button>
-
-          <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
-            <button
-              onClick={() => setView('grid')}
-              className={`p-2 rounded-md transition-all ${
-                view === 'grid'
-                  ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100'
-                  : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
-              title="Grid view"
-            >
-              <LayoutGrid size={20} />
-            </button>
-            <button
-              onClick={() => setView('list')}
-              className={`p-2 rounded-md transition-all ${
-                view === 'list'
-                  ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100'
-                  : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
-              title="List view"
-            >
-              <List size={20} />
-            </button>
-          </div>
         </div>
       </div>
 
@@ -128,7 +186,7 @@ export function BaseBoard<T extends { id: string }>({
         }>
           {filteredItems.map((item) => (
             <React.Fragment key={item.id}>
-              {view === 'grid' ? renderGridItem(item) : renderListItem(item)}
+              {view === 'grid' ? renderGridItem(item, searchQuery) : renderListItem(item, searchQuery)}
             </React.Fragment>
           ))}
         </div>
