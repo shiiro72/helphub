@@ -3,6 +3,7 @@ export interface Profile {
   username: string;
   is_verified: boolean;
   image_url: string | null;
+  role: 'user' | 'admin';
   trust_rank: number;
   total_ratings: number;
   created_at: string;
@@ -84,4 +85,16 @@ export interface Report {
   message_id: string | null;
   reason: string;
   created_at: string;
+  reporter?: Profile;
+  reported?: Profile;
+}
+
+export interface SupportTicket {
+  id: string;
+  user_id: string;
+  subject: string;
+  message: string;
+  status: 'open' | 'closed';
+  created_at: string;
+  profiles?: Profile;
 }

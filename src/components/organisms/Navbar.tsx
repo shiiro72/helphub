@@ -3,9 +3,10 @@ import Link from 'next/link';
 import { Button } from '../atoms/Button';
 import { NavLink } from '../molecules/NavLink';
 import { createClient } from '@/lib/supabase/client';
-import { LogOut, User, Menu, X, Settings } from 'lucide-react';
+import { LogOut, User, Menu, X, Settings, Shield, MessageCircle } from 'lucide-react';
 import { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { ProfileSettingsModal } from './ProfileSettingsModal';
+import { SupportTicketModal } from './SupportTicketModal';
 import { Profile } from '@/lib/types';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { useTranslations } from 'next-intl';
@@ -17,6 +18,7 @@ export function Navbar() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -74,6 +76,14 @@ export function Navbar() {
               <NavLink href="/offers">{t('browse_offers')}</NavLink>
               {user && <NavLink href="/archive">{t('archive')}</NavLink>}
               {user && <NavLink href="/messages">{t('messages')}</NavLink>}
+              {profile?.role === 'admin' && (
+                <NavLink href="/admin">
+                  <div className="flex items-center gap-1">
+                    <Shield size={16} />
+                    {t('admin_board')}
+                  </div>
+                </NavLink>
+              )}
             </div>
           </div>
 
@@ -89,6 +99,10 @@ export function Navbar() {
                     <VerificationBadge isVerified={profile?.is_verified} size={14} />
                   </span>
                 </div>
+                <Button variant="outline" size="sm" onClick={() => setIsSupportOpen(true)}>
+                  <MessageCircle size={16} className="mr-2" />
+                  {t('support')}
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
                   <Settings size={16} className="mr-2" />
                   {t('settings')}
@@ -145,6 +159,15 @@ export function Navbar() {
             </NavLink>
           )}
 
+          {profile?.role === 'admin' && (
+            <NavLink href="/admin" mobile onClick={() => setIsMenuOpen(false)}>
+              <div className="flex items-center gap-1">
+                <Shield size={16} />
+                {t('admin_board')}
+              </div>
+            </NavLink>
+          )}
+
           <LanguageSwitcher variant="mobile" onLanguageChange={() => setIsMenuOpen(false)} />
 
           {user ? (
@@ -156,6 +179,10 @@ export function Navbar() {
                   <VerificationBadge isVerified={profile?.is_verified} size={14} />
                 </span>
               </div>
+              <Button variant="outline" size="full" onClick={() => { setIsSupportOpen(true); setIsMenuOpen(false); }}>
+                <MessageCircle size={16} className="mr-2" />
+                {t('support')}
+              </Button>
               <Button variant="outline" size="full" onClick={() => { setIsSettingsOpen(true); setIsMenuOpen(false); }}>
                 <Settings size={16} className="mr-2" />
                 {t('settings')}
@@ -182,6 +209,13 @@ export function Navbar() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
+      {user && (
+        <SupportTicketModal
+          isOpen={isSupportOpen}
+          onClose={() => setIsSupportOpen(false)}
+          userId={user.id}
+        />
+      )}
     </nav>
   );
 }
