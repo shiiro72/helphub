@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { Calendar, User, MessageSquare, Languages, Loader2 } from 'lucide-react';
+import { Calendar, User, MessageSquare, Languages, Loader2, Clock } from 'lucide-react';
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
+import { Highlight } from '../atoms/Highlight';
 import { translateText } from '@/lib/translate';
 import { useRouter } from 'next/router';
 import { useTranslations } from 'next-intl';
 
 interface RequestListItemProps {
   request: HelpRequest;
+  searchQuery?: string;
 }
 
-export const RequestListItem: React.FC<RequestListItemProps> = ({ request }) => {
+export const RequestListItem: React.FC<RequestListItemProps> = ({ request, searchQuery = '' }) => {
   const t = useTranslations();
   const { locale } = useRouter();
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
@@ -40,21 +42,47 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({ request }) => 
     year: 'numeric',
   });
 
+  const formatDatetime = (dt: string | null | undefined) => {
+    if (!dt) return null;
+    return new Date(dt).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const startStr = formatDatetime(request.start_datetime);
+  const endStr = formatDatetime(request.end_datetime);
+
+  const isMatch = searchQuery && (
+    request.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    request.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4">
+    <div className={`rounded-xl border p-4 shadow-sm hover:shadow-md transition-all flex items-center gap-4 ${
+      isMatch
+        ? 'bg-yellow-50/50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800'
+        : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
+    }`}>
       <div className="flex-grow min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 truncate">
-            {request.title}
+            <Highlight text={request.title} query={searchQuery} />
           </h3>
           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 font-medium whitespace-nowrap">
-            {request.request_location || 'Remote'}
+            {request.city ? `${request.city}${request.country ? `, ${request.country}` : ''}` : (request.request_location || 'Remote')}
           </span>
         </div>
 
         <div className="flex items-center gap-2 mb-2">
           <p className="text-zinc-600 dark:text-zinc-400 text-sm line-clamp-1">
-            {translatedContent || request.content}
+            {translatedContent ? (
+              translatedContent
+            ) : (
+              <Highlight text={request.content} query={searchQuery} />
+            )}
           </p>
           <button
             onClick={handleTranslate}
@@ -83,6 +111,15 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({ request }) => 
             <Calendar size={12} className="mr-1.5" />
             <span>{date}</span>
           </div>
+
+          {startStr && (
+            <div className="flex items-center text-[10px] text-zinc-500 dark:text-zinc-400">
+              <Clock size={10} className="mr-1" />
+              <span className="truncate max-w-[150px]">
+                {startStr} {endStr ? `— ${endStr}` : ''}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

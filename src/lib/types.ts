@@ -26,6 +26,11 @@ export interface HelpRequest {
   image_url: string | null;
   reward_offer: string | null;
   request_location: string | null;
+  city?: string | null;
+  country?: string | null;
+  address?: string | null;
+  start_datetime?: string | null;
+  end_datetime?: string | null;
   date_posted: string;
   profiles?: Profile;
 }
@@ -37,6 +42,12 @@ export interface HelpOffer {
   content: string;
   image_url: string | null;
   offer_location: string | null;
+  city?: string | null;
+  country?: string | null;
+  address?: string | null;
+  reward_offer?: string | null;
+  start_datetime?: string | null;
+  end_datetime?: string | null;
   date_posted: string;
   profiles?: Profile;
 }

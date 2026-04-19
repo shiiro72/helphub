@@ -17,8 +17,12 @@ interface PostHelpModalProps {
 export const PostHelpModal: React.FC<PostHelpModalProps> = ({ isOpen, onClose, onSuccess, type }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [location, setLocation] = useState('');
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('');
+  const [address, setAddress] = useState('');
   const [reward, setReward] = useState('');
+  const [startDatetime, setStartDatetime] = useState('');
+  const [endDatetime, setEndDatetime] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,13 +49,18 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({ isOpen, onClose, o
       user_id: user.id,
       title,
       content,
+      city: city || null,
+      country: country || null,
+      address: address || null,
+      reward_offer: reward || null,
+      start_datetime: startDatetime || null,
+      end_datetime: endDatetime || null,
     };
 
     if (isRequest) {
-      payload.request_location = location || 'Remote';
-      payload.reward_offer = reward || null;
+      payload.request_location = city ? `${city}, ${country}` : 'Remote';
     } else {
-      payload.offer_location = location || 'Remote';
+      payload.offer_location = city ? `${city}, ${country}` : 'Remote';
     }
 
     const { error: insertError } = await supabase
@@ -66,8 +75,12 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({ isOpen, onClose, o
       // Reset form
       setTitle('');
       setContent('');
-      setLocation('');
+      setCity('');
+      setCountry('');
+      setAddress('');
       setReward('');
+      setStartDatetime('');
+      setEndDatetime('');
     }
     setLoading(false);
   };
@@ -117,27 +130,66 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({ isOpen, onClose, o
             />
           </div>
 
-          <div className={`grid ${isRequest ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="location">Location (Optional)</Label>
+              <Label htmlFor="city">City (Optional)</Label>
               <Input
-                id="location"
-                placeholder="e.g. New York, NY"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                id="city"
+                placeholder="e.g. New York"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
               />
             </div>
-            {isRequest && (
-              <div className="space-y-2">
-                <Label htmlFor="reward">Reward (Optional)</Label>
-                <Input
-                  id="reward"
-                  placeholder="e.g. Coffee, $20"
-                  value={reward}
-                  onChange={(e) => setReward(e.target.value)}
-                />
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label htmlFor="country">Country (Optional)</Label>
+              <Input
+                id="country"
+                placeholder="e.g. USA"
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address">Address (Optional)</Label>
+            <Input
+              id="address"
+              placeholder="e.g. 123 Main St"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="reward">Reward (Optional)</Label>
+            <Input
+              id="reward"
+              placeholder="e.g. Coffee, $20, Nothing"
+              value={reward}
+              onChange={(e) => setReward(e.target.value)}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="start_datetime">Required From (Start)</Label>
+              <Input
+                id="start_datetime"
+                type="datetime-local"
+                value={startDatetime}
+                onChange={(e) => setStartDatetime(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="end_datetime">Required Until (End - Optional)</Label>
+              <Input
+                id="end_datetime"
+                type="datetime-local"
+                value={endDatetime}
+                onChange={(e) => setEndDatetime(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4">
