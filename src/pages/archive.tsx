@@ -11,6 +11,8 @@ import { RequestListItem } from '@/components/molecules/RequestListItem';
 import { OfferCard } from '@/components/molecules/OfferCard';
 import { OfferListItem } from '@/components/molecules/OfferListItem';
 import { HelpRequest, HelpOffer } from '@/lib/types';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useRouter } from 'next/router';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,20 +28,36 @@ type ArchivedItem = (HelpRequest | HelpOffer) & { type: 'request' | 'offer' };
 
 export default function ArchivePage() {
   const t = useTranslations();
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [items, setItems] = useState<ArchivedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
     const fetchArchived = async () => {
       setLoading(true);
       const supabase = createClient();
       const now = new Date().toISOString();
 
       const [requests, offers] = await Promise.all([
-        supabase.from('help_requests').select('*, profiles(*)').lt('end_datetime', now),
-        supabase.from('help_offers').select('*, profiles(*)').lt('end_datetime', now)
+        supabase
+          .from('help_requests')
+          .select('*, profiles(*)')
+          .eq('user_id', user.id)
+          .lt('end_datetime', now),
+        supabase
+          .from('help_offers')
+          .select('*, profiles(*)')
+          .eq('user_id', user.id)
+          .lt('end_datetime', now)
       ]);
 
       const archivedRequests = (requests.data || []).map(r => ({ ...r, type: 'request' as const }));
@@ -54,7 +72,18 @@ export default function ArchivePage() {
     };
 
     fetchArchived();
-  }, []);
+  }, [user, authLoading, router]);
+
+  if (authLoading || (!user && typeof window !== 'undefined')) {
+    return (
+      <div className={`${geistSans.className} ${geistMono.className} min-h-screen bg-zinc-50 dark:bg-black font-sans`}>
+        <Navbar />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+          <p className="text-zinc-500">{t('processing')}</p>
+        </main>
+      </div>
+    );
+  }
 
   const filteredItems = items.filter(item =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
