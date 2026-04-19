@@ -60,5 +60,8 @@
   "tell_us_more": "Spune-ne mai multe despre experiența ta...",
   "submitting": "Se trimite...",
   "submit_rating": "Trimite Evaluarea",
-  "rate_user": "Evaluează Utilizatorul"
+  "rate_user": "Evaluează Utilizatorul",
+  "login_required": "Autentificare Necesară",
+  "login_to_post": "Trebuie să te autentifici sau să creezi un cont pentru a posta.",
+  "login_now": "Autentifică-te Acum"
 }
