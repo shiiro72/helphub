@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { StarRating } from '../atoms/StarRating';
 import { RatingModal } from '../molecules/RatingModal';
+import { useTranslations } from 'next-intl';
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -23,8 +24,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   onBlock,
   onReport,
 }) => {
+  const t = useTranslations();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
@@ -39,6 +42,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   };
 
   useEffect(() => {
+    const fetchProfile = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUserId)
+        .single();
+      setCurrentUserProfile(data);
+    };
+    fetchProfile();
+
     const fetchMessages = async () => {
       setLoading(true);
       const { data, error } = await supabase
@@ -269,7 +282,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {/* Input */}
-      <ChatInput onSendMessage={onSendMessage} />
+      {currentUserProfile?.is_restricted ? (
+        <div className="bg-zinc-100 dark:bg-zinc-900 px-4 py-3 text-center text-sm text-red-500 border-t border-zinc-200 dark:border-zinc-800">
+          {t('messaging_restricted')}
+        </div>
+      ) : (
+        <ChatInput onSendMessage={onSendMessage} />
+      )}
 
       {/* Rating Modal */}
       <RatingModal

@@ -3,6 +3,8 @@ export interface Profile {
   username: string;
   is_verified: boolean;
   image_url: string | null;
+  role: 'user' | 'admin';
+  is_restricted: boolean;
   trust_rank: number;
   total_ratings: number;
   created_at: string;
@@ -37,6 +39,14 @@ export interface HelpRequest {
   volunteer_count?: number;
   confirmed_count?: number;
   waitlist_count?: number;
+}
+
+export interface BannedUser {
+  id: string;
+  email: string;
+  username: string | null;
+  reason: string | null;
+  banned_at: string;
 }
 
 export interface HelpOffer {
@@ -125,4 +135,16 @@ export interface Report {
   message_id: string | null;
   reason: string;
   created_at: string;
+  reporter?: Profile;
+  reported?: Profile;
+}
+
+export interface SupportTicket {
+  id: string;
+  user_id: string;
+  subject: string;
+  message: string;
+  status: 'open' | 'closed';
+  created_at: string;
+  profiles?: Profile;
 }
