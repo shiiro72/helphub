@@ -89,7 +89,13 @@ export function AuthForm({ mode }: AuthFormProps) {
           placeholder="name@example.com"
           value={email}
           autoComplete="email"
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            setEmail(val);
+            if (mode === 'register' && !username && val.includes('@')) {
+              setUsername(val.split('@')[0]);
+            }
+          }}
           required
         />
         <FormField

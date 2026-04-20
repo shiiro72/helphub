@@ -83,7 +83,7 @@ export function Navbar() {
                   >
                     <User size={18} />
                     <span className="flex items-center gap-1">
-                      {profile?.username || user.email}
+                      {profile?.username || user.user_metadata?.full_name || user.email}
                       <VerificationBadge isVerified={profile?.is_verified} size={14} />
                     </span>
                   </button>
@@ -169,7 +169,7 @@ export function Navbar() {
                 >
                   <User size={18} />
                   <span className="flex items-center gap-1">
-                    {profile?.username || user.email}
+                    {profile?.username || user.user_metadata?.full_name || user.email}
                     <VerificationBadge isVerified={profile?.is_verified} size={14} />
                   </span>
                 </button>

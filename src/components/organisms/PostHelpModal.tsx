@@ -37,6 +37,35 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const commonCities = [
+    "Bucharest (Romania)",
+    "Cluj-Napoca (Romania)",
+    "Timisoara (Romania)",
+    "Iasi (Romania)",
+    "Brasov (Romania)",
+    "London (UK)",
+    "Paris (France)",
+    "Berlin (Germany)",
+    "Madrid (Spain)",
+    "Rome (Italy)",
+    "New York (USA)",
+    "Los Angeles (USA)",
+    "Toronto (Canada)",
+    "Sydney (Australia)"
+  ];
+
+  const handleCityChange = (val: string) => {
+    setCity(val);
+    const match = val.match(/^(.+)\s\((.+)\)$/);
+    if (match) {
+      // We keep the full value in the input for a moment or
+      // we can set city to the parsed value but then we might lose country if they type more.
+      // Better: if it matches, set both. If it doesn't match, they might be typing a custom city.
+      setCity(match[1]);
+      setCountry(match[2]);
+    }
+  };
+
   useEffect(() => {
     if (initialData && isOpen) {
       // Use functional updates to avoid linting issues if they arise,
@@ -165,7 +194,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
           <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
 
           <div className="space-y-2">
-            <Label htmlFor="title">{t('title')}</Label>
+            <Label htmlFor="title" required>{t('title')}</Label>
             <Input
               id="title"
               placeholder={isRequest ? t('request_title_placeholder') : t('offer_title_placeholder')}
@@ -186,50 +215,56 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city">{t('city_optional')}</Label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2 md:col-span-1">
+              <Label htmlFor="city" required>{t('city')}</Label>
               <Input
                 id="city"
                 placeholder="e.g. New York"
                 value={city}
-                onChange={(e) => setCity(e.target.value)}
+                onChange={(e) => handleCityChange(e.target.value)}
+                list="cities-list"
+                required
               />
+              <datalist id="cities-list">
+                {commonCities.map(c => <option key={c} value={c} />)}
+              </datalist>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="country">{t('country_optional')}</Label>
+            <div className="space-y-2 md:col-span-1">
+              <Label htmlFor="country" required>{t('country')}</Label>
               <Input
                 id="country"
                 placeholder="e.g. USA"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2 md:col-span-1">
+              <Label htmlFor="address" required>{t('address')}</Label>
+              <Input
+                id="address"
+                placeholder="e.g. 123 Main St"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="address">{t('address_optional')}</Label>
-            <Input
-              id="address"
-              placeholder="e.g. 123 Main St"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="reward">{t('reward_optional')}</Label>
+              <Label htmlFor="reward">{t('reward')}</Label>
               <Input
                 id="reward"
-                placeholder="e.g. Coffee, $20, Nothing"
+                placeholder="e.g. Coffee, $20"
                 value={reward}
                 onChange={(e) => setReward(e.target.value)}
               />
             </div>
             {isRequest && (
               <div className="space-y-2">
-                <Label htmlFor="maxVolunteers">{t('max_volunteers_optional')}</Label>
+                <Label htmlFor="maxVolunteers">{t('max_volunteers_field')}</Label>
                 <Input
                   id="maxVolunteers"
                   type="number"
@@ -244,16 +279,17 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="start_datetime">{t('start_datetime_label')}</Label>
+              <Label htmlFor="start_datetime" required>{t('start_datetime_label')}</Label>
               <Input
                 id="start_datetime"
                 type="datetime-local"
                 value={startDatetime}
                 onChange={(e) => setStartDatetime(e.target.value)}
+                required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="end_datetime">{t('end_datetime_label_optional')}</Label>
+              <Label htmlFor="end_datetime">{t('end_datetime_label')}</Label>
               <Input
                 id="end_datetime"
                 type="datetime-local"
