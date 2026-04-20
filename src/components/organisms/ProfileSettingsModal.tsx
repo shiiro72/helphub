@@ -10,6 +10,7 @@ import { ConfirmationModal } from '../molecules/ConfirmationModal';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { ErrorBanner } from '../molecules/ErrorBanner';
 import { useTranslations } from 'next-intl';
+import { StarRating } from '../atoms/StarRating';
 
 interface ProfileSettingsModalProps {
   isOpen: boolean;
@@ -30,7 +31,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
   useEffect(() => {
     async function fetchProfile() {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (user) {
         const { data, error } = await supabase
@@ -90,10 +93,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
     const supabase = createClient();
 
     // RLS and CASCADE should handle help_requests and help_offers deletion
-    const { error: deleteError } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', profile?.id);
+    const { error: deleteError } = await supabase.from('profiles').delete().eq('id', profile?.id);
 
     if (deleteError) {
       setError(deleteError.message);
@@ -117,7 +117,12 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
         <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
           <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
             <div className="flex items-center gap-2">
-              <h2 id="profile-settings-modal-title" className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{t('profile_settings')}</h2>
+              <h2
+                id="profile-settings-modal-title"
+                className="text-xl font-bold text-zinc-900 dark:text-zinc-100"
+              >
+                {t('profile_settings')}
+              </h2>
               <VerificationBadge isVerified={profile?.is_verified} size={20} />
             </div>
             <button
@@ -146,13 +151,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
               <div className="w-24 h-24 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border-2 border-zinc-200 dark:border-zinc-700">
                 {imageUrl ? (
                   <div className="relative w-full h-full">
-                    <Image
-                      src={imageUrl}
-                      alt="Profile"
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
+                    <Image src={imageUrl} alt="Profile" fill className="object-cover" unoptimized />
                   </div>
                 ) : (
                   <User size={48} className="text-zinc-400" />
@@ -221,8 +220,14 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
           <div className="space-y-2">
             <p>{t('confirm_update_message')}</p>
             <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-sm">
-              <p><strong>{t('username')}:</strong> {username}</p>
-              {imageUrl && <p className="truncate"><strong>{t('image_url')}:</strong> {imageUrl}</p>}
+              <p>
+                <strong>{t('username')}:</strong> {username}
+              </p>
+              {imageUrl && (
+                <p className="truncate">
+                  <strong>{t('image_url')}:</strong> {imageUrl}
+                </p>
+              )}
             </div>
           </div>
         }

@@ -114,7 +114,9 @@ export default function MessagesPage() {
 
       let groupConversations: any[] = [];
       if (memberData && memberData.length > 0) {
-        const conversationIds = memberData.map((m: { conversation_id: string }) => m.conversation_id);
+        const conversationIds = memberData.map(
+          (m: { conversation_id: string }) => m.conversation_id,
+        );
         const { data: groupData, error: groupError } = await supabase
           .from('conversations')
           .select(
@@ -232,17 +234,17 @@ export default function MessagesPage() {
         const onlineIds = new Set<string>(Object.keys(state));
         setOnlineUsers(onlineIds);
       })
-      .on('presence', { event: 'join' }, ({ key }) => {
+      .on('presence', { event: 'join' }, ({ key }: { key: string }) => {
         setOnlineUsers((prev) => new Set([...Array.from(prev), key]));
       })
-      .on('presence', { event: 'leave' }, ({ key }) => {
+      .on('presence', { event: 'leave' }, ({ key }: { key: string }) => {
         setOnlineUsers((prev) => {
           const next = new Set(prev);
           next.delete(key);
           return next;
         });
       })
-      .subscribe(async (status) => {
+      .subscribe(async (status: string) => {
         if (status === 'SUBSCRIBED') {
           await presenceChannel.track({
             online_at: new Date().toISOString(),
@@ -429,9 +431,7 @@ export default function MessagesPage() {
               <h2 className="text-2xl font-light text-zinc-900 dark:text-zinc-100 mb-2">
                 {t('messages_welcome_title')}
               </h2>
-              <p className="text-zinc-500 max-w-sm">
-                {t('messages_welcome_desc')}
-              </p>
+              <p className="text-zinc-500 max-w-sm">{t('messages_welcome_desc')}</p>
             </div>
           )}
         </div>

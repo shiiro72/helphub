@@ -15,6 +15,7 @@ interface ChatWindowProps {
   onSendMessage: (content: string) => void;
   onBlock: (userId: string) => void;
   onReport: (userId: string) => void;
+  isOnline?: boolean;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -88,7 +89,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           const newMessage = payload.new as Message;
           console.log('Received new message via realtime:', newMessage);
           setMessages((prev) => {
-            if (prev.find(m => m.id === newMessage.id)) return prev;
+            if (prev.find((m) => m.id === newMessage.id)) return prev;
             return [...prev, newMessage];
           });
 
@@ -212,7 +213,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   size={12}
                   showCount
                 />
-                <span className={`text-[10px] ${isOnline ? 'text-green-500 font-medium' : 'text-zinc-500'}`}>
+                <span
+                  className={`text-[10px] ${isOnline ? 'text-green-500 font-medium' : 'text-zinc-500'}`}
+                >
                   • {isOnline ? 'online' : 'offline'}
                 </span>
               </div>
