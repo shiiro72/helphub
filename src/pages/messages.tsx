@@ -18,6 +18,7 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [invitations, setInvitations] = useState<ConversationInvitation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
   const router = useRouter();
   const { userId, conversationId } = router.query;
   const [supabase] = useState(() => createClient());
@@ -212,6 +213,42 @@ export default function MessagesPage() {
       }
     };
     checkUser();
+  }, [supabase, router.isReady, fetchConversations, userId, conversationId]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const presenceChannel = supabase.channel('online-users', {
+      config: {
+        presence: {
+          key: user.id,
+        },
+      },
+    });
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        const onlineIds = new Set<string>(Object.keys(state));
+        setOnlineUsers(onlineIds);
+      })
+      .on('presence', { event: 'join' }, ({ key }) => {
+        setOnlineUsers((prev) => new Set([...Array.from(prev), key]));
+      })
+      .on('presence', { event: 'leave' }, ({ key }) => {
+        setOnlineUsers((prev) => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({
+            online_at: new Date().toISOString(),
+          });
+        }
+      });
 
     const invChannel = supabase
       .channel(`invitations:${Math.random().toString(36).slice(2)}`)
@@ -219,15 +256,16 @@ export default function MessagesPage() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'conversation_invitations' },
         () => {
-          if (user) fetchConversations(user.id);
+          fetchConversations(user.id);
         },
       )
       .subscribe();
 
     return () => {
+      supabase.removeChannel(presenceChannel);
       supabase.removeChannel(invChannel);
     };
-  }, [supabase, router.isReady, fetchConversations, user, userId, conversationId]);
+  }, [supabase, user, fetchConversations]);
 
   const handleSendMessage = async (content: string) => {
     if (!activeConversation || !user) return;
@@ -302,8 +340,8 @@ export default function MessagesPage() {
         <title>Messages | HelpHub</title>
       </Head>
       <Navbar />
-      <main className="flex-grow flex overflow-hidden">
-        <div className="w-full md:w-1/3 border-r border-zinc-200 dark:border-zinc-800 flex flex-col">
+      <main className="flex-grow flex overflow-hidden w-full shadow-2xl">
+        <div className="w-full md:w-72 lg:w-80 border-r border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0">
           {invitations.length > 0 && (
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/50">
               <h3 className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-3">
@@ -364,6 +402,7 @@ export default function MessagesPage() {
               conversations={conversations}
               activeId={activeConversation?.id}
               onSelect={setActiveConversation}
+              onlineUsers={onlineUsers}
             />
           </div>
         </div>
@@ -375,6 +414,12 @@ export default function MessagesPage() {
               onSendMessage={handleSendMessage}
               onBlock={handleBlock}
               onReport={handleReport}
+              isOnline={
+                !activeConversation.is_group &&
+                (activeConversation.participant_1 === user.id
+                  ? onlineUsers.has(activeConversation.participant_2!)
+                  : onlineUsers.has(activeConversation.participant_1!))
+              }
             />
           ) : (
             <div className="flex flex-col items-center justify-center w-full text-center p-8">
@@ -407,6 +452,12 @@ export default function MessagesPage() {
                   onSendMessage={handleSendMessage}
                   onBlock={handleBlock}
                   onReport={handleReport}
+                  isOnline={
+                    !activeConversation.is_group &&
+                    (activeConversation.participant_1 === user.id
+                      ? onlineUsers.has(activeConversation.participant_2!)
+                      : onlineUsers.has(activeConversation.participant_1!))
+                  }
                 />
               </div>
             </div>

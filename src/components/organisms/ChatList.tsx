@@ -7,12 +7,14 @@ interface ChatListProps {
   conversations: Conversation[];
   activeId?: string;
   onSelect: (conversation: Conversation) => void;
+  onlineUsers?: Set<string>;
 }
 
 export const ChatList: React.FC<ChatListProps> = ({
   conversations,
   activeId,
   onSelect,
+  onlineUsers,
 }) => {
   return (
     <div className="flex flex-col h-full bg-chat-sidebar overflow-y-auto border-r border-zinc-200 dark:border-zinc-800">
@@ -33,17 +35,22 @@ export const ChatList: React.FC<ChatListProps> = ({
                 activeId === conv.id ? 'bg-chat-item-active' : ''
               }`}
             >
-              <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center mr-4 shrink-0 overflow-hidden">
-                {conv.is_group ? (
-                   <Users size={24} className="text-zinc-500" />
-                ) : conv.profiles?.image_url ? (
-                  <img
-                    src={conv.profiles.image_url}
-                    alt={conv.profiles.username}
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <User size={24} className="text-zinc-500" />
+              <div className="relative mr-4 shrink-0">
+                <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
+                  {conv.is_group ? (
+                    <Users size={24} className="text-zinc-500" />
+                  ) : conv.profiles?.image_url ? (
+                    <img
+                      src={conv.profiles.image_url}
+                      alt={conv.profiles.username}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <User size={24} className="text-zinc-500" />
+                  )}
+                </div>
+                {!conv.is_group && onlineUsers?.has(conv.profiles?.id || '') && (
+                  <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-zinc-900 rounded-full" title="Online" />
                 )}
               </div>
               <div className="flex-grow text-left overflow-hidden">
