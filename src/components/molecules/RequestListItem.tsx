@@ -160,14 +160,14 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
             <button
               onClick={() => handleVolunteerToggle(request.max_volunteers || null)}
               disabled={isVolunteerLoading}
-              className={`p-2 transition-colors flex items-center gap-1 ${
+              className={`p-2 transition-all flex items-center gap-1 rounded-md border ${
                 isVolunteering
                   ? volunteerStatus === 'waitlisted'
-                    ? 'text-orange-500 hover:text-orange-600'
-                    : 'text-green-500 hover:text-green-600'
+                    ? 'bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100'
+                    : 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100'
                   : confirmedCount >= (request.max_volunteers || Infinity)
-                    ? 'text-orange-400 hover:text-orange-500'
-                    : 'text-zinc-400 hover:text-blue-500'
+                    ? 'bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100'
+                    : 'bg-zinc-50 border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:border-blue-300 hover:text-blue-600'
               }`}
               title={
                 isVolunteering

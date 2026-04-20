@@ -79,6 +79,17 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
     if (updateError) {
       setError(updateError.message);
       setLoading(false);
+      return;
+    }
+
+    // Also update auth metadata to keep it in sync
+    const { error: authUpdateError } = await supabase.auth.updateUser({
+      data: { full_name: username },
+    });
+
+    if (authUpdateError) {
+      setError(authUpdateError.message);
+      setLoading(false);
     } else {
       setIsUpdateConfirmOpen(false);
       setLoading(false);

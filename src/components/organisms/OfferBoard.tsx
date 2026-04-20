@@ -62,7 +62,6 @@ export const OfferBoard: React.FC = () => {
     filters: {
       query: string;
       city: string;
-      country: string;
       dateRange: string;
       startDate: string;
       startTime: string;
@@ -77,9 +76,6 @@ export const OfferBoard: React.FC = () => {
 
     // City filter
     const matchesCity = !city || (offer.city || '').toLowerCase().includes(city.toLowerCase());
-
-    // Country filter
-    const matchesCountry = !country || (offer.country || '').toLowerCase().includes(country.toLowerCase());
 
     // Date filter (posted)
     let matchesDate = true;
@@ -114,7 +110,7 @@ export const OfferBoard: React.FC = () => {
       isNotExpired = endDateTime > now;
     }
 
-    return matchesSearch && matchesCity && matchesCountry && matchesDate && matchesStartDate && isNotExpired;
+    return matchesSearch && matchesCity && matchesDate && matchesStartDate && isNotExpired;
   };
 
   return (

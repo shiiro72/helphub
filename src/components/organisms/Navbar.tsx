@@ -77,16 +77,18 @@ export function Navbar() {
               <LanguageSwitcher variant="desktop" />
               {user ? (
                 <>
-                  <button
-                    onClick={() => setIsSettingsOpen(true)}
-                    className="flex items-center gap-2 mr-4 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors"
-                  >
-                    <User size={18} />
-                    <span className="flex items-center gap-1">
-                      {profile?.username || user.user_metadata?.full_name || user.email}
-                      <VerificationBadge isVerified={profile?.is_verified} size={14} />
-                    </span>
-                  </button>
+                  <div className="flex items-center gap-2 mr-4 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <button
+                      onClick={() => setIsSettingsOpen(true)}
+                      className="flex items-center gap-2 hover:text-black dark:hover:text-white transition-colors"
+                    >
+                      <User size={18} />
+                      <span className="flex items-center gap-1">
+                        {profile?.username || user.user_metadata?.full_name || user.email}
+                        <VerificationBadge isVerified={profile?.is_verified} size={14} />
+                      </span>
+                    </button>
+                  </div>
                   <Button variant="outline" size="sm" onClick={() => setIsSupportOpen(true)}>
                     <MessageCircle size={16} className="mr-2" />
                     {t('support')}
