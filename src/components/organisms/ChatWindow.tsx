@@ -256,7 +256,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         ) : messages.length === 0 ? (
           <div className="flex justify-center items-center h-full">
             <p className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-4 py-1 rounded text-xs">
-              Messages are end-to-end encrypted
+              {t('start_chatting')}
             </p>
           </div>
         ) : (
