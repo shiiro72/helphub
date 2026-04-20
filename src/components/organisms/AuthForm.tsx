@@ -24,18 +24,19 @@ export function AuthForm({ mode }: AuthFormProps) {
     setLoading(true);
     setError(null);
 
-    const { error } = mode === 'login'
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-            data: {
-              full_name: username,
+    const { error } =
+      mode === 'login'
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+              data: {
+                full_name: username,
+              },
             },
-          }
-        });
+          });
 
     if (error) {
       setError(error.message);
@@ -64,9 +65,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           {mode === 'login' ? t('welcome_back') : t('create_account')}
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          {mode === 'login'
-            ? t('login_description')
-            : t('register_description')}
+          {mode === 'login' ? t('login_description') : t('register_description')}
         </p>
       </div>
 
@@ -78,6 +77,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             type="text"
             placeholder={t('username_placeholder')}
             value={username}
+            autoComplete="username"
             onChange={(e) => setUsername(e.target.value)}
             required
           />
@@ -88,6 +88,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           type="email"
           placeholder="name@example.com"
           value={email}
+          autoComplete="email"
           onChange={(e) => setEmail(e.target.value)}
           required
         />
@@ -97,6 +98,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           type="password"
           placeholder="••••••••"
           value={password}
+          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
@@ -104,7 +106,9 @@ export function AuthForm({ mode }: AuthFormProps) {
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         <Button type="submit" size="full" disabled={loading}>
-          {loading ? t('processing') : (
+          {loading ? (
+            t('processing')
+          ) : (
             <span className="flex items-center gap-2">
               {mode === 'login' ? <LogIn size={18} /> : <UserPlus size={18} />}
               {mode === 'login' ? t('sign_in') : t('sign_up')}
@@ -118,7 +122,9 @@ export function AuthForm({ mode }: AuthFormProps) {
           <span className="w-full border-t border-zinc-200 dark:border-zinc-800" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white dark:bg-zinc-900 px-2 text-zinc-500">{t('or_continue_with')}</span>
+          <span className="bg-white dark:bg-zinc-900 px-2 text-zinc-500">
+            {t('or_continue_with')}
+          </span>
         </div>
       </div>
 
@@ -148,14 +154,20 @@ export function AuthForm({ mode }: AuthFormProps) {
         {mode === 'login' ? (
           <p className="text-zinc-500">
             {t('no_account')}{' '}
-            <Link href="/register" className="text-black dark:text-white font-semibold hover:underline">
+            <Link
+              href="/register"
+              className="text-black dark:text-white font-semibold hover:underline"
+            >
               {t('sign_up')}
             </Link>
           </p>
         ) : (
           <p className="text-zinc-500">
             {t('have_account')}{' '}
-            <Link href="/login" className="text-black dark:text-white font-semibold hover:underline">
+            <Link
+              href="/login"
+              className="text-black dark:text-white font-semibold hover:underline"
+            >
               {t('sign_in')}
             </Link>
           </p>

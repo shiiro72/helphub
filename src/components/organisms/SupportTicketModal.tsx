@@ -28,13 +28,11 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
     setError(null);
 
     const supabase = createClient();
-    const { error } = await supabase
-      .from('support_tickets')
-      .insert({
-        user_id: userId,
-        subject,
-        message,
-      });
+    const { error } = await supabase.from('support_tickets').insert({
+      user_id: userId,
+      subject,
+      message,
+    });
 
     setIsSubmitting(false);
 
@@ -52,7 +50,11 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="bg-white dark:bg-zinc-950 rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-zinc-200 dark:border-zinc-800">
         <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-900">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
@@ -86,6 +88,7 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
                 <Input
                   required
                   value={subject}
+                  autoComplete="off"
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder={t('ticket_subject_placeholder')}
                 />
@@ -114,12 +117,7 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
                 >
                   {t('cancel')}
                 </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  className="flex-1"
-                  disabled={isSubmitting}
-                >
+                <Button type="submit" variant="primary" className="flex-1" disabled={isSubmitting}>
                   {isSubmitting ? t('processing') : t('send_ticket')}
                 </Button>
               </div>

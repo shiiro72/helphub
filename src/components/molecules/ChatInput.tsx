@@ -35,6 +35,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Type a message"
         disabled={disabled}
+        autoComplete="off"
         className="flex-grow bg-chat-input border-none rounded-lg px-4 py-2 text-sm focus:ring-0 placeholder-zinc-500 text-zinc-900 dark:text-zinc-100"
       />
       <Button

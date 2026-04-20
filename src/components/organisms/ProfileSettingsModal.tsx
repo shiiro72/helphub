@@ -109,7 +109,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
   return (
     <>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto"
+        className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="profile-settings-modal-title"
@@ -167,6 +167,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                   id="username"
                   placeholder={t('username_placeholder')}
                   value={username}
+                  autoComplete="username"
                   onChange={(e) => setUsername(e.target.value)}
                   required
                 />
@@ -178,6 +179,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                   id="imageUrl"
                   placeholder="https://example.com/image.jpg"
                   value={imageUrl}
+                  autoComplete="off"
                   onChange={(e) => setImageUrl(e.target.value)}
                 />
               </div>
