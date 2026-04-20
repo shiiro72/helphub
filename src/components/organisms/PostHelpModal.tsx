@@ -42,16 +42,22 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
     "Cluj-Napoca (Romania)",
     "Timisoara (Romania)",
     "Iasi (Romania)",
+    "Constanta (Romania)",
+    "Craiova (Romania)",
     "Brasov (Romania)",
-    "London (UK)",
-    "Paris (France)",
-    "Berlin (Germany)",
-    "Madrid (Spain)",
-    "Rome (Italy)",
-    "New York (USA)",
-    "Los Angeles (USA)",
-    "Toronto (Canada)",
-    "Sydney (Australia)"
+    "Galati (Romania)",
+    "Ploiesti (Romania)",
+    "Oradea (Romania)",
+    "Braila (Romania)",
+    "Arad (Romania)",
+    "Pitesti (Romania)",
+    "Sibiu (Romania)",
+    "Bacau (Romania)",
+    "Targu Mures (Romania)",
+    "Baia Mare (Romania)",
+    "Buzau (Romania)",
+    "Botosani (Romania)",
+    "Satu Mare (Romania)"
   ];
 
   const handleCityChange = (val: string) => {
