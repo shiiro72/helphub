@@ -1,4 +1,3 @@
-import { Geist, Geist_Mono } from 'next/font/google';
 import { Navbar } from '@/components/organisms/Navbar';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -11,16 +10,6 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { HelpRequest, HelpOffer } from '@/lib/types';
 import { RequestCard } from '@/components/molecules/RequestCard';
 import { OfferCard } from '@/components/molecules/OfferCard';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 export default function Home() {
   const t = useTranslations();
@@ -55,18 +44,16 @@ export default function Home() {
   }, []);
 
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} min-h-screen bg-zinc-50 dark:bg-black font-sans`}
-    >
+    <div className="min-h-screen bg-brand-background">
       <Navbar />
 
       <main className="max-w-4xl mx-auto px-6 py-20">
         <div className="text-center space-y-6">
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-black dark:text-white">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-brand-text-main">
             {t('welcome_main')} <br />
-            <span className="text-zinc-500">{t('welcome_meets')}</span>
+            <span className="text-brand-text-secondary">{t('welcome_meets')}</span>
           </h1>
-          <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+          <p className="text-xl text-brand-text-secondary max-w-2xl mx-auto">
             {t('hero_description')}
           </p>
 
@@ -107,7 +94,7 @@ export default function Home() {
           {/* Latest Requests Section */}
           <section className="space-y-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold tracking-tight text-black dark:text-white">
+              <h2 className="text-3xl font-bold tracking-tight text-brand-text-main">
                 {t('browse_requests')}
               </h2>
               <Link href="/requests">
@@ -121,7 +108,7 @@ export default function Home() {
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-64 rounded-xl bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
+                  <div key={i} className="h-64 rounded-xl bg-brand-surface animate-pulse" />
                 ))}
               </div>
             ) : latestRequests.length > 0 ? (
@@ -131,7 +118,7 @@ export default function Home() {
                 ))}
               </div>
             ) : (
-              <p className="text-center text-zinc-500 py-10 bg-white dark:bg-zinc-900 rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800">
+              <p className="text-center text-brand-text-secondary py-10 bg-brand-surface rounded-2xl border border-dashed border-brand-border">
                 {t('no_requests')}
               </p>
             )}
@@ -140,7 +127,7 @@ export default function Home() {
           {/* Latest Offers Section */}
           <section className="space-y-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold tracking-tight text-black dark:text-white">
+              <h2 className="text-3xl font-bold tracking-tight text-brand-text-main">
                 {t('browse_offers')}
               </h2>
               <Link href="/offers">
@@ -154,7 +141,7 @@ export default function Home() {
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-64 rounded-xl bg-zinc-100 dark:bg-zinc-900 animate-pulse" />
+                  <div key={i} className="h-64 rounded-xl bg-brand-surface animate-pulse" />
                 ))}
               </div>
             ) : latestOffers.length > 0 ? (
@@ -164,24 +151,24 @@ export default function Home() {
                 ))}
               </div>
             ) : (
-              <p className="text-center text-zinc-500 py-10 bg-white dark:bg-zinc-900 rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800">
+              <p className="text-center text-brand-text-secondary py-10 bg-brand-surface rounded-2xl border border-dashed border-brand-border">
                 {t('no_offers')}
               </p>
             )}
           </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-zinc-200 dark:border-zinc-800">
-            <div className="p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-10 border-t border-brand-border">
+            <div className="p-6 bg-brand-surface rounded-2xl border border-brand-border">
               <h3 className="text-lg font-bold mb-2">{t('request_help_title')}</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm">{t('request_help_desc')}</p>
+              <p className="text-brand-text-secondary text-sm">{t('request_help_desc')}</p>
             </div>
-            <div className="p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+            <div className="p-6 bg-brand-surface rounded-2xl border border-brand-border">
               <h3 className="text-lg font-bold mb-2">{t('offer_skills_title')}</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm">{t('offer_skills_desc')}</p>
+              <p className="text-brand-text-secondary text-sm">{t('offer_skills_desc')}</p>
             </div>
-            <div className="p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+            <div className="p-6 bg-brand-surface rounded-2xl border border-brand-border">
               <h3 className="text-lg font-bold mb-2">{t('build_community_title')}</h3>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm">{t('build_community_desc')}</p>
+              <p className="text-brand-text-secondary text-sm">{t('build_community_desc')}</p>
             </div>
           </div>
         </div>

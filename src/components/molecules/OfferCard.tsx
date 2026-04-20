@@ -52,12 +52,12 @@ export const OfferCard: React.FC<OfferCardProps> = ({
   return (
     <div className={`rounded-xl border p-5 shadow-sm hover:shadow-md transition-all flex flex-col h-full ${
       isMatch
-        ? 'bg-yellow-50/50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800'
-        : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
+        ? 'bg-yellow-50/50 border-yellow-200'
+        : 'bg-brand-surface border-brand-border'
     }`}>
       <div className="flex justify-between items-start mb-4">
         <div className="flex-grow min-w-0">
-          <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">
+          <h3 className="text-lg font-bold text-brand-text-main line-clamp-1">
             <Highlight text={offer.title} query={searchQuery} />
           </h3>
         </div>
@@ -92,24 +92,24 @@ export const OfferCard: React.FC<OfferCardProps> = ({
       </div>
 
       <div className="flex-grow mb-4">
-        <p className="text-zinc-600 dark:text-zinc-400 text-sm line-clamp-3">
+        <p className="text-brand-text-secondary text-sm line-clamp-3">
           <Highlight text={offer.content} query={searchQuery} />
         </p>
         {offer.reward_offer && (
-          <div className="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded w-fit">
+          <div className="mt-2 text-xs font-medium text-brand-text-main bg-brand-secondary px-2 py-1 rounded w-fit">
             Reward: {offer.reward_offer}
           </div>
         )}
       </div>
 
-      <div className="space-y-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+      <div className="space-y-3 pt-4 border-t border-brand-border">
         <div className="flex items-center justify-between">
-          <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center text-xs text-brand-text-secondary">
             <User size={14} className="mr-2" />
-            <span className="font-medium mr-1 text-zinc-700 dark:text-zinc-300">
+            <span className="font-medium mr-1 text-brand-text-main">
               {offer.profiles?.username || 'Anonymous'}
             </span>
-            <VerificationBadge isVerified={offer.profiles?.is_verified} size={12} className="text-blue-500 ml-1" />
+            <VerificationBadge isVerified={offer.profiles?.is_verified} size={12} className="text-brand-primary ml-1" />
           </div>
           <StarRating
             rating={offer.profiles?.trust_rank || 0}
@@ -120,16 +120,16 @@ export const OfferCard: React.FC<OfferCardProps> = ({
         </div>
 
         {startStr && (
-          <div className="flex items-center text-[11px] text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center text-[11px] text-brand-text-secondary">
             <Clock size={12} className="mr-1.5" />
-            <span className="font-medium text-zinc-700 dark:text-zinc-300">
+            <span className="font-medium text-brand-text-main">
               {startStr} {endStr ? `— ${endStr}` : ''}
             </span>
           </div>
         )}
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center text-xs text-brand-text-secondary">
             <MapPin size={14} className="mr-1 flex-shrink-0" />
             <span className="truncate max-w-[180px]">
               {offer.address ? `${offer.address}, ` : ''}
@@ -142,7 +142,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
               ) : (offer.offer_location || 'Remote')}
             </span>
           </div>
-          <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center text-xs text-brand-text-secondary">
             <Calendar size={14} className="mr-1" />
             <span>{date}</span>
           </div>
