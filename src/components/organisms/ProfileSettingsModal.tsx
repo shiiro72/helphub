@@ -133,6 +133,16 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
             <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
 
             <div className="flex flex-col items-center gap-4 mb-6">
+              {profile && (
+                <div className="mb-2">
+                  <StarRating
+                    rating={profile.trust_rank || 0}
+                    totalRatings={profile.total_ratings || 0}
+                    size={20}
+                    showCount
+                  />
+                </div>
+              )}
               <div className="w-24 h-24 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border-2 border-zinc-200 dark:border-zinc-700">
                 {imageUrl ? (
                   <div className="relative w-full h-full">

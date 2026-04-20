@@ -23,6 +23,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   onSendMessage,
   onBlock,
   onReport,
+  isOnline = false,
 }) => {
   const t = useTranslations();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -44,21 +45,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       setCurrentUserProfile(data);
     };
     fetchProfile();
+  }, [supabase, currentUserId]);
 
+  useEffect(() => {
     const fetchMessages = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', conversation.id)
-        .order('created_at', { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conversation.id)
+          .order('created_at', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching messages:', error);
-      } else {
-        setMessages(data || []);
+        if (error) {
+          console.error('Error fetching messages:', error);
+        } else {
+          console.log(`Fetched ${data?.length || 0} messages for conversation ${conversation.id}`);
+          setMessages(data || []);
+        }
+      } catch (err) {
+        console.error('Unexpected error fetching messages:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchMessages();
@@ -77,7 +86,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         },
         (payload) => {
           const newMessage = payload.new as Message;
-          setMessages((prev) => [...prev, newMessage]);
+          console.log('Received new message via realtime:', newMessage);
+          setMessages((prev) => {
+            if (prev.find(m => m.id === newMessage.id)) return prev;
+            return [...prev, newMessage];
+          });
 
           // Mark as read if it's from the other person
           if (newMessage.sender_id !== currentUserId) {
@@ -101,9 +114,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       .subscribe();
 
     return () => {
+      console.log('Unsubscribing from channel:', channelName);
       supabase.removeChannel(channel);
     };
-  }, [conversation.id, currentUserId]);
+  }, [supabase, conversation.id, currentUserId]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -198,7 +212,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   size={12}
                   showCount
                 />
-                <span className="text-[10px] text-zinc-500">• online</span>
+                <span className={`text-[10px] ${isOnline ? 'text-green-500 font-medium' : 'text-zinc-500'}`}>
+                  • {isOnline ? 'online' : 'offline'}
+                </span>
               </div>
             )}
           </div>
