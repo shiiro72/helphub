@@ -52,8 +52,8 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" role="dialog" aria-modal="true">
-      <div className="bg-white dark:bg-zinc-950 rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-zinc-200 dark:border-zinc-800">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto pt-8 md:pt-16" role="dialog" aria-modal="true">
+      <div className="bg-white dark:bg-zinc-950 rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-zinc-200 dark:border-zinc-800 mb-8">
         <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-900">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             {t('send_ticket')}

@@ -13,6 +13,7 @@ interface AuthFormProps {
 export function AuthForm({ mode }: AuthFormProps) {
   const t = useTranslations();
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +31,9 @@ export function AuthForm({ mode }: AuthFormProps) {
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+            data: {
+              full_name: username,
+            },
           }
         });
 
@@ -67,6 +71,17 @@ export function AuthForm({ mode }: AuthFormProps) {
       </div>
 
       <form onSubmit={handleEmailAuth} className="space-y-4">
+        {mode === 'register' && (
+          <FormField
+            id="username"
+            label={t('username')}
+            type="text"
+            placeholder={t('username_placeholder')}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        )}
         <FormField
           id="email"
           label={t('email_label')}
