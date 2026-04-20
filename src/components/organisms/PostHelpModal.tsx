@@ -129,7 +129,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
     const payload: Partial<HelpRequest & HelpOffer> = {
       user_id: user.id,
       title,
-      content,
+      content: content || null,
       city: city || null,
       county: county || null,
       country: country || null,
@@ -227,7 +227,6 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
               placeholder={isRequest ? t('request_desc_placeholder') : t('offer_desc_placeholder')}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              required
             />
           </div>
 
@@ -252,7 +251,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
               <Label htmlFor="address" required>{t('address')}</Label>
               <Input
                 id="address"
-                placeholder="e.g. 123 Main St"
+                placeholder={isRequest ? "e.g. 123 Main St or Downtown" : "e.g. Can meet in City Center"}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 required

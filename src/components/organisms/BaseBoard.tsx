@@ -5,6 +5,7 @@ import { Input } from '../atoms/Input';
 import { Button } from '../atoms/Button';
 import { ErrorBanner } from '../molecules/ErrorBanner';
 import { useTranslations } from 'next-intl';
+import romanianCities from '@/lib/romanian-cities.json';
 
 interface BaseBoardProps<T> {
   title: string;
@@ -20,7 +21,6 @@ interface BaseBoardProps<T> {
     filters: {
       query: string;
       city: string;
-      country: string;
       dateRange: string;
       startDate: string;
       startTime: string;
@@ -47,7 +47,6 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [cityFilter, setCityFilter] = useState('');
-  const [countryFilter, setCountryFilter] = useState('');
   const [dateRange, setDateRange] = useState('all'); // 'all', 'today', 'week', 'month'
   const [startDateFilter, setStartDateFilter] = useState('');
   const [startTimeFilter, setStartTimeFilter] = useState('');
@@ -81,7 +80,6 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
       filterFn(item, {
         query: searchQuery,
         city: cityFilter,
-        country: countryFilter,
         dateRange,
         startDate: startDateFilter,
         startTime: startTimeFilter,
@@ -126,15 +124,22 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
             <Input
               placeholder="Filter by city..."
               value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCityFilter(val);
+                const found = romanianCities.find(c => `${c.name} (${c.county})` === val);
+                if (found) {
+                  setCityFilter(found.name);
+                }
+              }}
               className="bg-white dark:bg-zinc-900 text-sm"
+              list="filter-cities-list"
             />
-            <Input
-              placeholder="Filter by country..."
-              value={countryFilter}
-              onChange={(e) => setCountryFilter(e.target.value)}
-              className="bg-white dark:bg-zinc-900 text-sm"
-            />
+            <datalist id="filter-cities-list">
+              {romanianCities.map(c => (
+                <option key={`filter-${c.name}-${c.county}`} value={`${c.name} (${c.county})`} />
+              ))}
+            </datalist>
           </div>
 
           <div className="space-y-2">
@@ -174,7 +179,6 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
             onClick={() => {
               setSearchQuery('');
               setCityFilter('');
-              setCountryFilter('');
               setDateRange('all');
               setStartDateFilter('');
               setStartTimeFilter('');
