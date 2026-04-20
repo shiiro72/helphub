@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { MapPin, Calendar, User, MessageSquare, Clock, Edit2, Trash2, UserPlus, Users } from 'lucide-react';
+import {
+  MapPin,
+  Calendar,
+  User,
+  MessageSquare,
+  Clock,
+  Edit2,
+  Trash2,
+  UserPlus,
+  Users,
+  Loader2,
+} from 'lucide-react';
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
@@ -21,7 +32,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
   request,
   searchQuery = '',
   onEdit,
-  onDelete
+  onDelete,
 }) => {
   const t = useTranslations();
   const { user } = useAuth();
@@ -34,7 +45,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
     volunteerStatus,
     confirmedCount,
     isLoading: isVolunteerLoading,
-    toggleVolunteer: handleVolunteerToggle
+    toggleVolunteer: handleVolunteerToggle,
   } = useVolunteer(request.id);
   const date = new Date(request.date_posted).toLocaleDateString('en-US', {
     month: 'short',
@@ -55,17 +66,19 @@ export const RequestCard: React.FC<RequestCardProps> = ({
   const startStr = formatDatetime(request.start_datetime);
   const endStr = formatDatetime(request.end_datetime);
 
-  const isMatch = searchQuery && (
-    request.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    request.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const isMatch =
+    searchQuery &&
+    (request.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.content.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
-    <div className={`rounded-xl border p-5 shadow-sm hover:shadow-md transition-all flex flex-col h-full ${
-      isMatch
-        ? 'bg-yellow-50/50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800'
-        : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
-    }`}>
+    <div
+      className={`rounded-xl border p-5 shadow-sm hover:shadow-md transition-all flex flex-col h-full ${
+        isMatch
+          ? 'bg-yellow-50/50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800'
+          : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
+      }`}
+    >
       <div className="flex justify-between items-start mb-4">
         <div className="flex-grow min-w-0">
           <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">
@@ -97,12 +110,20 @@ export const RequestCard: React.FC<RequestCardProps> = ({
                 disabled={isVolunteerLoading}
                 className={`transition-colors flex items-center gap-1 ${
                   isVolunteering
-                    ? volunteerStatus === 'waitlisted' ? 'text-orange-500 hover:text-orange-600' : 'text-green-500 hover:text-green-600'
+                    ? volunteerStatus === 'waitlisted'
+                      ? 'text-orange-500 hover:text-orange-600'
+                      : 'text-green-500 hover:text-green-600'
                     : confirmedCount >= (request.max_volunteers || Infinity)
                       ? 'text-orange-400 hover:text-orange-500'
                       : 'text-zinc-400 hover:text-blue-500'
                 }`}
-                title={isVolunteering ? t('unvolunteer') : confirmedCount >= (request.max_volunteers || Infinity) ? t('join_waitlist') : t('volunteer')}
+                title={
+                  isVolunteering
+                    ? t('unvolunteer')
+                    : confirmedCount >= (request.max_volunteers || Infinity)
+                      ? t('join_waitlist')
+                      : t('volunteer')
+                }
               >
                 {isVolunteerLoading ? (
                   <Loader2 size={18} className="animate-spin" />
@@ -110,9 +131,12 @@ export const RequestCard: React.FC<RequestCardProps> = ({
                   <UserPlus size={18} />
                 )}
                 <span className="text-xs font-bold">
-                  {confirmedCount}{request.max_volunteers ? `/${request.max_volunteers}` : ''}
+                  {confirmedCount}
+                  {request.max_volunteers ? `/${request.max_volunteers}` : ''}
                   {isVolunteering && volunteerStatus === 'waitlisted' && ` (${t('waitlisted')})`}
-                  {!isVolunteering && confirmedCount >= (request.max_volunteers || Infinity) && ` (${t('waitlist')})`}
+                  {!isVolunteering &&
+                    confirmedCount >= (request.max_volunteers || Infinity) &&
+                    ` (${t('waitlist')})`}
                 </span>
               </button>
               <Link
@@ -145,7 +169,11 @@ export const RequestCard: React.FC<RequestCardProps> = ({
             <span className="font-medium mr-1 text-zinc-700 dark:text-zinc-300">
               {request.profiles?.username || 'Anonymous'}
             </span>
-            <VerificationBadge isVerified={request.profiles?.is_verified} size={12} className="text-blue-500 ml-1" />
+            <VerificationBadge
+              isVerified={request.profiles?.is_verified}
+              size={12}
+              className="text-blue-500 ml-1"
+            />
           </div>
           <StarRating
             rating={request.profiles?.trust_rank || 0}
@@ -175,7 +203,9 @@ export const RequestCard: React.FC<RequestCardProps> = ({
                   {request.county ? `, ${request.county}` : ''}
                   {request.country ? ` (${request.country})` : ''}
                 </>
-              ) : (request.request_location || 'Remote')}
+              ) : (
+                request.request_location || 'Remote'
+              )}
             </span>
           </div>
           <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
@@ -196,9 +226,16 @@ export const RequestCard: React.FC<RequestCardProps> = ({
       </div>
 
       {showVolunteerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" role="dialog" aria-modal="true">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+        >
           <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md shadow-2xl p-6">
-            <VolunteerList request={{ ...request, confirmed_count: confirmedCount }} onClose={() => setShowVolunteerModal(false)} />
+            <VolunteerList
+              request={{ ...request, confirmed_count: confirmedCount }}
+              onClose={() => setShowVolunteerModal(false)}
+            />
           </div>
         </div>
       )}
