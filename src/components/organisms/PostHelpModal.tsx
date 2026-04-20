@@ -8,6 +8,7 @@ import { ErrorBanner } from '../molecules/ErrorBanner';
 import { createClient } from '@/lib/supabase/client';
 import { HelpRequest, HelpOffer } from '@/lib/types';
 import { useTranslations } from 'next-intl';
+import romanianCities from '@/lib/romanian-cities.json';
 
 interface PostHelpModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [city, setCity] = useState('');
+  const [county, setCounty] = useState('');
   const [country, setCountry] = useState('');
   const [address, setAddress] = useState('');
   const [reward, setReward] = useState('');
@@ -37,38 +39,13 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const commonCities = [
-    "Bucharest (Romania)",
-    "Cluj-Napoca (Romania)",
-    "Timisoara (Romania)",
-    "Iasi (Romania)",
-    "Constanta (Romania)",
-    "Craiova (Romania)",
-    "Brasov (Romania)",
-    "Galati (Romania)",
-    "Ploiesti (Romania)",
-    "Oradea (Romania)",
-    "Braila (Romania)",
-    "Arad (Romania)",
-    "Pitesti (Romania)",
-    "Sibiu (Romania)",
-    "Bacau (Romania)",
-    "Targu Mures (Romania)",
-    "Baia Mare (Romania)",
-    "Buzau (Romania)",
-    "Botosani (Romania)",
-    "Satu Mare (Romania)"
-  ];
-
   const handleCityChange = (val: string) => {
     setCity(val);
-    const match = val.match(/^(.+)\s\((.+)\)$/);
-    if (match) {
-      // We keep the full value in the input for a moment or
-      // we can set city to the parsed value but then we might lose country if they type more.
-      // Better: if it matches, set both. If it doesn't match, they might be typing a custom city.
-      setCity(match[1]);
-      setCountry(match[2]);
+    const found = romanianCities.find(c => `${c.name} (${c.county})` === val);
+    if (found) {
+      setCity(found.name);
+      setCounty(found.county);
+      setCountry('Romania');
     }
   };
 
@@ -80,6 +57,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
       setTitle(initialData.title || '');
       setContent(initialData.content || '');
       setCity(initialData.city || '');
+      setCounty(initialData.county || '');
       setCountry(initialData.country || '');
       setAddress(initialData.address || '');
       setReward(initialData.reward_offer || '');
@@ -93,6 +71,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
       setTitle('');
       setContent('');
       setCity('');
+      setCounty('');
       setCountry('');
       setAddress('');
       setReward('');
@@ -126,6 +105,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
       title,
       content,
       city: city || null,
+      county: county || null,
       country: country || null,
       address: address || null,
       reward_offer: reward || null,
@@ -134,10 +114,10 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
     };
 
     if (isRequest) {
-      payload.request_location = city ? `${city}, ${country}` : 'Remote';
+      payload.request_location = city ? `${city}, ${county ? county + ', ' : ''}${country}` : 'Remote';
       payload.max_volunteers = maxVolunteers ? parseInt(maxVolunteers) : null;
     } else {
-      payload.offer_location = city ? `${city}, ${country}` : 'Remote';
+      payload.offer_location = city ? `${city}, ${county ? county + ', ' : ''}${country}` : 'Remote';
     }
 
     let dbError;
@@ -163,6 +143,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
       setTitle('');
       setContent('');
       setCity('');
+      setCounty('');
       setCountry('');
       setAddress('');
       setReward('');
@@ -221,32 +202,47 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2 md:col-span-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label htmlFor="city" required>{t('city')}</Label>
               <Input
                 id="city"
-                placeholder="e.g. New York"
+                placeholder="e.g. Bucharest"
                 value={city}
                 onChange={(e) => handleCityChange(e.target.value)}
                 list="cities-list"
                 required
               />
               <datalist id="cities-list">
-                {commonCities.map(c => <option key={c} value={c} />)}
+                {romanianCities.map(c => (
+                  <option key={`${c.name}-${c.county}`} value={`${c.name} (${c.county})`} />
+                ))}
               </datalist>
             </div>
-            <div className="space-y-2 md:col-span-1">
+            <div className="space-y-2">
+              <Label htmlFor="county" required>{t('county')}</Label>
+              <Input
+                id="county"
+                placeholder="e.g. București"
+                value={county}
+                onChange={(e) => setCounty(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label htmlFor="country" required>{t('country')}</Label>
               <Input
                 id="country"
-                placeholder="e.g. USA"
+                placeholder="e.g. Romania"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
                 required
               />
             </div>
-            <div className="space-y-2 md:col-span-1">
+            <div className="space-y-2">
               <Label htmlFor="address" required>{t('address')}</Label>
               <Input
                 id="address"
