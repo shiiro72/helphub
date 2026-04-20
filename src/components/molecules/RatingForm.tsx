@@ -94,7 +94,7 @@ export const RatingForm: React.FC<RatingFormProps> = ({
 
       <div className="space-y-2">
         <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {t('comment_optional')}
+          {t('comment')}
         </label>
         <textarea
           value={comment}

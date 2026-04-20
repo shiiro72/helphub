@@ -157,6 +157,11 @@ export const RequestCard: React.FC<RequestCardProps> = ({
             <Highlight text={request.content} query={searchQuery} />
           )}
         </p>
+        {request.reward_offer && (
+          <div className="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded w-fit">
+            Reward: {request.reward_offer}
+          </div>
+        )}
         <button
           onClick={handleTranslate}
           disabled={isTranslating}
@@ -199,9 +204,10 @@ export const RequestCard: React.FC<RequestCardProps> = ({
 
         <div className="flex items-center justify-between">
           <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
-            <MapPin size={14} className="mr-1" />
-            <span className="truncate max-w-[150px]">
-              {request.city ? `${request.city}${request.country ? `, ${request.country}` : ''}` : (request.request_location || 'Remote')}
+            <MapPin size={14} className="mr-1 flex-shrink-0" />
+            <span className="truncate max-w-[180px]">
+              {request.address ? `${request.address}, ` : ''}
+              {request.city ? `${request.city}${request.country ? ` (${request.country})` : ''}` : (request.request_location || 'Remote')}
             </span>
           </div>
           <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
