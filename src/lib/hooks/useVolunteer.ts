@@ -23,8 +23,8 @@ export const useVolunteer = (requestId: string) => {
 
     if (!countError && counts) {
       setVolunteerCount(counts.length);
-      setConfirmedCount(counts.filter(c => c.status === 'confirmed').length);
-      setWaitlistCount(counts.filter(c => c.status === 'waitlisted').length);
+      setConfirmedCount(counts.filter((c: { status: VolunteerStatus }) => c.status === 'confirmed').length);
+      setWaitlistCount(counts.filter((c: { status: VolunteerStatus }) => c.status === 'waitlisted').length);
     }
 
     if (user) {

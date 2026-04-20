@@ -84,7 +84,7 @@ export default function MessagesPage() {
 
       let groupConversations: any[] = [];
       if (memberData && memberData.length > 0) {
-        const conversationIds = memberData.map((m) => m.conversation_id);
+        const conversationIds = memberData.map((m: { conversation_id: string }) => m.conversation_id);
         const { data: groupData, error: groupError } = await supabase
           .from('conversations')
           .select(

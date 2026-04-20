@@ -74,7 +74,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           table: 'messages',
           filter: `conversation_id=eq.${conversation.id}`,
         },
-        (payload) => {
+        (payload: { new: Message }) => {
           const newMessage = payload.new as Message;
           setMessages((prev) => [...prev, newMessage]);
 
@@ -92,7 +92,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           table: 'messages',
           filter: `conversation_id=eq.${conversation.id}`,
         },
-        (payload) => {
+        (payload: { new: Message }) => {
           const updatedMessage = payload.new as Message;
           setMessages((prev) => prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m)));
         },
