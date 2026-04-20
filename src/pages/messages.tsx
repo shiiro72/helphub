@@ -24,6 +24,37 @@ export default function MessagesPage() {
 
   const startNewConversation = useCallback(
     async (currentUserId: string, otherUserId: string) => {
+      const [p1, p2] = [currentUserId, otherUserId].sort();
+
+      // Check if conversation already exists to avoid unique constraint error
+      const { data: existing } = await supabase
+        .from('conversations')
+        .select(
+          `
+          *,
+          participant_1_profile:profiles!participant_1(*),
+          participant_2_profile:profiles!participant_2(*)
+        `,
+        )
+        .eq('participant_1', p1)
+        .eq('participant_2', p2)
+        .eq('is_group', false)
+        .maybeSingle();
+
+      if (existing) {
+        const otherProfile =
+          existing.participant_1 === currentUserId
+            ? existing.participant_2_profile
+            : existing.participant_1_profile;
+        const conv = { ...existing, profiles: otherProfile } as Conversation;
+        setConversations((prev) => {
+          if (prev.find((c) => c.id === conv.id)) return prev;
+          return [conv, ...prev];
+        });
+        setActiveConversation(conv);
+        return;
+      }
+
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
@@ -31,8 +62,6 @@ export default function MessagesPage() {
         .single();
 
       if (!profile) return;
-
-      const [p1, p2] = [currentUserId, otherUserId].sort();
 
       const { data, error } = await supabase
         .from('conversations')
@@ -185,7 +214,7 @@ export default function MessagesPage() {
     checkUser();
 
     const invChannel = supabase
-      .channel('invitations')
+      .channel(`invitations:${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'conversation_invitations' },
@@ -198,7 +227,7 @@ export default function MessagesPage() {
     return () => {
       supabase.removeChannel(invChannel);
     };
-  }, [supabase, router.isReady, fetchConversations, user]);
+  }, [supabase, router.isReady, fetchConversations, user, userId, conversationId]);
 
   const handleSendMessage = async (content: string) => {
     if (!activeConversation || !user) return;
