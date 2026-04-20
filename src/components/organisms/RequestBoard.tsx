@@ -57,8 +57,18 @@ export const RequestBoard: React.FC = () => {
     setIsDeleting(false);
   };
 
-  const filterFn = (req: HelpRequest, filters: { query: string; city: string; country: string; dateRange: string; startDate: string }) => {
-    const { query, city, country, dateRange, startDate } = filters;
+  const filterFn = (
+    req: HelpRequest,
+    filters: {
+      query: string;
+      city: string;
+      country: string;
+      dateRange: string;
+      startDate: string;
+      startTime: string;
+    },
+  ) => {
+    const { query, city, country, dateRange, startDate, startTime } = filters;
 
     // Search filter
     const matchesSearch =
@@ -87,12 +97,12 @@ export const RequestBoard: React.FC = () => {
       }
     }
 
-    // Start date filter (required start)
+    // Start date & time filter (required start)
     let matchesStartDate = true;
     if (startDate && req.start_datetime) {
-      const filterDate = new Date(startDate);
+      const filterDateTimeStr = startTime ? `${startDate}T${startTime}` : `${startDate}T00:00`;
+      const filterDate = new Date(filterDateTimeStr);
       const reqStartDate = new Date(req.start_datetime);
-      // Compare just dates
       matchesStartDate = reqStartDate >= filterDate;
     }
 
