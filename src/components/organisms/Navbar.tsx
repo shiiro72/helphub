@@ -90,10 +90,6 @@ export function Navbar() {
                   <MessageCircle size={16} className="mr-2" />
                   {t('support')}
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setIsSettingsOpen(true)}>
-                  <Settings size={16} className="mr-2" />
-                  {t('settings')}
-                </Button>
                 <Button variant="outline" size="sm" onClick={handleLogout}>
                   <LogOut size={16} className="mr-2" />
                   {t('logout')}
@@ -186,17 +182,6 @@ export function Navbar() {
               >
                 <MessageCircle size={16} className="mr-2" />
                 {t('support')}
-              </Button>
-              <Button
-                variant="outline"
-                size="full"
-                onClick={() => {
-                  setIsSettingsOpen(true);
-                  setIsMenuOpen(false);
-                }}
-              >
-                <Settings size={16} className="mr-2" />
-                {t('settings')}
               </Button>
               <Button variant="outline" size="full" onClick={handleLogout}>
                 <LogOut size={16} className="mr-2" />
