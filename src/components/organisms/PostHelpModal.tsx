@@ -41,7 +41,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
 
   const handleCityChange = (val: string) => {
     setCity(val);
-    const found = romanianCities.find(c => `${c.name} (${c.county})` === val);
+    const found = romanianCities.find((c) => `${c.name} (${c.county})` === val);
     if (found) {
       setCity(found.name);
       setCounty(found.county);
@@ -129,7 +129,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
     const payload: Partial<HelpRequest & HelpOffer> = {
       user_id: user.id,
       title,
-      content: content || null,
+      content: content || undefined,
       city: city || null,
       county: county || null,
       country: country || null,
@@ -140,10 +140,14 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
     };
 
     if (isRequest) {
-      payload.request_location = city ? `${city}, ${county ? county + ', ' : ''}${country}` : 'Remote';
+      payload.request_location = city
+        ? `${city}, ${county ? county + ', ' : ''}${country}`
+        : 'Remote';
       payload.max_volunteers = maxVolunteers ? parseInt(maxVolunteers) : null;
     } else {
-      payload.offer_location = city ? `${city}, ${county ? county + ', ' : ''}${country}` : 'Remote';
+      payload.offer_location = city
+        ? `${city}, ${county ? county + ', ' : ''}${country}`
+        : 'Remote';
     }
 
     let dbError;
@@ -208,7 +212,9 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
           <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
 
           <div className="space-y-2">
-            <Label htmlFor="title" required>{t('title')}</Label>
+            <Label htmlFor="title" required>
+              {t('title')}
+            </Label>
             <Input
               id="title"
               placeholder={
@@ -232,7 +238,9 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="city" required>{t('city')}</Label>
+              <Label htmlFor="city" required>
+                {t('city')}
+              </Label>
               <Input
                 id="city"
                 placeholder="e.g. Bucharest"
@@ -242,16 +250,20 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
                 required
               />
               <datalist id="cities-list">
-                {romanianCities.map(c => (
+                {romanianCities.map((c) => (
                   <option key={`${c.name}-${c.county}`} value={`${c.name} (${c.county})`} />
                 ))}
               </datalist>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="address" required>{t('address')}</Label>
+              <Label htmlFor="address" required>
+                {t('address')}
+              </Label>
               <Input
                 id="address"
-                placeholder={isRequest ? "e.g. 123 Main St or Downtown" : "e.g. Can meet in City Center"}
+                placeholder={
+                  isRequest ? 'e.g. 123 Main St or Downtown' : 'e.g. Can meet in City Center'
+                }
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 required
@@ -286,7 +298,9 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="start_datetime" required>{t('start_datetime_label')}</Label>
+              <Label htmlFor="start_datetime" required>
+                {t('start_datetime_label')}
+              </Label>
               <Input
                 id="start_datetime"
                 type="datetime-local"

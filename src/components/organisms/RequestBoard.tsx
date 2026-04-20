@@ -43,15 +43,12 @@ export const RequestBoard: React.FC = () => {
     if (!deletingRequest) return;
     setIsDeleting(true);
     const supabase = createClient();
-    const { error } = await supabase
-      .from('help_requests')
-      .delete()
-      .eq('id', deletingRequest.id);
+    const { error } = await supabase.from('help_requests').delete().eq('id', deletingRequest.id);
 
     if (error) {
       console.error('Error deleting request:', error);
     } else {
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
       setDeletingRequest(null);
     }
     setIsDeleting(false);
@@ -67,7 +64,7 @@ export const RequestBoard: React.FC = () => {
       startTime: string;
     },
   ) => {
-    const { query, city, country, dateRange, startDate, startTime } = filters;
+    const { query, city, dateRange, startDate, startTime } = filters;
 
     // Search filter
     const matchesSearch =
@@ -171,7 +168,7 @@ export const RequestBoard: React.FC = () => {
           setIsPostModalOpen(false);
           setEditingRequest(null);
         }}
-        onSuccess={() => setRefreshTrigger(prev => prev + 1)}
+        onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
       />
     </>
   );

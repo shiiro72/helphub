@@ -43,15 +43,12 @@ export const OfferBoard: React.FC = () => {
     if (!deletingOffer) return;
     setIsDeleting(true);
     const supabase = createClient();
-    const { error } = await supabase
-      .from('help_offers')
-      .delete()
-      .eq('id', deletingOffer.id);
+    const { error } = await supabase.from('help_offers').delete().eq('id', deletingOffer.id);
 
     if (error) {
       console.error('Error deleting offer:', error);
     } else {
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
       setDeletingOffer(null);
     }
     setIsDeleting(false);
@@ -67,7 +64,7 @@ export const OfferBoard: React.FC = () => {
       startTime: string;
     },
   ) => {
-    const { query, city, country, dateRange, startDate, startTime } = filters;
+    const { query, city, dateRange, startDate, startTime } = filters;
 
     // Search filter
     const matchesSearch =
@@ -171,7 +168,7 @@ export const OfferBoard: React.FC = () => {
           setIsPostModalOpen(false);
           setEditingOffer(null);
         }}
-        onSuccess={() => setRefreshTrigger(prev => prev + 1)}
+        onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
       />
     </>
   );
