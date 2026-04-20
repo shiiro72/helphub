@@ -153,7 +153,7 @@ export default function MessagesPage() {
           if (existing) {
             setActiveConversation(existing);
           }
-        } else if (userId && typeof userId === 'string') {
+        } else if (userId && typeof userId === 'string' && userId !== currentUserId) {
           const existing = processed.find(
             (c) => !c.is_group && (c.participant_1 === userId || c.participant_2 === userId),
           );
@@ -169,6 +169,8 @@ export default function MessagesPage() {
   );
 
   useEffect(() => {
+    if (!router.isReady) return;
+
     const checkUser = async () => {
       const {
         data: { user },
@@ -196,7 +198,7 @@ export default function MessagesPage() {
     return () => {
       supabase.removeChannel(invChannel);
     };
-  }, [supabase, router, fetchConversations, user]);
+  }, [supabase, router.isReady, fetchConversations, user]);
 
   const handleSendMessage = async (content: string) => {
     if (!activeConversation || !user) return;
@@ -351,11 +353,10 @@ export default function MessagesPage() {
                 <span className="text-white text-4xl font-bold">HH</span>
               </div>
               <h2 className="text-2xl font-light text-zinc-900 dark:text-zinc-100 mb-2">
-                HelpHub for Desktop
+                {t('messages_welcome_title')}
               </h2>
               <p className="text-zinc-500 max-w-sm">
-                Send and receive messages without keeping your phone online. Use HelpHub on up to 4
-                linked devices and 1 phone at the same time.
+                {t('messages_welcome_desc')}
               </p>
             </div>
           )}
