@@ -14,7 +14,10 @@ interface BaseBoardProps<T> {
   onPostClick: () => void;
   renderGridItem: (item: T, query: string) => React.ReactNode;
   renderListItem: (item: T, query: string) => React.ReactNode;
-  filterFn: (item: T, filters: { query: string; city: string; country: string; dateRange: string; startDate: string }) => boolean;
+  filterFn: (
+    item: T,
+    filters: { query: string; city: string; country: string; dateRange: string; startDate: string },
+  ) => boolean;
   refreshTrigger?: number;
 }
 
@@ -61,13 +64,15 @@ export function BaseBoard<T extends { id: string }>({
     fetchItems();
   }, [table, refreshTrigger]);
 
-  const filteredItems = items.filter(item => filterFn(item, {
-    query: searchQuery,
-    city: cityFilter,
-    country: countryFilter,
-    dateRange,
-    startDate: startDateFilter
-  }));
+  const filteredItems = items.filter((item) =>
+    filterFn(item, {
+      query: searchQuery,
+      city: cityFilter,
+      country: countryFilter,
+      dateRange,
+      startDate: startDateFilter,
+    }),
+  );
 
   return (
     <div className="space-y-6">
@@ -89,12 +94,7 @@ export function BaseBoard<T extends { id: string }>({
           </div>
 
           <div className="flex items-center gap-4 self-end md:self-auto">
-            <Button
-              className="gap-2"
-              size="md"
-              variant="primary"
-              onClick={onPostClick}
-            >
+            <Button className="gap-2" size="md" variant="primary" onClick={onPostClick}>
               <Plus size={18} />
               {postButtonText}
             </Button>
@@ -179,14 +179,18 @@ export function BaseBoard<T extends { id: string }>({
           ))}
         </div>
       ) : filteredItems.length > 0 ? (
-        <div className={
-          view === 'grid'
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            : "flex flex-col gap-4"
-        }>
+        <div
+          className={
+            view === 'grid'
+              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+              : 'flex flex-col gap-4'
+          }
+        >
           {filteredItems.map((item) => (
             <React.Fragment key={item.id}>
-              {view === 'grid' ? renderGridItem(item, searchQuery) : renderListItem(item, searchQuery)}
+              {view === 'grid'
+                ? renderGridItem(item, searchQuery)
+                : renderListItem(item, searchQuery)}
             </React.Fragment>
           ))}
         </div>

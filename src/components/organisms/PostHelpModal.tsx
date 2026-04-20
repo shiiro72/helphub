@@ -23,7 +23,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
   onClose,
   onSuccess,
   type,
-  initialData
+  initialData,
 }) => {
   const t = useTranslations();
   const [title, setTitle] = useState('');
@@ -61,7 +61,9 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
       setCountry(initialData.country || '');
       setAddress(initialData.address || '');
       setReward(initialData.reward_offer || '');
-      setStartDatetime(initialData.start_datetime ? initialData.start_datetime.substring(0, 16) : '');
+      setStartDatetime(
+        initialData.start_datetime ? initialData.start_datetime.substring(0, 16) : '',
+      );
       setEndDatetime(initialData.end_datetime ? initialData.end_datetime.substring(0, 16) : '');
       if ('max_volunteers' in initialData) {
         setMaxVolunteers(initialData.max_volunteers?.toString() || '');
@@ -91,12 +93,36 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
     setError(null);
 
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       setError(t('login_to_post'));
       setLoading(false);
       return;
+    }
+
+    // Ensure user profile exists before posting
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile) {
+      // Create profile if it doesn't exist
+      const { error: profileError } = await supabase.from('profiles').insert({
+        id: user.id,
+        username: user.email?.split('@')[0] || 'user',
+        image_url: null,
+      });
+
+      if (profileError) {
+        setError('Failed to create user profile');
+        setLoading(false);
+        return;
+      }
     }
 
     const table = isRequest ? 'help_requests' : 'help_offers';
@@ -128,9 +154,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
         .eq('id', initialData.id);
       dbError = updateError;
     } else {
-      const { error: insertError } = await supabase
-        .from(table)
-        .insert(payload);
+      const { error: insertError } = await supabase.from(table).insert(payload);
       dbError = insertError;
     }
 
@@ -164,9 +188,12 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
           <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
             {initialData
-              ? (isRequest ? t('edit_request') : t('edit_offer'))
-              : (isRequest ? t('post_request') : t('post_offer'))
-            }
+              ? isRequest
+                ? t('edit_request')
+                : t('edit_offer')
+              : isRequest
+                ? t('post_request')
+                : t('post_offer')}
           </h2>
           <button
             onClick={onClose}
@@ -184,7 +211,9 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
             <Label htmlFor="title" required>{t('title')}</Label>
             <Input
               id="title"
-              placeholder={isRequest ? t('request_title_placeholder') : t('offer_title_placeholder')}
+              placeholder={
+                isRequest ? t('request_title_placeholder') : t('offer_title_placeholder')
+              }
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
@@ -308,10 +337,13 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
             <Button type="submit" className="flex-1" disabled={loading}>
               {loading
                 ? t('processing')
-                : (initialData
-                    ? (isRequest ? t('update_request') : t('update_offer'))
-                    : (isRequest ? t('post_request_btn') : t('post_offer_btn')))
-              }
+                : initialData
+                  ? isRequest
+                    ? t('update_request')
+                    : t('update_offer')
+                  : isRequest
+                    ? t('post_request_btn')
+                    : t('post_offer_btn')}
             </Button>
           </div>
         </form>
