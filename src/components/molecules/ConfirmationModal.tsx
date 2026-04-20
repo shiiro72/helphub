@@ -29,19 +29,19 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
+      <div className="bg-brand-surface rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b border-brand-border">
           <div className="flex items-center gap-2">
-            {variant === 'danger' && <AlertTriangle className="text-red-500" size={20} />}
-            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{title}</h2>
+            {variant === 'danger' && <AlertTriangle className="text-brand-error" size={20} />}
+            <h2 className="text-xl font-bold text-brand-text-main">{title}</h2>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+          <button onClick={onClose} className="text-brand-text-secondary hover:text-brand-text-main">
             <X size={24} />
           </button>
         </div>
 
         <div className="p-6">
-          <div className="text-zinc-600 dark:text-zinc-400">
+          <div className="text-brand-text-secondary">
             {message}
           </div>
 
@@ -57,7 +57,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </Button>
             <Button
               type="button"
-              className={`flex-1 ${variant === 'danger' ? 'bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700' : ''}`}
+              className={`flex-1 ${variant === 'danger' ? 'bg-brand-error hover:opacity-90 text-white' : ''}`}
               onClick={onConfirm}
               disabled={isLoading}
             >

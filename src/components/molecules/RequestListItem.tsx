@@ -73,16 +73,16 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
     <div
       className={`rounded-xl border p-4 shadow-sm hover:shadow-md transition-all flex items-center gap-4 ${
         isMatch
-          ? 'bg-yellow-50/50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800'
-          : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
+          ? 'bg-yellow-50/50 border-yellow-200'
+          : 'bg-brand-surface border-brand-border'
       }`}
     >
       <div className="flex-grow min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 truncate">
+          <h3 className="text-base font-bold text-brand-text-main truncate">
             <Highlight text={request.title} query={searchQuery} />
           </h3>
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 font-medium whitespace-nowrap">
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-brand-background text-brand-text-secondary font-medium whitespace-nowrap">
             {request.city
               ? `${request.city}${request.country ? `, ${request.country}` : ''}`
               : request.request_location || 'Remote'}
@@ -90,31 +90,31 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
         </div>
 
         <div className="flex items-center gap-2 mb-2">
-          <p className="text-zinc-600 dark:text-zinc-400 text-sm line-clamp-1">
+          <p className="text-brand-text-secondary text-sm line-clamp-1">
             <Highlight text={request.content} query={searchQuery} />
           </p>
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center text-xs text-brand-text-secondary">
             <User size={12} className="mr-1.5" />
-            <span className="font-medium mr-1 text-zinc-700 dark:text-zinc-300 truncate max-w-[100px]">
+            <span className="font-medium mr-1 text-brand-text-main truncate max-w-[100px]">
               {request.profiles?.username || 'Anonymous'}
             </span>
             <VerificationBadge
               isVerified={request.profiles?.is_verified}
               size={10}
-              className="text-blue-500"
+              className="text-brand-primary"
             />
           </div>
 
-          <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center text-xs text-brand-text-secondary">
             <Calendar size={12} className="mr-1.5" />
             <span>{date}</span>
           </div>
 
           {startStr && (
-            <div className="flex items-center text-[10px] text-zinc-500 dark:text-zinc-400">
+            <div className="flex items-center text-[10px] text-brand-text-secondary">
               <Clock size={10} className="mr-1" />
               <span className="truncate max-w-[150px]">
                 {startStr} {endStr ? `— ${endStr}` : ''}
@@ -129,13 +129,13 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
           <>
             <button
               onClick={() => setShowVolunteerModal(true)}
-              className="p-2 text-zinc-400 hover:text-blue-500 transition-colors relative"
+              className="p-2 text-brand-text-secondary hover:text-brand-primary transition-colors relative"
               aria-label="Manage volunteers"
               title={t('manage_volunteers')}
             >
               <Users size={20} />
               {confirmedCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-brand-primary text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                   {confirmedCount}
                 </span>
               )}
@@ -164,10 +164,10 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
                 isVolunteering
                   ? volunteerStatus === 'waitlisted'
                     ? 'bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100'
-                    : 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100'
+                    : 'bg-brand-primary/10 border-brand-primary text-brand-primary hover:bg-brand-primary/20'
                   : confirmedCount >= (request.max_volunteers || Infinity)
                     ? 'bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100'
-                    : 'bg-zinc-50 border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:border-blue-300 hover:text-blue-600'
+                    : 'bg-brand-background border-brand-border text-brand-text-secondary hover:bg-brand-primary/10 hover:border-brand-primary hover:text-brand-primary'
               }`}
               title={
                 isVolunteering
@@ -208,7 +208,7 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
           role="dialog"
           aria-modal="true"
         >
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md shadow-2xl p-6">
+          <div className="bg-brand-surface rounded-2xl w-full max-w-md shadow-2xl p-6">
             <VolunteerList
               request={{ ...request, confirmed_count: confirmedCount }}
               onClose={() => setShowVolunteerModal(false)}

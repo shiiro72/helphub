@@ -9,7 +9,7 @@ interface VerificationBadgeProps {
 
 export const VerificationBadge: React.FC<VerificationBadgeProps> = ({
   size = 12,
-  className = "text-blue-500",
+  className = "text-brand-primary",
   isVerified = false
 }) => {
   if (!isVerified) return null;

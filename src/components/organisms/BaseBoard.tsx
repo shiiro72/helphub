@@ -101,15 +101,15 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
       {/* Sidebar Filters */}
       <aside className="w-full lg:w-64 flex-shrink-0 space-y-6">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{title}</h2>
+          <h2 className="text-2xl font-bold text-brand-text-main">{title}</h2>
           <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
         </div>
 
-        <div className="space-y-4 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
+        <div className="space-y-4 p-4 bg-brand-surface rounded-xl border border-brand-border">
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">{t('search')}</label>
+            <label className="text-xs font-semibold uppercase text-brand-text-secondary">{t('search')}</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-text-secondary" size={16} />
               <Input
                 placeholder={searchPlaceholder}
                 className="pl-9 text-sm"
@@ -120,7 +120,7 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">{t('location')}</label>
+            <label className="text-xs font-semibold uppercase text-brand-text-secondary">{t('location')}</label>
             <Input
               placeholder="Filter by city..."
               value={cityFilter}
@@ -132,7 +132,7 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
                   setCityFilter(found.name);
                 }
               }}
-              className="bg-white dark:bg-zinc-900 text-sm"
+              className="bg-brand-background text-sm"
               list="filter-cities-list"
             />
             <datalist id="filter-cities-list">
@@ -143,11 +143,11 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">{t('posted_date')}</label>
+            <label className="text-xs font-semibold uppercase text-brand-text-secondary">{t('posted_date')}</label>
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-              className="w-full h-10 px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 transition-all"
+              className="w-full h-10 px-3 py-2 bg-brand-background border border-brand-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all text-brand-text-main"
             >
               <option value="all">{t('all_time')}</option>
               <option value="today">{t('today')}</option>
@@ -157,19 +157,19 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">{t('start_date_time')}</label>
+            <label className="text-xs font-semibold uppercase text-brand-text-secondary">{t('start_date_time')}</label>
             <Input
               type="date"
               value={startDateFilter}
               onChange={(e) => setStartDateFilter(e.target.value)}
-              className="bg-white dark:bg-zinc-900 text-sm"
+              className="bg-brand-background text-sm"
               title="Filter by required start date"
             />
             <Input
               type="time"
               value={startTimeFilter}
               onChange={(e) => setStartTimeFilter(e.target.value)}
-              className="bg-white dark:bg-zinc-900 text-sm"
+              className="bg-brand-background text-sm"
               title="Filter by required start time"
             />
           </div>
@@ -194,12 +194,12 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
       <main className="flex-grow space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-1 shadow-sm">
-              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-2">{t('sort_by')}:</span>
+            <div className="flex items-center gap-2 bg-brand-surface border border-brand-border rounded-lg p-1 shadow-sm">
+              <span className="text-xs font-medium text-brand-text-secondary px-2">{t('sort_by')}:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'date_posted' | 'start_datetime')}
-                className="bg-transparent text-sm focus:outline-none px-2 py-1"
+                className="bg-transparent text-sm focus:outline-none px-2 py-1 text-brand-text-main"
               >
                 <option value="date_posted">{t('posted_date')}</option>
                 <option value="start_datetime">{t('start_date')}</option>
@@ -207,7 +207,7 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-                className="bg-transparent text-sm focus:outline-none border-l border-zinc-200 dark:border-zinc-800 px-2 py-1"
+                className="bg-transparent text-sm focus:outline-none border-l border-brand-border px-2 py-1 text-brand-text-main"
               >
                 <option value="asc">{t('ascending')}</option>
                 <option value="desc">{t('descending')}</option>
@@ -221,13 +221,13 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
               {postButtonText}
             </Button>
 
-            <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
+            <div className="flex items-center gap-2 bg-brand-border/30 p-1 rounded-lg">
               <button
                 onClick={() => setView('grid')}
                 className={`p-2 rounded-md transition-all ${
                   view === 'grid'
-                    ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                    ? 'bg-brand-surface shadow-sm text-brand-text-main'
+                    : 'text-brand-text-secondary hover:text-brand-text-main'
                 }`}
                 title="Grid view"
               >
@@ -237,8 +237,8 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
                 onClick={() => setView('list')}
                 className={`p-2 rounded-md transition-all ${
                   view === 'list'
-                    ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                    ? 'bg-brand-surface shadow-sm text-brand-text-main'
+                    : 'text-brand-text-secondary hover:text-brand-text-main'
                 }`}
                 title="List view"
               >
@@ -251,7 +251,7 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-48 rounded-xl bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+              <div key={i} className="h-48 rounded-xl bg-brand-surface animate-pulse" />
             ))}
           </div>
         ) : filteredItems.length > 0 ? (
@@ -271,8 +271,8 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
-            <p className="text-zinc-500 dark:text-zinc-400">{emptyMessage}</p>
+          <div className="text-center py-20 border-2 border-dashed border-brand-border rounded-2xl">
+            <p className="text-brand-text-secondary">{emptyMessage}</p>
           </div>
         )}
       </main>

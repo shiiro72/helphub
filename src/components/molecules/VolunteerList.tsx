@@ -117,10 +117,10 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
     <div className="flex flex-col h-full max-h-[80vh]">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+          <h2 className="text-xl font-bold text-brand-text-main">
             {t('volunteers')}
           </h2>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-brand-text-secondary">
             {confirmed.length} {request.max_volunteers ? `/ ${request.max_volunteers}` : ''} {t('volunteers').toLowerCase()}
           </p>
         </div>
@@ -144,37 +144,37 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
       <div className="flex-grow overflow-y-auto min-h-[200px] space-y-6 pr-2">
         {loading ? (
           <div className="flex items-center justify-center h-40">
-            <Loader2 className="animate-spin text-zinc-400" />
+            <Loader2 className="animate-spin text-brand-text-secondary" />
           </div>
         ) : (
           <>
             {/* Confirmed List */}
             <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-brand-text-secondary">
                 {t('confirmed')} ({confirmed.length})
               </h3>
               {confirmed.length === 0 ? (
-                <p className="text-sm text-zinc-500 italic">{t('no_volunteers')}</p>
+                <p className="text-sm text-brand-text-secondary italic">{t('no_volunteers')}</p>
               ) : (
                 confirmed.map((v) => (
                   <div
                     key={v.id}
-                    className="flex items-center justify-between p-3 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50"
+                    className="flex items-center justify-between p-3 rounded-xl border border-brand-border bg-brand-background"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
+                      <div className="w-10 h-10 rounded-full bg-brand-border/30 flex items-center justify-center overflow-hidden">
                         {v.profiles?.image_url ? (
                           <img src={v.profiles.image_url} alt={v.profiles.username} className="w-full h-full object-cover" />
                         ) : (
-                          <User size={20} className="text-zinc-500" />
+                          <User size={20} className="text-brand-text-secondary" />
                         )}
                       </div>
                       <div>
                         <div className="flex items-center gap-1">
-                          <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                          <span className="font-semibold text-brand-text-main">
                             {v.profiles?.username}
                           </span>
-                          <VerificationBadge isVerified={v.profiles?.is_verified} size={14} />
+                          <VerificationBadge isVerified={v.profiles?.is_verified} size={14} className="text-brand-primary" />
                         </div>
                         <StarRating
                           rating={v.profiles?.trust_rank || 0}
@@ -200,28 +200,28 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
             {/* Waitlist List */}
             {waitlisted.length > 0 && (
               <div className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-orange-400">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-brand-secondary">
                   {t('waitlist')} ({waitlisted.length})
                 </h3>
                 {waitlisted.map((v) => (
                   <div
                     key={v.id}
-                    className="flex items-center justify-between p-3 rounded-xl border border-orange-100 dark:border-orange-900/30 bg-orange-50/30 dark:bg-orange-900/10"
+                    className="flex items-center justify-between p-3 rounded-xl border border-brand-secondary/30 bg-brand-secondary/10"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
+                      <div className="w-10 h-10 rounded-full bg-brand-border/30 flex items-center justify-center overflow-hidden">
                         {v.profiles?.image_url ? (
                           <img src={v.profiles.image_url} alt={v.profiles.username} className="w-full h-full object-cover" />
                         ) : (
-                          <User size={20} className="text-zinc-500" />
+                          <User size={20} className="text-brand-text-secondary" />
                         )}
                       </div>
                       <div>
                         <div className="flex items-center gap-1">
-                          <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                          <span className="font-semibold text-brand-text-main">
                             {v.profiles?.username}
                           </span>
-                          <VerificationBadge isVerified={v.profiles?.is_verified} size={14} />
+                          <VerificationBadge isVerified={v.profiles?.is_verified} size={14} className="text-brand-primary" />
                         </div>
                         <StarRating
                           rating={v.profiles?.trust_rank || 0}
@@ -259,7 +259,7 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
         )}
       </div>
 
-      <div className="mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+      <div className="mt-6 pt-4 border-t border-brand-border">
         <Button variant="outline" className="w-full" onClick={onClose}>
           {t('cancel')}
         </Button>
