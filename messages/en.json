@@ -142,5 +142,8 @@
   "update_request": "Update Request",
   "update_offer": "Update Offer",
   "post_request_btn": "Post Request",
-  "post_offer_btn": "Post Offer"
+  "post_offer_btn": "Post Offer",
+  "messages_welcome_title": "HelpHub Messaging",
+  "messages_welcome_desc": "Connect with other users, coordinate help, and build your community. Here you can chat with other users.",
+  "start_chatting": "Start a conversation by sending a message."
 }
