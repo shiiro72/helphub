@@ -171,7 +171,13 @@ export const OfferCard: React.FC<OfferCardProps> = ({
             <MapPin size={14} className="mr-1 flex-shrink-0" />
             <span className="truncate max-w-[180px]">
               {offer.address ? `${offer.address}, ` : ''}
-              {offer.city ? `${offer.city}${offer.country ? ` (${offer.country})` : ''}` : (offer.offer_location || 'Remote')}
+              {offer.city ? (
+                <>
+                  {offer.city}
+                  {offer.county ? `, ${offer.county}` : ''}
+                  {offer.country ? ` (${offer.country})` : ''}
+                </>
+              ) : (offer.offer_location || 'Remote')}
             </span>
           </div>
           <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">

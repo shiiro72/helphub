@@ -207,7 +207,13 @@ export const RequestCard: React.FC<RequestCardProps> = ({
             <MapPin size={14} className="mr-1 flex-shrink-0" />
             <span className="truncate max-w-[180px]">
               {request.address ? `${request.address}, ` : ''}
-              {request.city ? `${request.city}${request.country ? ` (${request.country})` : ''}` : (request.request_location || 'Remote')}
+              {request.city ? (
+                <>
+                  {request.city}
+                  {request.county ? `, ${request.county}` : ''}
+                  {request.country ? ` (${request.country})` : ''}
+                </>
+              ) : (request.request_location || 'Remote')}
             </span>
           </div>
           <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">

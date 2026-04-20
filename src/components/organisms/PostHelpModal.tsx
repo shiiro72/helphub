@@ -249,29 +249,6 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
               </datalist>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="county" required>{t('county')}</Label>
-              <Input
-                id="county"
-                placeholder="e.g. București"
-                value={county}
-                onChange={(e) => setCounty(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="country" required>{t('country')}</Label>
-              <Input
-                id="country"
-                placeholder="e.g. Romania"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="address" required>{t('address')}</Label>
               <Input
                 id="address"
