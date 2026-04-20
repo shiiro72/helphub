@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { MapPin, Calendar, User, MessageSquare, Languages, Loader2, Clock, Edit2, Trash2, UserPlus, Users } from 'lucide-react';
+import { MapPin, Calendar, User, MessageSquare, Clock, Edit2, Trash2, UserPlus, Users } from 'lucide-react';
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { StarRating } from '../atoms/StarRating';
 import { Highlight } from '../atoms/Highlight';
-import { translateText } from '@/lib/translate';
-import { useRouter } from 'next/router';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { VolunteerList } from './VolunteerList';
@@ -26,10 +24,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
   onDelete
 }) => {
   const t = useTranslations();
-  const { locale } = useRouter();
   const { user } = useAuth();
-  const [translatedContent, setTranslatedContent] = useState<string | null>(null);
-  const [isTranslating, setIsTranslating] = useState(false);
   const [showVolunteerModal, setShowVolunteerModal] = useState(false);
 
   const isOwner = user?.id === request.user_id;
@@ -41,23 +36,6 @@ export const RequestCard: React.FC<RequestCardProps> = ({
     isLoading: isVolunteerLoading,
     toggleVolunteer: handleVolunteerToggle
   } = useVolunteer(request.id);
-
-  const handleTranslate = async () => {
-    if (translatedContent) {
-      setTranslatedContent(null);
-      return;
-    }
-
-    setIsTranslating(true);
-    try {
-      const translated = await translateText(request.content, locale || 'en');
-      setTranslatedContent(translated);
-    } catch (error) {
-      console.error('Translation failed:', error);
-    } finally {
-      setIsTranslating(false);
-    }
-  };
   const date = new Date(request.date_posted).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -151,29 +129,13 @@ export const RequestCard: React.FC<RequestCardProps> = ({
 
       <div className="flex-grow mb-6">
         <p className="text-zinc-600 dark:text-zinc-400 text-sm line-clamp-3">
-          {translatedContent ? (
-            translatedContent
-          ) : (
-            <Highlight text={request.content} query={searchQuery} />
-          )}
+          <Highlight text={request.content} query={searchQuery} />
         </p>
         {request.reward_offer && (
           <div className="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded w-fit">
             Reward: {request.reward_offer}
           </div>
         )}
-        <button
-          onClick={handleTranslate}
-          disabled={isTranslating}
-          className="mt-2 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-        >
-          {isTranslating ? (
-            <Loader2 size={12} className="animate-spin" />
-          ) : (
-            <Languages size={12} />
-          )}
-          {translatedContent ? t('show_original') : t('translate')}
-        </button>
       </div>
 
       <div className="space-y-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">

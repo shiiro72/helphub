@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { Calendar, User, MessageSquare, Languages, Loader2, Clock, Edit2, Trash2, UserPlus, Users } from 'lucide-react';
+import { Calendar, User, MessageSquare, Clock, Edit2, Trash2, UserPlus, Users } from 'lucide-react';
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { Highlight } from '../atoms/Highlight';
-import { translateText } from '@/lib/translate';
-import { useRouter } from 'next/router';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { VolunteerList } from './VolunteerList';
@@ -25,10 +23,7 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
   onDelete
 }) => {
   const t = useTranslations();
-  const { locale } = useRouter();
   const { user } = useAuth();
-  const [translatedContent, setTranslatedContent] = useState<string | null>(null);
-  const [isTranslating, setIsTranslating] = useState(false);
   const [showVolunteerModal, setShowVolunteerModal] = useState(false);
 
   const isOwner = user?.id === request.user_id;
@@ -40,24 +35,6 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
     isLoading: isVolunteerLoading,
     toggleVolunteer: handleVolunteerToggle
   } = useVolunteer(request.id);
-
-  const handleTranslate = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (translatedContent) {
-      setTranslatedContent(null);
-      return;
-    }
-
-    setIsTranslating(true);
-    try {
-      const translated = await translateText(request.content, locale || 'en');
-      setTranslatedContent(translated);
-    } catch (error) {
-      console.error('Translation failed:', error);
-    } finally {
-      setIsTranslating(false);
-    }
-  };
   const date = new Date(request.date_posted).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -100,24 +77,8 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
 
         <div className="flex items-center gap-2 mb-2">
           <p className="text-zinc-600 dark:text-zinc-400 text-sm line-clamp-1">
-            {translatedContent ? (
-              translatedContent
-            ) : (
-              <Highlight text={request.content} query={searchQuery} />
-            )}
+            <Highlight text={request.content} query={searchQuery} />
           </p>
-          <button
-            onClick={handleTranslate}
-            disabled={isTranslating}
-            className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 flex-shrink-0"
-          >
-            {isTranslating ? (
-              <Loader2 size={10} className="animate-spin" />
-            ) : (
-              <Languages size={10} />
-            )}
-            {translatedContent ? t('show_original') : t('translate')}
-          </button>
         </div>
 
         <div className="flex items-center gap-4">

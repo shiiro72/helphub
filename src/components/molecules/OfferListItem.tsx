@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { Calendar, User, MessageSquare, Languages, Loader2, Clock, Edit2, Trash2 } from 'lucide-react';
+import { Calendar, User, MessageSquare, Clock, Edit2, Trash2 } from 'lucide-react';
 import { HelpOffer } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { Highlight } from '../atoms/Highlight';
-import { translateText } from '@/lib/translate';
-import { useRouter } from 'next/router';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/hooks/useAuth';
 
@@ -23,30 +21,9 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
   onDelete
 }) => {
   const t = useTranslations();
-  const { locale } = useRouter();
   const { user } = useAuth();
-  const [translatedContent, setTranslatedContent] = useState<string | null>(null);
-  const [isTranslating, setIsTranslating] = useState(false);
 
   const isOwner = user?.id === offer.user_id;
-
-  const handleTranslate = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (translatedContent) {
-      setTranslatedContent(null);
-      return;
-    }
-
-    setIsTranslating(true);
-    try {
-      const translated = await translateText(offer.content, locale || 'en');
-      setTranslatedContent(translated);
-    } catch (error) {
-      console.error('Translation failed:', error);
-    } finally {
-      setIsTranslating(false);
-    }
-  };
   const date = new Date(offer.date_posted).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -96,24 +73,8 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
 
         <div className="flex items-center gap-2 mb-2">
           <p className="text-zinc-600 dark:text-zinc-400 text-sm line-clamp-1">
-            {translatedContent ? (
-              translatedContent
-            ) : (
-              <Highlight text={offer.content} query={searchQuery} />
-            )}
+            <Highlight text={offer.content} query={searchQuery} />
           </p>
-          <button
-            onClick={handleTranslate}
-            disabled={isTranslating}
-            className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 flex-shrink-0"
-          >
-            {isTranslating ? (
-              <Loader2 size={10} className="animate-spin" />
-            ) : (
-              <Languages size={10} />
-            )}
-            {translatedContent ? t('show_original') : t('translate')}
-          </button>
         </div>
 
         <div className="flex items-center gap-4">
