@@ -32,7 +32,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const markAsRead = async (messageId: string) => {
     await supabase.from('messages').update({ is_read: true }).eq('id', messageId);
@@ -64,8 +64,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     fetchMessages();
 
     // Subscribe to new messages
+    const channelName = `messages:${conversation.id}:${Math.random().toString(36).slice(2)}`;
     const channel = supabase
-      .channel(`messages:${conversation.id}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
