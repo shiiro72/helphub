@@ -82,8 +82,11 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
 
           <div className="flex flex-col justify-start pt-20 ml-4">
             <Link href="/requests">
-              <Button variant="ghost" className="group gap-2 text-brand-primary font-bold text-lg hover:bg-brand-primary/10">
-                {t('learn_more')}
+              <Button
+                variant="ghost"
+                className="group gap-2 text-brand-primary font-bold text-lg hover:bg-brand-primary/10"
+              >
+                {t('show_more')}
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -103,9 +106,15 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
         <div className="flex items-end gap-6 max-w-[1300px] mx-auto justify-end w-full">
           <div className="flex flex-col justify-end pb-20 mr-4">
             <Link href="/offers">
-              <Button variant="ghost" className="group gap-2 text-brand-secondary font-bold text-lg hover:bg-brand-secondary/10">
-                <ArrowRight size={20} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
-                {t('learn_more')}
+              <Button
+                variant="ghost"
+                className="group gap-2 text-brand-secondary font-bold text-lg hover:bg-brand-secondary/10"
+              >
+                <ArrowRight
+                  size={20}
+                  className="rotate-180 group-hover:-translate-x-1 transition-transform"
+                />
+                {t('show_more')}
               </Button>
             </Link>
           </div>

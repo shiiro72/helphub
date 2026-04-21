@@ -64,7 +64,7 @@ export default function Home() {
                 </h2>
                 <Link href="/requests">
                   <Button variant="ghost" className="gap-2">
-                    {t('learn_more')}
+                    {t('show_more')}
                     <ArrowRight size={16} />
                   </Button>
                 </Link>
@@ -97,7 +97,7 @@ export default function Home() {
                 </h2>
                 <Link href="/offers">
                   <Button variant="ghost" className="gap-2">
-                    {t('learn_more')}
+                    {t('show_more')}
                     <ArrowRight size={16} />
                   </Button>
                 </Link>
