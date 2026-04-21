@@ -188,9 +188,9 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden mb-8">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+      <div className="bg-brand-surface border border-brand-border rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden mb-8">
+        <div className="flex items-center justify-between p-6 border-b border-brand-border">
+          <h2 className="text-xl font-bold text-brand-text-main">
             {initialData
               ? isRequest
                 ? t('edit_request')
@@ -212,7 +212,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
           <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
 
           <div className="space-y-2">
-            <Label htmlFor="title" required>
+            <Label htmlFor="title" required className="text-brand-text-main">
               {t('title')}
             </Label>
             <Input
