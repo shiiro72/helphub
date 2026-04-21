@@ -5,7 +5,7 @@ import { GetStaticProps } from 'next';
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black">
+    <div className="min-h-screen bg-brand-background">
       <Head>
         <title>Register | HelpHub</title>
       </Head>
