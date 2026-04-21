@@ -125,12 +125,12 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
         aria-modal="true"
         aria-labelledby="profile-settings-modal-title"
       >
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
-          <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800">
+        <div className="bg-brand-surface-container-lowest rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-brand-outline-variant">
+          <div className="flex items-center justify-between p-6 border-b border-brand-outline-variant">
             <div className="flex items-center gap-2">
               <h2
                 id="profile-settings-modal-title"
-                className="text-xl font-bold text-zinc-900 dark:text-zinc-100"
+                className="text-xl font-bold text-brand-text-main"
               >
                 {t('profile_settings')}
               </h2>
@@ -159,16 +159,16 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                   />
                 </div>
               )}
-              <div className="w-24 h-24 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border-2 border-zinc-200 dark:border-zinc-700">
+              <div className="w-24 h-24 rounded-full bg-brand-surface-container flex items-center justify-center overflow-hidden border-2 border-brand-outline-variant">
                 {imageUrl ? (
                   <div className="relative w-full h-full">
                     <Image src={imageUrl} alt="Profile" fill className="object-cover" unoptimized />
                   </div>
                 ) : (
-                  <User size={48} className="text-zinc-400" />
+                  <User size={48} className="text-brand-text-secondary" />
                 )}
               </div>
-              <p className="text-xs text-zinc-500">{t('image_preview')}</p>
+              <p className="text-xs text-brand-text-secondary">{t('image_preview')}</p>
             </div>
 
             <div className="space-y-4">
@@ -207,11 +207,11 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                 </Button>
               </div>
 
-              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 mt-4">
+              <div className="pt-4 border-t border-brand-outline-variant mt-4">
                 <Button
                   type="button"
                   variant="ghost"
-                  className="w-full text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 gap-2"
+                  className="w-full text-brand-error hover:text-brand-error-container hover:bg-brand-error-container/10 gap-2"
                   onClick={() => setIsDeleteConfirmOpen(true)}
                   disabled={loading}
                 >
@@ -231,8 +231,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
         title={t('confirm_update_title')}
         message={
           <div className="space-y-2">
-            <p>{t('confirm_update_message')}</p>
-            <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-sm">
+            <p className="text-brand-text-main">{t('confirm_update_message')}</p>
+            <div className="mt-4 p-3 bg-brand-surface-container rounded-lg text-sm text-brand-text-main">
               <p>
                 <strong>{t('username')}:</strong> {username}
               </p>

@@ -55,9 +55,9 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-white dark:bg-zinc-950 rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-zinc-200 dark:border-zinc-800">
-        <div className="flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-900">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+      <div className="bg-brand-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-brand-outline-variant">
+        <div className="flex items-center justify-between p-4 border-b border-brand-outline-variant">
+          <h2 className="text-lg font-bold text-brand-text-main">
             {t('send_ticket')}
           </h2>
           <button
@@ -82,7 +82,7 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
               )}
 
               <div className="space-y-1">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="text-sm font-medium text-brand-text-main">
                   {t('subject')}
                 </label>
                 <Input
@@ -95,7 +95,7 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="text-sm font-medium text-brand-text-main">
                   {t('message_label')}
                 </label>
                 <Textarea

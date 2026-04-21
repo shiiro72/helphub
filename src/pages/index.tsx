@@ -3,14 +3,16 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/atoms/Button';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { Heart, HandHelping, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/lib/hooks/useAuth';
 import { HelpRequest, HelpOffer } from '@/lib/types';
 import { RequestCard } from '@/components/molecules/RequestCard';
 import { OfferCard } from '@/components/molecules/OfferCard';
 
 export default function Home() {
   const t = useTranslations();
+  const { user } = useAuth();
   const [latestRequests, setLatestRequests] = useState<HelpRequest[]>([]);
   const [latestOffers, setLatestOffers] = useState<HelpOffer[]>([]);
   const [loading, setLoading] = useState(true);

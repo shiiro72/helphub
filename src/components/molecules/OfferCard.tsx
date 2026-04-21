@@ -50,10 +50,10 @@ export const OfferCard: React.FC<OfferCardProps> = ({
   );
 
   return (
-    <div className={`rounded-xl border p-5 shadow-sm hover:shadow-md transition-all flex flex-col h-full ${
+    <div className={`rounded-2xl border p-5 shadow-ambient hover:shadow-lg transition-all flex flex-col h-full ${
       isMatch
-        ? 'bg-yellow-50/50 border-yellow-200'
-        : 'bg-brand-surface border-brand-border'
+        ? 'bg-brand-secondary-container/10 border-brand-secondary-container'
+        : 'bg-brand-surface-container-lowest border-brand-outline-variant'
     }`}>
       <div className="flex justify-between items-start mb-4">
         <div className="flex-grow min-w-0">
@@ -96,7 +96,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
           <Highlight text={offer.content} query={searchQuery} />
         </p>
         {offer.reward_offer && (
-          <div className="mt-2 text-xs font-medium text-brand-text-main bg-brand-secondary px-2 py-1 rounded w-fit">
+          <div className="mt-2 text-xs font-bold text-brand-on-secondary bg-brand-secondary px-2 py-1 rounded w-fit">
             Reward: {offer.reward_offer}
           </div>
         )}

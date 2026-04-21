@@ -1,32 +1,57 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F9F7F5;
-  --foreground: #2C2C2C;
+  --background: #fbf8ff;
+  --foreground: #161a32;
 
-  --brand-background: #F9F7F5;
-  --brand-surface: #FFFFFF;
-  --brand-primary: #8BA88A;
-  --brand-secondary: #F2C6B6;
-  --brand-text-main: #2C2C2C;
-  --brand-text-secondary: #6B6B6B;
-  --brand-border: #E5E2DF;
-  --brand-error: #D97A7A;
-  --brand-success: #8BA88A;
+  --brand-background: #fbf8ff;
+  --brand-surface: #fbf8ff;
+  --brand-surface-dim: #d5d8f9;
+  --brand-surface-bright: #fbf8ff;
+  --brand-surface-container-lowest: #ffffff;
+  --brand-surface-container-low: #f4f2ff;
+  --brand-surface-container: #ececff;
+  --brand-surface-container-high: #e5e6ff;
+  --brand-surface-container-highest: #dee0ff;
+  --brand-on-surface: #161a32;
+  --brand-on-surface-variant: #404943;
+  --brand-outline: #707973;
+  --brand-outline-variant: #bfc9c1;
+  --brand-primary: #0f5238;
+  --brand-on-primary: #ffffff;
+  --brand-primary-container: #2d6a4f;
+  --brand-on-primary-container: #a8e7c5;
+  --brand-secondary: #895100;
+  --brand-on-secondary: #ffffff;
+  --brand-secondary-container: #fd9d1a;
+  --brand-on-secondary-container: #663b00;
+  --brand-tertiary: #3e4947;
+  --brand-on-tertiary: #ffffff;
+  --brand-tertiary-container: #56615f;
+  --brand-on-tertiary-container: #d0dcd9;
+  --brand-error: #ba1a1a;
+  --brand-on-error: #ffffff;
+  --brand-error-container: #ffdad6;
+  --brand-on-error-container: #93000a;
 
-  --link: #8BA88A;
-  --link-hover: #7A9779;
+  --brand-text-main: #161a32;
+  --brand-text-secondary: #404943;
+  --brand-border: #bfc9c1;
+  --brand-success: #0f5238;
 
-  --chat-bg: #F9F7F5;
-  --chat-header: #FFFFFF;
-  --chat-sidebar: #FFFFFF;
-  --chat-input: #FFFFFF;
-  --chat-bubble-sent: #E8F0E7;
-  --chat-bubble-received: #FFFFFF;
-  --chat-item-hover: #F0EDE9;
-  --chat-item-active: #E5E2DF;
-  --chat-menu-bg: #FFFFFF;
-  --chat-menu-hover: #F9F7F5;
+  --link: #0f5238;
+  --link-hover: #2d6a4f;
+
+  --chat-bg: #fbf8ff;
+  --chat-header: #ffffff;
+  --chat-sidebar: #ffffff;
+  --chat-input: #ffffff;
+  --chat-bubble-sent: #a8e7c5;
+  --chat-bubble-received: #ececff;
+  --chat-item-hover: #f4f2ff;
+  --chat-item-active: #ececff;
+  --chat-menu-bg: #ffffff;
+  --chat-menu-hover: #fbf8ff;
 }
 
 @theme inline {
@@ -35,12 +60,37 @@
 
   --color-brand-background: var(--brand-background);
   --color-brand-surface: var(--brand-surface);
+  --color-brand-surface-dim: var(--brand-surface-dim);
+  --color-brand-surface-bright: var(--brand-surface-bright);
+  --color-brand-surface-container-lowest: var(--brand-surface-container-lowest);
+  --color-brand-surface-container-low: var(--brand-surface-container-low);
+  --color-brand-surface-container: var(--brand-surface-container);
+  --color-brand-surface-container-high: var(--brand-surface-container-high);
+  --color-brand-surface-container-highest: var(--brand-surface-container-highest);
+  --color-brand-on-surface: var(--brand-on-surface);
+  --color-brand-on-surface-variant: var(--brand-on-surface-variant);
+  --color-brand-outline: var(--brand-outline);
+  --color-brand-outline-variant: var(--brand-outline-variant);
   --color-brand-primary: var(--brand-primary);
+  --color-brand-on-primary: var(--brand-on-primary);
+  --color-brand-primary-container: var(--brand-primary-container);
+  --color-brand-on-primary-container: var(--brand-on-primary-container);
   --color-brand-secondary: var(--brand-secondary);
+  --color-brand-on-secondary: var(--brand-on-secondary);
+  --color-brand-secondary-container: var(--brand-secondary-container);
+  --color-brand-on-secondary-container: var(--brand-on-secondary-container);
+  --color-brand-tertiary: var(--brand-tertiary);
+  --color-brand-on-tertiary: var(--brand-on-tertiary);
+  --color-brand-tertiary-container: var(--brand-tertiary-container);
+  --color-brand-on-tertiary-container: var(--brand-on-tertiary-container);
+  --color-brand-error: var(--brand-error);
+  --color-brand-on-error: var(--brand-on-error);
+  --color-brand-error-container: var(--brand-error-container);
+  --color-brand-on-error-container: var(--brand-on-error-container);
+
   --color-brand-text-main: var(--brand-text-main);
   --color-brand-text-secondary: var(--brand-text-secondary);
   --color-brand-border: var(--brand-border);
-  --color-brand-error: var(--brand-error);
   --color-brand-success: var(--brand-success);
 
   --color-link: var(--link);
@@ -57,18 +107,33 @@
   --color-chat-menu-bg: var(--chat-menu-bg);
   --color-chat-menu-hover: var(--chat-menu-hover);
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-be-vietnam), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 3rem;
+  --spacing-xl: 5rem;
 }
 
 body {
   background: var(--brand-background);
   color: var(--brand-text-main);
-  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  font-family: var(--font-be-vietnam), Arial, Helvetica, sans-serif;
+  line-height: 1.6;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-fredoka), sans-serif;
+  font-family: var(--font-plus-jakarta), sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 a {
@@ -86,4 +151,8 @@ button {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+.shadow-ambient {
+  box-shadow: 0 4px 16px rgba(22, 26, 50, 0.1);
 }
