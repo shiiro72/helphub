@@ -46,23 +46,23 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
         />
       </svg>
 
-      {/* Browse Offers (Top Section) */}
+      {/* Browse Requests (Top Section) */}
       <div className="absolute top-0 left-0 w-full h-[60%] pt-8 px-12">
         <div className="flex items-center gap-3 mb-8">
-          <Heart className="text-brand-secondary w-10 h-10 fill-brand-secondary" />
+          <HandHelping className="text-brand-primary w-10 h-10" />
           <h2 className="text-4xl font-bold tracking-tight text-brand-text-main">
-            {t('browse_offers')}
+            {t('browse_requests')}
           </h2>
         </div>
 
         <div className="flex items-start gap-6 max-w-[1300px] mx-auto">
-          {offers.length > 0 ? (
-            offers.slice(0, 2).map((offer, index) => {
+          {requests.length > 0 ? (
+            requests.slice(0, 2).map((request, index) => {
               const scale = 1 - index * 0.2;
               const opacity = 1 - index * 0.15;
               return (
                 <div
-                  key={offer.id}
+                  key={request.id}
                   className="w-80 flex-shrink-0 transition-all duration-300 hover:z-20 relative"
                   style={{
                     transform: `scale(${scale})`,
@@ -70,19 +70,19 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
                     opacity: opacity,
                   }}
                 >
-                  <OfferCard offer={offer} />
+                  <RequestCard request={request} />
                 </div>
               );
             })
           ) : (
             <div className="flex items-center justify-center h-64 w-80 bg-brand-surface rounded-2xl border border-dashed border-brand-border text-brand-text-secondary font-medium">
-              {t('no_offers')}
+              {t('no_requests')}
             </div>
           )}
 
           <div className="flex flex-col justify-start pt-20 ml-4">
-            <Link href="/offers">
-              <Button variant="ghost" className="group gap-2 text-brand-secondary font-bold text-lg hover:bg-brand-secondary/10">
+            <Link href="/requests">
+              <Button variant="ghost" className="group gap-2 text-brand-primary font-bold text-lg hover:bg-brand-primary/10">
                 {t('learn_more')}
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -91,35 +91,35 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
         </div>
       </div>
 
-      {/* Browse Requests (Bottom Section) */}
+      {/* Browse Offers (Bottom Section) */}
       <div className="absolute bottom-0 left-0 w-full h-[60%] pb-8 px-12 flex flex-col items-end justify-end">
         <div className="flex items-center gap-3 mb-8 mr-12">
           <h2 className="text-4xl font-bold tracking-tight text-brand-text-main">
-            {t('browse_requests')}
+            {t('browse_offers')}
           </h2>
-          <HandHelping className="text-brand-primary w-10 h-10" />
+          <Heart className="text-brand-secondary w-10 h-10 fill-brand-secondary" />
         </div>
 
         <div className="flex items-end gap-6 max-w-[1300px] mx-auto justify-end w-full">
           <div className="flex flex-col justify-end pb-20 mr-4">
-            <Link href="/requests">
-              <Button variant="ghost" className="group gap-2 text-brand-primary font-bold text-lg hover:bg-brand-primary/10">
+            <Link href="/offers">
+              <Button variant="ghost" className="group gap-2 text-brand-secondary font-bold text-lg hover:bg-brand-secondary/10">
                 <ArrowRight size={20} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
                 {t('learn_more')}
               </Button>
             </Link>
           </div>
 
-          {requests.length > 0 ? (
-            requests
+          {offers.length > 0 ? (
+            offers
               .slice(0, 2)
               .reverse()
-              .map((request, index) => {
+              .map((offer, index) => {
                 const scale = 0.8 + index * 0.2;
                 const opacity = 0.85 + index * 0.15;
                 return (
                   <div
-                    key={request.id}
+                    key={offer.id}
                     className="w-80 flex-shrink-0 transition-all duration-300 hover:z-20 relative"
                     style={{
                       transform: `scale(${scale})`,
@@ -127,13 +127,13 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
                       opacity: opacity,
                     }}
                   >
-                    <RequestCard request={request} />
+                    <OfferCard offer={offer} />
                   </div>
                 );
               })
           ) : (
             <div className="flex items-center justify-center h-64 w-80 bg-brand-surface rounded-2xl border border-dashed border-brand-border text-brand-text-secondary font-medium">
-              {t('no_requests')}
+              {t('no_offers')}
             </div>
           )}
         </div>
