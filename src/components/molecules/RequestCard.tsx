@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import {
   MapPin,
-  Calendar,
   User,
   MessageSquare,
   Clock,
   Edit2,
   Trash2,
-  UserPlus,
   Users,
   Loader2,
+  Hand,
 } from 'lucide-react';
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
@@ -123,7 +122,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
                 {isVolunteerLoading ? (
                   <Loader2 size={18} className="animate-spin" />
                 ) : (
-                  <UserPlus size={18} />
+                  <Hand size={18} />
                 )}
                 <span className="text-xs font-bold">
                   {confirmedCount}
@@ -190,7 +189,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
         <div className="flex items-center">
           <div className="flex items-center text-xs text-brand-text-secondary">
             <MapPin size={14} className="mr-1 shrink-0" />
-            <span className="truncate max-w-45">
+            <span className="truncate max-w-56">
               {request.address ? `${request.address}, ` : ''}
               {request.city ? (
                 <>
