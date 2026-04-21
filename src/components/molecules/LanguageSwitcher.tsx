@@ -21,12 +21,12 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   if (variant === 'mobile') {
     return (
-      <div className="flex items-center gap-2 px-2 py-2 border-t border-zinc-100 dark:border-zinc-900">
-        <Languages size={18} className="text-zinc-500" />
+      <div className="flex items-center gap-2 px-2 py-2 border-t border-brand-border">
+        <Languages size={18} className="text-brand-text-secondary" />
         <select
           value={locale}
           onChange={handleChange}
-          className="bg-transparent text-sm font-medium focus:outline-none cursor-pointer text-zinc-700 dark:text-zinc-300"
+          className="bg-transparent text-sm font-medium focus:outline-none cursor-pointer text-brand-text-main"
         >
           <option value="en">English</option>
           <option value="ro">Română</option>
@@ -37,11 +37,11 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   return (
     <div className="flex items-center gap-2 mr-2">
-      <Languages size={18} className="text-zinc-500" />
+      <Languages size={18} className="text-brand-text-secondary" />
       <select
         value={locale}
         onChange={handleChange}
-        className="bg-transparent text-sm font-medium focus:outline-none cursor-pointer text-zinc-700 dark:text-zinc-300"
+        className="bg-transparent text-sm font-medium focus:outline-none cursor-pointer text-brand-text-main"
       >
         <option value="en">EN</option>
         <option value="ro">RO</option>
