@@ -52,6 +52,12 @@
   --chat-item-active: #ececff;
   --chat-menu-bg: #ffffff;
   --chat-menu-hover: #fbf8ff;
+
+  --radius-sm: 0.25rem;
+  --radius-default: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
 }
 
 @theme inline {
@@ -110,11 +116,16 @@
   --font-sans: var(--font-be-vietnam), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
 
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.75rem;
-  --spacing-md: 1.5rem;
-  --spacing-lg: 3rem;
-  --spacing-xl: 5rem;
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --spacing-brand-xs: 0.25rem;
+  --spacing-brand-sm: 0.75rem;
+  --spacing-brand-md: 1.5rem;
+  --spacing-brand-lg: 3rem;
+  --spacing-brand-xl: 5rem;
 }
 
 body {
