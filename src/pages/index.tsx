@@ -50,9 +50,9 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-6 pt-4 pb-10">
         <div className="space-y-12">
           {/* Desktop View: Triangular Board */}
-          {!loading && (latestRequests.length > 0 || latestOffers.length > 0) && (
-            <TriangularBoard requests={latestRequests} offers={latestOffers} />
-          )}
+          <div className="hidden md:block">
+            <TriangularBoard requests={latestRequests} offers={latestOffers} loading={loading} />
+          </div>
 
           {/* Mobile View: Traditional Grids */}
           <div className="md:hidden space-y-16">
