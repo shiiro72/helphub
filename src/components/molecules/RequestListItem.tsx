@@ -6,7 +6,7 @@ import {
   Clock,
   Edit2,
   Trash2,
-  UserPlus,
+  Hand,
   Users,
   Loader2,
 } from 'lucide-react';
@@ -178,7 +178,7 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
               {isVolunteerLoading ? (
                 <Loader2 size={18} className="animate-spin" />
               ) : (
-                <UserPlus size={18} />
+                <Hand size={18} />
               )}
               <span className="text-[10px] font-bold">
                 {confirmedCount}

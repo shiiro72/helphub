@@ -130,7 +130,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center text-xs text-brand-text-secondary">
             <MapPin size={14} className="mr-1 shrink-0" />
-            <span className="truncate max-w-45">
+            <span className="truncate max-w-56">
               {offer.address ? `${offer.address}, ` : ''}
               {offer.city ? (
                 <>
