@@ -73,10 +73,10 @@ export const RequestCard: React.FC<RequestCardProps> = ({
 
   return (
     <div
-      className={`rounded-xl border p-5 shadow-sm hover:shadow-md transition-all flex flex-col h-full ${
+      className={`rounded-2xl border p-5 shadow-ambient hover:shadow-lg transition-all flex flex-col h-full ${
         isMatch
-          ? 'bg-yellow-50/50 border-yellow-200'
-          : 'bg-brand-surface border-brand-border'
+          ? 'bg-brand-secondary-container/10 border-brand-secondary-container'
+          : 'bg-brand-surface-container-lowest border-brand-outline-variant'
       }`}
     >
       <div className="flex justify-between items-start mb-4">

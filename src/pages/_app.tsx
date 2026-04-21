@@ -2,16 +2,17 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { NextIntlClientProvider } from 'next-intl';
 import { useRouter } from 'next/router';
-import { Fredoka, Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans, Be_Vietnam_Pro } from 'next/font/google';
 
-const fredoka = Fredoka({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  variable: '--font-fredoka',
+  variable: '--font-plus-jakarta',
 });
 
-const inter = Inter({
+const beVietnamPro = Be_Vietnam_Pro({
   subsets: ['latin'],
-  variable: '--font-inter',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-be-vietnam',
 });
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -22,7 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
       locale={router.locale || 'en'}
       messages={pageProps.messages}
     >
-      <div className={`${fredoka.variable} ${inter.variable} font-sans`}>
+      <div className={`${plusJakartaSans.variable} ${beVietnamPro.variable} font-sans`}>
         <Component {...pageProps} />
       </div>
     </NextIntlClientProvider>
