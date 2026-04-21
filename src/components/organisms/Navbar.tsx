@@ -48,7 +48,7 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-black/80 backdrop-blur-md sticky top-0 z-50">
+      <nav className="border-b border-brand-border bg-brand-surface/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-8">
@@ -77,15 +77,15 @@ export function Navbar() {
               <LanguageSwitcher variant="desktop" />
               {user ? (
                 <>
-                  <div className="flex items-center gap-2 mr-4 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <div className="flex items-center gap-2 mr-4 text-sm font-medium text-brand-text-secondary">
                     <button
                       onClick={() => setIsSettingsOpen(true)}
-                      className="flex items-center gap-2 hover:text-black dark:hover:text-white transition-colors"
+                      className="flex items-center gap-2 hover:text-brand-text-main transition-colors"
                     >
                       <User size={18} />
                       <span className="flex items-center gap-1">
                         {profile?.username || user.user_metadata?.full_name || user.email}
-                        <VerificationBadge isVerified={profile?.is_verified} size={14} />
+                        <VerificationBadge isVerified={profile?.is_verified} size={14} className="text-brand-primary" />
                       </span>
                     </button>
                   </div>
@@ -118,7 +118,7 @@ export function Navbar() {
             <div className="md:hidden flex items-center">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                className="text-brand-text-secondary hover:text-brand-text-main"
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -128,7 +128,7 @@ export function Navbar() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-zinc-200 dark:border-zinc-800 p-4 space-y-3 bg-white dark:bg-black">
+          <div className="md:hidden border-t border-brand-border p-4 space-y-3 bg-brand-surface">
             <NavLink href="/requests" mobile onClick={() => setIsMenuOpen(false)}>
               {t('browse_requests')}
             </NavLink>
@@ -167,12 +167,12 @@ export function Navbar() {
                     setIsSettingsOpen(true);
                     setIsMenuOpen(false);
                   }}
-                  className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors"
+                  className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-brand-text-secondary hover:text-brand-text-main transition-colors"
                 >
                   <User size={18} />
                   <span className="flex items-center gap-1">
                     {profile?.username || user.user_metadata?.full_name || user.email}
-                    <VerificationBadge isVerified={profile?.is_verified} size={14} />
+                    <VerificationBadge isVerified={profile?.is_verified} size={14} className="text-brand-primary" />
                   </span>
                 </button>
                 <Button

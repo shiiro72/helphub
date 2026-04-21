@@ -1,5 +1,4 @@
 import { Navbar } from '@/components/organisms/Navbar';
-import { Geist, Geist_Mono } from 'next/font/google';
 import { useTranslations } from 'next-intl';
 import { GetStaticProps } from 'next';
 import React, { useState, useEffect } from 'react';
@@ -13,16 +12,6 @@ import { OfferListItem } from '@/components/molecules/OfferListItem';
 import { HelpRequest, HelpOffer } from '@/lib/types';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter } from 'next/router';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 type ArchivedItem = (HelpRequest | HelpOffer) & { type: 'request' | 'offer' };
 
@@ -82,12 +71,10 @@ export default function ArchivePage() {
 
   if (authLoading || (!user && typeof window !== 'undefined')) {
     return (
-      <div
-        className={`${geistSans.className} ${geistMono.className} min-h-screen bg-zinc-50 dark:bg-black font-sans`}
-      >
+      <div className="min-h-screen bg-brand-background">
         <Navbar />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-          <p className="text-zinc-500">{t('processing')}</p>
+          <p className="text-brand-text-secondary">{t('processing')}</p>
         </main>
       </div>
     );
@@ -100,25 +87,23 @@ export default function ArchivePage() {
   );
 
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} min-h-screen bg-zinc-50 dark:bg-black font-sans`}
-    >
+    <div className="min-h-screen bg-brand-background">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-brand-text-main tracking-tight flex items-center gap-3">
             <Archive size={32} />
             {t('archive_title')}
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 mt-2">{t('archive_description')}</p>
+          <p className="text-brand-text-secondary mt-2">{t('archive_description')}</p>
         </div>
 
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="relative flex-grow max-w-md">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-text-secondary"
                 size={18}
               />
               <Input
@@ -129,13 +114,13 @@ export default function ArchivePage() {
               />
             </div>
 
-            <div className="flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
+            <div className="flex items-center gap-2 bg-brand-border/30 p-1 rounded-lg">
               <button
                 onClick={() => setView('grid')}
                 className={`p-2 rounded-md transition-all ${
                   view === 'grid'
-                    ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                    ? 'bg-brand-surface shadow-sm text-brand-text-main'
+                    : 'text-brand-text-secondary hover:text-brand-text-main'
                 }`}
                 title="Grid view"
               >
@@ -145,8 +130,8 @@ export default function ArchivePage() {
                 onClick={() => setView('list')}
                 className={`p-2 rounded-md transition-all ${
                   view === 'list'
-                    ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                    ? 'bg-brand-surface shadow-sm text-brand-text-main'
+                    : 'text-brand-text-secondary hover:text-brand-text-main'
                 }`}
                 title="List view"
               >
@@ -160,7 +145,7 @@ export default function ArchivePage() {
               {[...Array(6)].map((_, i) => (
                 <div
                   key={i}
-                  className="h-48 rounded-xl bg-zinc-100 dark:bg-zinc-800 animate-pulse"
+                  className="h-48 rounded-xl bg-brand-surface animate-pulse"
                 />
               ))}
             </div>
@@ -189,8 +174,8 @@ export default function ArchivePage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-20 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
-              <p className="text-zinc-500 dark:text-zinc-400">{t('no_archived_items')}</p>
+            <div className="text-center py-20 border-2 border-dashed border-brand-border rounded-2xl">
+              <p className="text-brand-text-secondary">{t('no_archived_items')}</p>
             </div>
           )}
         </div>

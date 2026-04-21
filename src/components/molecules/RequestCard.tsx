@@ -75,13 +75,13 @@ export const RequestCard: React.FC<RequestCardProps> = ({
     <div
       className={`rounded-xl border p-5 shadow-sm hover:shadow-md transition-all flex flex-col h-full ${
         isMatch
-          ? 'bg-yellow-50/50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800'
-          : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800'
+          ? 'bg-yellow-50/50 border-yellow-200'
+          : 'bg-brand-surface border-brand-border'
       }`}
     >
       <div className="flex justify-between items-start mb-4">
         <div className="flex-grow min-w-0">
-          <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">
+          <h3 className="text-lg font-bold text-brand-text-main line-clamp-1">
             <Highlight text={request.title} query={searchQuery} />
           </h3>
         </div>
@@ -112,10 +112,10 @@ export const RequestCard: React.FC<RequestCardProps> = ({
                   isVolunteering
                     ? volunteerStatus === 'waitlisted'
                       ? 'bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100'
-                      : 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100'
+                      : 'bg-brand-primary/10 border-brand-primary text-brand-primary hover:bg-brand-primary/20'
                     : confirmedCount >= (request.max_volunteers || Infinity)
                       ? 'bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100'
-                      : 'bg-zinc-50 border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:border-blue-300 hover:text-blue-600'
+                      : 'bg-brand-background border-brand-border text-brand-text-secondary hover:bg-brand-primary/10 hover:border-brand-primary hover:text-brand-primary'
                 }`}
                 title={
                   isVolunteering
@@ -152,27 +152,27 @@ export const RequestCard: React.FC<RequestCardProps> = ({
       </div>
 
       <div className="flex-grow mb-6">
-        <p className="text-zinc-600 dark:text-zinc-400 text-sm line-clamp-3">
+        <p className="text-brand-text-secondary text-sm line-clamp-3">
           <Highlight text={request.content} query={searchQuery} />
         </p>
         {request.reward_offer && (
-          <div className="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded w-fit">
+          <div className="mt-2 text-xs font-medium text-brand-text-main bg-brand-secondary px-2 py-1 rounded w-fit">
             Reward: {request.reward_offer}
           </div>
         )}
       </div>
 
-      <div className="space-y-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+      <div className="space-y-3 pt-4 border-t border-brand-border">
         <div className="flex items-center justify-between">
-          <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center text-xs text-brand-text-secondary">
             <User size={14} className="mr-2" />
-            <span className="font-medium mr-1 text-zinc-700 dark:text-zinc-300">
+            <span className="font-medium mr-1 text-brand-text-main">
               {request.profiles?.username || 'Anonymous'}
             </span>
             <VerificationBadge
               isVerified={request.profiles?.is_verified}
               size={12}
-              className="text-blue-500 ml-1"
+              className="text-brand-primary ml-1"
             />
           </div>
           <StarRating
@@ -184,16 +184,16 @@ export const RequestCard: React.FC<RequestCardProps> = ({
         </div>
 
         {startStr && (
-          <div className="flex items-center text-[11px] text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center text-[11px] text-brand-text-secondary">
             <Clock size={12} className="mr-1.5" />
-            <span className="font-medium text-zinc-700 dark:text-zinc-300">
+            <span className="font-medium text-brand-text-main">
               {startStr} {endStr ? `— ${endStr}` : ''}
             </span>
           </div>
         )}
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center text-xs text-brand-text-secondary">
             <MapPin size={14} className="mr-1 flex-shrink-0" />
             <span className="truncate max-w-[180px]">
               {request.address ? `${request.address}, ` : ''}
@@ -208,7 +208,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
               )}
             </span>
           </div>
-          <div className="flex items-center text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center text-xs text-brand-text-secondary">
             <Calendar size={14} className="mr-1" />
             <span>{date}</span>
           </div>
@@ -217,7 +217,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
         {isOwner && (
           <button
             onClick={() => setShowVolunteerModal(true)}
-            className="w-full mt-2 py-2 flex items-center justify-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors border border-blue-200 dark:border-blue-800"
+            className="w-full mt-2 py-2 flex items-center justify-center gap-2 text-xs font-bold text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-colors border border-brand-primary"
           >
             <Users size={14} />
             {t('manage_volunteers')} ({confirmedCount})
@@ -231,7 +231,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
           role="dialog"
           aria-modal="true"
         >
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md shadow-2xl p-6">
+          <div className="bg-brand-surface rounded-2xl w-full max-w-md shadow-2xl p-6">
             <VolunteerList
               request={{ ...request, confirmed_count: confirmedCount }}
               onClose={() => setShowVolunteerModal(false)}
