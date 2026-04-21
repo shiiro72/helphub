@@ -154,10 +154,3 @@ export const Default: Story = {
     offers: mockOffers,
   },
 };
-
-export const Empty: Story = {
-  args: {
-    requests: [],
-    offers: [],
-  },
-};
