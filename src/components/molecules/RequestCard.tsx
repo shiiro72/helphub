@@ -156,7 +156,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
           <Highlight text={request.content} query={searchQuery} />
         </p>
         {request.reward_offer && (
-          <div className="mt-2 text-xs font-medium text-brand-text-main bg-brand-secondary px-2 py-1 rounded w-fit">
+          <div className="mt-2 text-xs font-bold text-brand-on-secondary bg-brand-secondary px-2 py-1 rounded w-fit">
             Reward: {request.reward_offer}
           </div>
         )}

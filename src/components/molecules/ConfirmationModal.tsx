@@ -57,7 +57,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </Button>
             <Button
               type="button"
-              className={`flex-1 ${variant === 'danger' ? 'bg-brand-error hover:opacity-90 text-white' : ''}`}
+              className={`flex-1 ${variant === 'danger' ? 'bg-brand-error hover:opacity-90 text-brand-on-error' : ''}`}
               onClick={onConfirm}
               disabled={isLoading}
             >
