@@ -59,12 +59,12 @@ export function AuthForm({ mode }: AuthFormProps) {
   };
 
   return (
-    <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800">
+    <div className="w-full max-w-md p-8 space-y-6 bg-brand-surface-container-lowest rounded-2xl shadow-lg border border-brand-outline-variant">
       <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight">
+        <h1 className="text-2xl font-bold tracking-tight text-brand-text-main">
           {mode === 'login' ? t('welcome_back') : t('create_account')}
         </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="text-sm text-brand-text-secondary">
           {mode === 'login' ? t('login_description') : t('register_description')}
         </p>
       </div>
@@ -125,10 +125,10 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-zinc-200 dark:border-zinc-800" />
+          <span className="w-full border-t border-brand-outline-variant" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white dark:bg-zinc-900 px-2 text-zinc-500">
+          <span className="bg-brand-surface-container-lowest px-2 text-brand-text-secondary">
             {t('or_continue_with')}
           </span>
         </div>
@@ -158,21 +158,21 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <div className="text-center text-sm">
         {mode === 'login' ? (
-          <p className="text-zinc-500">
+          <p className="text-brand-text-secondary">
             {t('no_account')}{' '}
             <Link
               href="/register"
-              className="text-black dark:text-white font-semibold hover:underline"
+              className="text-brand-text-main font-semibold hover:underline"
             >
               {t('sign_up')}
             </Link>
           </p>
         ) : (
-          <p className="text-zinc-500">
+          <p className="text-brand-text-secondary">
             {t('have_account')}{' '}
             <Link
               href="/login"
-              className="text-black dark:text-white font-semibold hover:underline"
+              className="text-brand-text-main font-semibold hover:underline"
             >
               {t('sign_in')}
             </Link>

@@ -188,8 +188,8 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
       role="dialog"
       aria-modal="true"
     >
-      <div className="bg-brand-surface border border-brand-border rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden mb-8">
-        <div className="flex items-center justify-between p-6 border-b border-brand-border">
+      <div className="bg-brand-surface-container-lowest border border-brand-outline-variant rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden mb-8">
+        <div className="flex items-center justify-between p-6 border-b border-brand-outline-variant">
           <h2 className="text-xl font-bold text-brand-text-main">
             {initialData
               ? isRequest

@@ -46,50 +46,8 @@ export default function Home() {
     <div className="min-h-screen bg-brand-background">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-6 py-20">
-        <div className="text-center space-y-6">
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-brand-text-main">
-            {t('welcome_main')} <br />
-            <span className="text-brand-text-secondary">{t('welcome_meets')}</span>
-          </h1>
-          <p className="text-xl text-brand-text-secondary max-w-2xl mx-auto">
-            {t('hero_description')}
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            {user ? (
-              <>
-                <Link href="/requests">
-                  <Button size="lg" className="gap-2 w-full sm:w-auto">
-                    <HandHelping size={20} />
-                    {t('ask_for_help')}
-                  </Button>
-                </Link>
-                <Link href="/offers">
-                  <Button variant="outline" size="lg" className="gap-2 w-full sm:w-auto">
-                    <Heart size={20} />
-                    {t('offer_help')}
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/register">
-                  <Button size="lg" className="w-full sm:w-auto">
-                    {t('get_started')}
-                  </Button>
-                </Link>
-                <Link href="/login">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                    {t('learn_more')}
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-32 space-y-20">
+      <main className="max-w-4xl mx-auto px-6 py-10">
+        <div className="space-y-20">
           {/* Latest Requests Section */}
           <section className="space-y-8">
             <div className="flex items-center justify-between">
@@ -155,17 +113,6 @@ export default function Home() {
               </p>
             )}
           </section>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-10 border-t border-brand-border">
-            <div className="p-6 bg-brand-surface rounded-2xl border border-brand-border">
-              <h3 className="text-lg font-bold mb-2">{t('request_help_title')}</h3>
-              <p className="text-brand-text-secondary text-sm">{t('request_help_desc')}</p>
-            </div>
-            <div className="p-6 bg-brand-surface rounded-2xl border border-brand-border">
-              <h3 className="text-lg font-bold mb-2">{t('build_community_title')}</h3>
-              <p className="text-brand-text-secondary text-sm">{t('build_community_desc')}</p>
-            </div>
-          </div>
         </div>
       </main>
     </div>
