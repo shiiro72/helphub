@@ -29,8 +29,8 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-brand-surface rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-brand-border">
+      <div className="bg-brand-surface-container-lowest rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-brand-outline-variant">
+        <div className="flex items-center justify-between p-6 border-b border-brand-outline-variant">
           <div className="flex items-center gap-2">
             {variant === 'danger' && <AlertTriangle className="text-brand-error" size={20} />}
             <h2 className="text-xl font-bold text-brand-text-main">{title}</h2>
@@ -57,7 +57,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </Button>
             <Button
               type="button"
-              className={`flex-1 ${variant === 'danger' ? 'bg-brand-error hover:opacity-90 text-white' : ''}`}
+              className={`flex-1 ${variant === 'danger' ? 'bg-brand-error hover:opacity-90 text-brand-on-error' : ''}`}
               onClick={onConfirm}
               disabled={isLoading}
             >

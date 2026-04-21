@@ -73,10 +73,10 @@ export const RequestCard: React.FC<RequestCardProps> = ({
 
   return (
     <div
-      className={`rounded-xl border p-5 shadow-sm hover:shadow-md transition-all flex flex-col h-full ${
+      className={`rounded-2xl border p-5 shadow-ambient hover:shadow-lg transition-all flex flex-col h-full ${
         isMatch
-          ? 'bg-yellow-50/50 border-yellow-200'
-          : 'bg-brand-surface border-brand-border'
+          ? 'bg-brand-secondary-container/10 border-brand-secondary-container'
+          : 'bg-brand-surface-container-lowest border-brand-outline-variant'
       }`}
     >
       <div className="flex justify-between items-start mb-4">
@@ -156,7 +156,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
           <Highlight text={request.content} query={searchQuery} />
         </p>
         {request.reward_offer && (
-          <div className="mt-2 text-xs font-medium text-brand-text-main bg-brand-secondary px-2 py-1 rounded w-fit">
+          <div className="mt-2 text-xs font-bold text-brand-on-secondary bg-brand-secondary px-2 py-1 rounded w-fit">
             Reward: {request.reward_offer}
           </div>
         )}
