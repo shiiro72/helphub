@@ -44,24 +44,30 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
         </div>
 
         <div className="flex items-start gap-4 h-full max-w-[1200px] mx-auto">
-          {requests.slice(0, 3).map((request, index) => {
-            // index 0: 1.0, index 1: 0.8, index 2: 0.6
-            const scale = 1 - index * 0.2;
-            const opacity = 1 - index * 0.15;
-            return (
-              <div
-                key={request.id}
-                className="w-80 flex-shrink-0 transition-all duration-300 hover:z-20 relative"
-                style={{
-                  transform: `scale(${scale})`,
-                  transformOrigin: 'left top',
-                  opacity: opacity,
-                }}
-              >
-                <RequestCard request={request} />
-              </div>
-            );
-          })}
+          {requests.length > 0 ? (
+            requests.slice(0, 3).map((request, index) => {
+              // index 0: 1.0, index 1: 0.8, index 2: 0.6
+              const scale = 1 - index * 0.2;
+              const opacity = 1 - index * 0.15;
+              return (
+                <div
+                  key={request.id}
+                  className="w-80 flex-shrink-0 transition-all duration-300 hover:z-20 relative"
+                  style={{
+                    transform: `scale(${scale})`,
+                    transformOrigin: 'left top',
+                    opacity: opacity,
+                  }}
+                >
+                  <RequestCard request={request} />
+                </div>
+              );
+            })
+          ) : (
+            <div className="flex items-center justify-center h-64 w-80 bg-brand-surface rounded-2xl border border-dashed border-brand-border text-brand-text-secondary font-medium">
+              {t('no_requests')}
+            </div>
+          )}
 
           <div className="flex flex-col justify-start pt-12">
             <Link href="/requests">
@@ -86,24 +92,33 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
             </Link>
           </div>
 
-          {offers.slice(0, 3).reverse().map((offer, index) => {
-            // index 0: 0.6, index 1: 0.8, index 2: 1.0
-            const scale = 0.6 + index * 0.2;
-            const opacity = 0.7 + index * 0.15;
-            return (
-              <div
-                key={offer.id}
-                className="w-80 flex-shrink-0 transition-all duration-300 hover:z-20 relative"
-                style={{
-                  transform: `scale(${scale})`,
-                  transformOrigin: 'right bottom',
-                  opacity: opacity,
-                }}
-              >
-                <OfferCard offer={offer} />
-              </div>
-            );
-          })}
+          {offers.length > 0 ? (
+            offers
+              .slice(0, 3)
+              .reverse()
+              .map((offer, index) => {
+                // index 0: 0.6, index 1: 0.8, index 2: 1.0
+                const scale = 0.6 + index * 0.2;
+                const opacity = 0.7 + index * 0.15;
+                return (
+                  <div
+                    key={offer.id}
+                    className="w-80 flex-shrink-0 transition-all duration-300 hover:z-20 relative"
+                    style={{
+                      transform: `scale(${scale})`,
+                      transformOrigin: 'right bottom',
+                      opacity: opacity,
+                    }}
+                  >
+                    <OfferCard offer={offer} />
+                  </div>
+                );
+              })
+          ) : (
+            <div className="flex items-center justify-center h-64 w-80 bg-brand-surface rounded-2xl border border-dashed border-brand-border text-brand-text-secondary font-medium">
+              {t('no_offers')}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3 mt-12">
