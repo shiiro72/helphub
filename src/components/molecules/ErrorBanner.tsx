@@ -16,7 +16,7 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({ message, onDismiss, cl
       role="alert"
     >
       <AlertCircle size={18} className="shrink-0 mt-0.5" />
-      <div className="flex-grow">{message}</div>
+      <div className="grow">{message}</div>
       {onDismiss && (
         <button
           onClick={onDismiss}

@@ -47,11 +47,6 @@ export const RequestCard: React.FC<RequestCardProps> = ({
     isLoading: isVolunteerLoading,
     toggleVolunteer: handleVolunteerToggle,
   } = useVolunteer(request.id);
-  const date = new Date(request.date_posted).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
 
   const formatDatetime = (dt: string | null | undefined) => {
     if (!dt) return null;
@@ -80,7 +75,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
       }`}
     >
       <div className="flex justify-between items-start mb-4">
-        <div className="flex-grow min-w-0">
+        <div className="grow min-w-0">
           <h3 className="text-lg font-bold text-brand-text-main line-clamp-1">
             <Highlight text={request.title} query={searchQuery} />
           </h3>
@@ -151,7 +146,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
         </div>
       </div>
 
-      <div className="flex-grow mb-6">
+      <div className="grow mb-6">
         <p className="text-brand-text-secondary text-sm line-clamp-3">
           <Highlight text={request.content} query={searchQuery} />
         </p>
@@ -192,10 +187,10 @@ export const RequestCard: React.FC<RequestCardProps> = ({
           </div>
         )}
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <div className="flex items-center text-xs text-brand-text-secondary">
-            <MapPin size={14} className="mr-1 flex-shrink-0" />
-            <span className="truncate max-w-[180px]">
+            <MapPin size={14} className="mr-1 shrink-0" />
+            <span className="truncate max-w-45">
               {request.address ? `${request.address}, ` : ''}
               {request.city ? (
                 <>
@@ -207,10 +202,6 @@ export const RequestCard: React.FC<RequestCardProps> = ({
                 request.request_location || 'Remote'
               )}
             </span>
-          </div>
-          <div className="flex items-center text-xs text-brand-text-secondary">
-            <Calendar size={14} className="mr-1" />
-            <span>{date}</span>
           </div>
         </div>
 

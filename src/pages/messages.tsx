@@ -342,7 +342,7 @@ export default function MessagesPage() {
         <title>Messages | HelpHub</title>
       </Head>
       <Navbar />
-      <main className="flex-grow flex overflow-hidden w-full shadow-2xl">
+      <main className="grow flex overflow-hidden w-full shadow-2xl">
         <div className="w-full md:w-72 lg:w-80 border-r border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0">
           {invitations.length > 0 && (
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/50">
@@ -399,7 +399,7 @@ export default function MessagesPage() {
               </div>
             </div>
           )}
-          <div className="flex-grow overflow-hidden">
+          <div className="grow overflow-hidden">
             <ChatList
               conversations={conversations}
               activeId={activeConversation?.id}
@@ -408,7 +408,7 @@ export default function MessagesPage() {
             />
           </div>
         </div>
-        <div className="hidden md:flex flex-grow bg-chat-bg">
+        <div className="hidden md:flex grow bg-chat-bg">
           {activeConversation && user ? (
             <ChatWindow
               conversation={activeConversation}
@@ -445,7 +445,7 @@ export default function MessagesPage() {
               >
                 ← Back
               </button>
-              <div className="flex-grow overflow-hidden">
+              <div className="grow overflow-hidden">
                 <ChatWindow
                   conversation={activeConversation}
                   currentUserId={user.id}

@@ -101,7 +101,7 @@ export default function ArchivePage() {
 
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="relative flex-grow max-w-md">
+            <div className="relative grow max-w-md">
               <Search
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-text-secondary"
                 size={18}
@@ -143,10 +143,7 @@ export default function ArchivePage() {
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div
-                  key={i}
-                  className="h-48 rounded-xl bg-brand-surface animate-pulse"
-                />
+                <div key={i} className="h-48 rounded-xl bg-brand-surface animate-pulse" />
               ))}
             </div>
           ) : filteredItems.length > 0 ? (

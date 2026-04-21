@@ -21,11 +21,9 @@ export const ChatList: React.FC<ChatListProps> = ({
       <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-chat-header">
         <h2 className="text-xl font-bold">Chats</h2>
       </div>
-      <div className="flex-grow overflow-y-auto">
+      <div className="grow overflow-y-auto">
         {conversations.length === 0 ? (
-          <div className="p-8 text-center text-zinc-500">
-            No conversations yet.
-          </div>
+          <div className="p-8 text-center text-zinc-500">No conversations yet.</div>
         ) : (
           conversations.map((conv) => (
             <button
@@ -50,16 +48,21 @@ export const ChatList: React.FC<ChatListProps> = ({
                   )}
                 </div>
                 {!conv.is_group && onlineUsers?.has(conv.profiles?.id || '') && (
-                  <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-zinc-900 rounded-full" title="Online" />
+                  <div
+                    className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-zinc-900 rounded-full"
+                    title="Online"
+                  />
                 )}
               </div>
-              <div className="flex-grow text-left overflow-hidden">
+              <div className="grow text-left overflow-hidden">
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1 min-w-0">
                     <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                      {conv.is_group ? conv.title : (conv.profiles?.username || 'User')}
+                      {conv.is_group ? conv.title : conv.profiles?.username || 'User'}
                     </h3>
-                    {!conv.is_group && <VerificationBadge isVerified={conv.profiles?.is_verified} size={14} />}
+                    {!conv.is_group && (
+                      <VerificationBadge isVerified={conv.profiles?.is_verified} size={14} />
+                    )}
                   </div>
                   <span className="text-xs text-zinc-500">
                     {new Date(conv.last_message_at).toLocaleDateString([], {
@@ -68,9 +71,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                     })}
                   </span>
                 </div>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
-                  Click to chat
-                </p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">Click to chat</p>
               </div>
             </button>
           ))

@@ -17,14 +17,18 @@ export default function AdminPage() {
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
   const [flaggedUsers, setFlaggedUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'reports' | 'tickets' | 'banned' | 'flagged'>('reports');
+  const [activeTab, setActiveTab] = useState<'reports' | 'tickets' | 'banned' | 'flagged'>(
+    'reports',
+  );
   const [supabase] = useState(() => createClient());
 
   const fetchData = useCallback(async () => {
     setLoading(true);
 
     // Check if user is admin
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       router.push('/login');
       return;
@@ -44,20 +48,24 @@ export default function AdminPage() {
     // Fetch reports with profiles
     const { data: reportsData } = await supabase
       .from('reports')
-      .select(`
+      .select(
+        `
         *,
         reporter:profiles!reporter_id(*),
         reported:profiles!reported_id(*)
-      `)
+      `,
+      )
       .order('created_at', { ascending: false });
 
     // Fetch support tickets with profiles
     const { data: ticketsData } = await supabase
       .from('support_tickets')
-      .select(`
+      .select(
+        `
         *,
         profiles(*)
-      `)
+      `,
+      )
       .order('created_at', { ascending: false });
 
     // Fetch banned users
@@ -89,7 +97,7 @@ export default function AdminPage() {
 
     const { error } = await supabase.rpc('ban_user', {
       target_user_id: userId,
-      ban_reason: reason
+      ban_reason: reason,
     });
 
     if (error) {
@@ -124,7 +132,7 @@ export default function AdminPage() {
     if (error) {
       alert(t('error_updating_ticket'));
     } else {
-      setTickets(prev => prev.map(t => t.id === ticketId ? { ...t, status: newStatus } : t));
+      setTickets((prev) => prev.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t)));
     }
   };
 
@@ -231,14 +239,15 @@ export default function AdminPage() {
         ) : activeTab === 'reports' ? (
           <div className="space-y-4">
             {reports.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500">
-                {t('no_reports')}
-              </div>
+              <div className="text-center py-12 text-zinc-500">{t('no_reports')}</div>
             ) : (
               reports.map((report) => (
-                <div key={report.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm">
+                <div
+                  key={report.id}
+                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm"
+                >
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div className="flex-grow">
+                    <div className="grow">
                       <div className="flex items-center gap-4 mb-3">
                         <div className="flex flex-col">
                           <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">
@@ -259,9 +268,7 @@ export default function AdminPage() {
                         </div>
                       </div>
                       <div className="bg-zinc-50 dark:bg-zinc-950 p-4 rounded-lg border border-zinc-100 dark:border-zinc-800">
-                        <p className="text-zinc-700 dark:text-zinc-300 italic">
-                          "{report.reason}"
-                        </p>
+                        <p className="text-zinc-700 dark:text-zinc-300 italic">"{report.reason}"</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end shrink-0 gap-3">
@@ -287,25 +294,28 @@ export default function AdminPage() {
         ) : activeTab === 'tickets' ? (
           <div className="space-y-4">
             {tickets.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500">
-                {t('no_tickets')}
-              </div>
+              <div className="text-center py-12 text-zinc-500">{t('no_tickets')}</div>
             ) : (
               tickets.map((ticket) => (
-                <div key={ticket.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm">
+                <div
+                  key={ticket.id}
+                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm"
+                >
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div className="flex-grow">
+                    <div className="grow">
                       <div className="flex items-center justify-between mb-2">
-                         <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-                           {ticket.subject}
-                         </h3>
-                         <span className={`px-2 py-1 text-xs font-bold uppercase rounded ${
-                           ticket.status === 'open'
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                         }`}>
-                           {ticket.status}
-                         </span>
+                        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                          {ticket.subject}
+                        </h3>
+                        <span
+                          className={`px-2 py-1 text-xs font-bold uppercase rounded ${
+                            ticket.status === 'open'
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                          }`}
+                        >
+                          {ticket.status}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-zinc-500 mb-4">
                         <User size={14} />
@@ -349,36 +359,37 @@ export default function AdminPage() {
         ) : activeTab === 'banned' ? (
           <div className="space-y-4">
             {bannedUsers.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500">
-                {t('no_banned_users')}
-              </div>
+              <div className="text-center py-12 text-zinc-500">{t('no_banned_users')}</div>
             ) : (
               bannedUsers.map((user) => (
-                <div key={user.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm">
-                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                           <Ban className="text-red-500" size={18} />
-                           <span className="font-bold text-zinc-900 dark:text-zinc-100">
-                             {user.username || 'Anonymous'}
-                           </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-zinc-500">
-                           <Mail size={14} />
-                           {user.email}
-                        </div>
-                        <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-950 p-3 rounded border border-zinc-100 dark:border-zinc-800">
-                           <span className="font-medium mr-1">{t('reason')}:</span>
-                           {user.reason || t('no_reason_provided')}
-                        </div>
+                <div
+                  key={user.id}
+                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <Ban className="text-red-500" size={18} />
+                        <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                          {user.username || 'Anonymous'}
+                        </span>
                       </div>
-                      <div className="flex flex-col items-end text-xs text-zinc-500">
-                         <div className="flex items-center gap-1">
-                            <Clock size={14} />
-                            {new Date(user.banned_at).toLocaleString()}
-                         </div>
+                      <div className="flex items-center gap-2 text-sm text-zinc-500">
+                        <Mail size={14} />
+                        {user.email}
                       </div>
-                   </div>
+                      <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-950 p-3 rounded border border-zinc-100 dark:border-zinc-800">
+                        <span className="font-medium mr-1">{t('reason')}:</span>
+                        {user.reason || t('no_reason_provided')}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end text-xs text-zinc-500">
+                      <div className="flex items-center gap-1">
+                        <Clock size={14} />
+                        {new Date(user.banned_at).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))
             )}
@@ -386,50 +397,55 @@ export default function AdminPage() {
         ) : (
           <div className="space-y-4">
             {flaggedUsers.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500">
-                {t('no_flagged_users')}
-              </div>
+              <div className="text-center py-12 text-zinc-500">{t('no_flagged_users')}</div>
             ) : (
               flaggedUsers.map((user) => (
-                <div key={user.id} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm">
-                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
-                          {user.image_url ? (
-                            <img src={user.image_url} alt={user.username} className="w-full h-full object-cover" />
-                          ) : (
-                            <User size={24} className="text-zinc-500" />
-                          )}
-                        </div>
-                        <div className="flex flex-col">
-                           <span className="font-bold text-zinc-900 dark:text-zinc-100">
-                             {user.username}
-                           </span>
-                           <span className="text-xs text-red-500 font-medium uppercase tracking-wider">
-                             {t('automatically_restricted')}
-                           </span>
-                        </div>
+                <div
+                  key={user.id}
+                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
+                        {user.image_url ? (
+                          <img
+                            src={user.image_url}
+                            alt={user.username}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User size={24} className="text-zinc-500" />
+                        )}
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleUnrestrictUser(user.id)}
-                        >
-                          <CheckCircle size={16} className="mr-2" />
-                          {t('unrestrict_user')}
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="bg-red-50 text-red-600 border-red-100"
-                          onClick={() => handleBanUser(user.id, 'Repeatedly reported & flagged')}
-                        >
-                          <Ban size={16} className="mr-2" />
-                          {t('ban_user')}
-                        </Button>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                          {user.username}
+                        </span>
+                        <span className="text-xs text-red-500 font-medium uppercase tracking-wider">
+                          {t('automatically_restricted')}
+                        </span>
                       </div>
-                   </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleUnrestrictUser(user.id)}
+                      >
+                        <CheckCircle size={16} className="mr-2" />
+                        {t('unrestrict_user')}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="bg-red-50 text-red-600 border-red-100"
+                        onClick={() => handleBanUser(user.id, 'Repeatedly reported & flagged')}
+                      >
+                        <Ban size={16} className="mr-2" />
+                        {t('ban_user')}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               ))
             )}
