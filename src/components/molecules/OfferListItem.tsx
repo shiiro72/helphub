@@ -18,7 +18,7 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
   offer,
   searchQuery = '',
   onEdit,
-  onDelete
+  onDelete,
 }) => {
   const t = useTranslations();
   const { user } = useAuth();
@@ -43,18 +43,18 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
   const startStr = formatDatetime(offer.start_datetime);
   const endStr = formatDatetime(offer.end_datetime);
 
-  const isMatch = searchQuery && (
-    offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    offer.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const isMatch =
+    searchQuery &&
+    (offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      offer.content.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
-    <div className={`rounded-xl border p-4 shadow-sm hover:shadow-md transition-all flex items-center gap-4 ${
-      isMatch
-        ? 'bg-yellow-50/50 border-yellow-200'
-        : 'bg-brand-surface border-brand-border'
-    }`}>
-      <div className="flex-grow min-w-0">
+    <div
+      className={`rounded-xl border p-4 shadow-sm hover:shadow-md transition-all flex items-center gap-4 ${
+        isMatch ? 'bg-yellow-50/50 border-yellow-200' : 'bg-brand-surface border-brand-border'
+      }`}
+    >
+      <div className="grow min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <div className="flex items-center gap-2">
             <h3 className="text-base font-bold text-brand-text-main truncate">
@@ -67,7 +67,9 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
             )}
           </div>
           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-brand-background text-brand-text-secondary font-medium whitespace-nowrap">
-            {offer.city ? `${offer.city}${offer.country ? `, ${offer.country}` : ''}` : (offer.offer_location || 'Remote')}
+            {offer.city
+              ? `${offer.city}${offer.country ? `, ${offer.country}` : ''}`
+              : offer.offer_location || 'Remote'}
           </span>
         </div>
 
@@ -83,7 +85,11 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
             <span className="font-medium mr-1 text-brand-text-main truncate max-w-[100px]">
               {offer.profiles?.username || 'Anonymous'}
             </span>
-            <VerificationBadge isVerified={offer.profiles?.is_verified} size={10} className="text-brand-primary" />
+            <VerificationBadge
+              isVerified={offer.profiles?.is_verified}
+              size={10}
+              className="text-brand-primary"
+            />
           </div>
 
           <div className="flex items-center text-xs text-brand-text-secondary">
@@ -102,7 +108,7 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
         {isOwner ? (
           <>
             <button

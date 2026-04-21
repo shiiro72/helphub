@@ -268,7 +268,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-grow overflow-y-auto p-4 md:p-8 space-y-1">
+      <div ref={scrollRef} className="grow overflow-y-auto p-4 md:p-8 space-y-1">
         {loading ? (
           <div className="flex justify-center items-center h-full">
             <p className="text-zinc-500">Loading messages...</p>

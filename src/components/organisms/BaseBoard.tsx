@@ -29,7 +29,9 @@ interface BaseBoardProps<T> {
   refreshTrigger?: number;
 }
 
-export function BaseBoard<T extends { id: string; date_posted: string; start_datetime?: string | null }>({
+export function BaseBoard<
+  T extends { id: string; date_posted: string; start_datetime?: string | null },
+>({
   title,
   table,
   searchPlaceholder,
@@ -99,7 +101,7 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       {/* Sidebar Filters */}
-      <aside className="w-full lg:w-64 flex-shrink-0 space-y-6">
+      <aside className="w-full lg:w-64 shrink-0 space-y-6">
         <div className="flex flex-col gap-1">
           <h2 className="text-2xl font-bold text-brand-text-main">{title}</h2>
           <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
@@ -107,9 +109,14 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
 
         <div className="space-y-4 p-4 bg-brand-surface rounded-xl border border-brand-border">
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase text-brand-text-secondary">{t('search')}</label>
+            <label className="text-xs font-semibold uppercase text-brand-text-secondary">
+              {t('search')}
+            </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-text-secondary" size={16} />
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-text-secondary"
+                size={16}
+              />
               <Input
                 placeholder={searchPlaceholder}
                 className="pl-9 text-sm"
@@ -120,14 +127,16 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase text-brand-text-secondary">{t('location')}</label>
+            <label className="text-xs font-semibold uppercase text-brand-text-secondary">
+              {t('location')}
+            </label>
             <Input
               placeholder="Filter by city..."
               value={cityFilter}
               onChange={(e) => {
                 const val = e.target.value;
                 setCityFilter(val);
-                const found = romanianCities.find(c => `${c.name} (${c.county})` === val);
+                const found = romanianCities.find((c) => `${c.name} (${c.county})` === val);
                 if (found) {
                   setCityFilter(found.name);
                 }
@@ -136,14 +145,16 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
               list="filter-cities-list"
             />
             <datalist id="filter-cities-list">
-              {romanianCities.map(c => (
+              {romanianCities.map((c) => (
                 <option key={`filter-${c.name}-${c.county}`} value={`${c.name} (${c.county})`} />
               ))}
             </datalist>
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase text-brand-text-secondary">{t('posted_date')}</label>
+            <label className="text-xs font-semibold uppercase text-brand-text-secondary">
+              {t('posted_date')}
+            </label>
             <select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
@@ -157,7 +168,9 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase text-brand-text-secondary">{t('start_date_time')}</label>
+            <label className="text-xs font-semibold uppercase text-brand-text-secondary">
+              {t('start_date_time')}
+            </label>
             <Input
               type="date"
               value={startDateFilter}
@@ -191,11 +204,13 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
       </aside>
 
       {/* Main Content */}
-      <main className="flex-grow space-y-6">
+      <main className="grow space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2 bg-brand-surface border border-brand-border rounded-lg p-1 shadow-sm">
-              <span className="text-xs font-medium text-brand-text-secondary px-2">{t('sort_by')}:</span>
+              <span className="text-xs font-medium text-brand-text-secondary px-2">
+                {t('sort_by')}:
+              </span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'date_posted' | 'start_datetime')}
@@ -257,9 +272,7 @@ export function BaseBoard<T extends { id: string; date_posted: string; start_dat
         ) : filteredItems.length > 0 ? (
           <div
             className={
-              view === 'grid'
-                ? 'grid grid-cols-1 md:grid-cols-2 gap-6'
-                : 'flex flex-col gap-4'
+              view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'flex flex-col gap-4'
             }
           >
             {filteredItems.map((item) => (

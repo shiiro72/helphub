@@ -28,10 +28,12 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
       setLoading(true);
       const { data, error } = await supabase
         .from('help_request_volunteers')
-        .select(`
+        .select(
+          `
           *,
           profiles:profiles (*)
-        `)
+        `,
+        )
         .eq('request_id', request.id)
         .order('created_at', { ascending: true });
 
@@ -52,12 +54,14 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
   };
 
   const handleCreateGroupChat = async () => {
-    const confirmedVolunteers = volunteers.filter(v => v.status === 'confirmed');
+    const confirmedVolunteers = volunteers.filter((v) => v.status === 'confirmed');
     if (confirmedVolunteers.length === 0) return;
     setCreatingGroup(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       // 1. Create the conversation
@@ -66,7 +70,7 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
         .insert({
           is_group: true,
           title: `Group for: ${request.title}`,
-          request_id: request.id
+          request_id: request.id,
         })
         .select()
         .single();
@@ -76,15 +80,15 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
       // 2. Add owner as member immediately
       await supabase.from('conversation_members').insert({
         conversation_id: conversation.id,
-        user_id: user.id
+        user_id: user.id,
       });
 
       // 3. Send invitations to confirmed volunteers
-      const invitationEntries = confirmedVolunteers.map(v => ({
+      const invitationEntries = confirmedVolunteers.map((v) => ({
         conversation_id: conversation.id,
         inviter_id: user.id,
         invitee_id: v.user_id,
-        status: 'pending'
+        status: 'pending',
       }));
 
       const { error: invitationError } = await supabase
@@ -107,21 +111,22 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
   const handlePromote = async (userId: string) => {
     await promoteVolunteer(userId);
     // Refresh local list
-    setVolunteers(prev => prev.map(v => v.user_id === userId ? { ...v, status: 'confirmed' } : v));
+    setVolunteers((prev) =>
+      prev.map((v) => (v.user_id === userId ? { ...v, status: 'confirmed' } : v)),
+    );
   };
 
-  const confirmed = volunteers.filter(v => v.status === 'confirmed');
-  const waitlisted = volunteers.filter(v => v.status === 'waitlisted');
+  const confirmed = volunteers.filter((v) => v.status === 'confirmed');
+  const waitlisted = volunteers.filter((v) => v.status === 'waitlisted');
 
   return (
     <div className="flex flex-col h-full max-h-[80vh]">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-brand-text-main">
-            {t('volunteers')}
-          </h2>
+          <h2 className="text-xl font-bold text-brand-text-main">{t('volunteers')}</h2>
           <p className="text-sm text-brand-text-secondary">
-            {confirmed.length} {request.max_volunteers ? `/ ${request.max_volunteers}` : ''} {t('volunteers').toLowerCase()}
+            {confirmed.length} {request.max_volunteers ? `/ ${request.max_volunteers}` : ''}{' '}
+            {t('volunteers').toLowerCase()}
           </p>
         </div>
         {confirmed.length > 0 && (
@@ -131,17 +136,13 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
             disabled={creatingGroup}
             className="flex items-center gap-2"
           >
-            {creatingGroup ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Users size={16} />
-            )}
+            {creatingGroup ? <Loader2 size={16} className="animate-spin" /> : <Users size={16} />}
             {t('contact_volunteers')}
           </Button>
         )}
       </div>
 
-      <div className="flex-grow overflow-y-auto min-h-[200px] space-y-6 pr-2">
+      <div className="grow overflow-y-auto min-h-[200px] space-y-6 pr-2">
         {loading ? (
           <div className="flex items-center justify-center h-40">
             <Loader2 className="animate-spin text-brand-text-secondary" />
@@ -164,7 +165,11 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-brand-border/30 flex items-center justify-center overflow-hidden">
                         {v.profiles?.image_url ? (
-                          <img src={v.profiles.image_url} alt={v.profiles.username} className="w-full h-full object-cover" />
+                          <img
+                            src={v.profiles.image_url}
+                            alt={v.profiles.username}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <User size={20} className="text-brand-text-secondary" />
                         )}
@@ -174,7 +179,11 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
                           <span className="font-semibold text-brand-text-main">
                             {v.profiles?.username}
                           </span>
-                          <VerificationBadge isVerified={v.profiles?.is_verified} size={14} className="text-brand-primary" />
+                          <VerificationBadge
+                            isVerified={v.profiles?.is_verified}
+                            size={14}
+                            className="text-brand-primary"
+                          />
                         </div>
                         <StarRating
                           rating={v.profiles?.trust_rank || 0}
@@ -211,7 +220,11 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-brand-border/30 flex items-center justify-center overflow-hidden">
                         {v.profiles?.image_url ? (
-                          <img src={v.profiles.image_url} alt={v.profiles.username} className="w-full h-full object-cover" />
+                          <img
+                            src={v.profiles.image_url}
+                            alt={v.profiles.username}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <User size={20} className="text-brand-text-secondary" />
                         )}
@@ -221,7 +234,11 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
                           <span className="font-semibold text-brand-text-main">
                             {v.profiles?.username}
                           </span>
-                          <VerificationBadge isVerified={v.profiles?.is_verified} size={14} className="text-brand-primary" />
+                          <VerificationBadge
+                            isVerified={v.profiles?.is_verified}
+                            size={14}
+                            className="text-brand-primary"
+                          />
                         </div>
                         <StarRating
                           rating={v.profiles?.trust_rank || 0}
@@ -251,8 +268,7 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
                       </Button>
                     </div>
                   </div>
-                ))
-              }
+                ))}
               </div>
             )}
           </>

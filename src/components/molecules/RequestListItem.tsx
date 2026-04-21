@@ -72,12 +72,10 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
   return (
     <div
       className={`rounded-xl border p-4 shadow-sm hover:shadow-md transition-all flex items-center gap-4 ${
-        isMatch
-          ? 'bg-yellow-50/50 border-yellow-200'
-          : 'bg-brand-surface border-brand-border'
+        isMatch ? 'bg-yellow-50/50 border-yellow-200' : 'bg-brand-surface border-brand-border'
       }`}
     >
-      <div className="flex-grow min-w-0">
+      <div className="grow min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="text-base font-bold text-brand-text-main truncate">
             <Highlight text={request.title} query={searchQuery} />
@@ -124,7 +122,7 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 flex-shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
         {isOwner ? (
           <>
             <button
