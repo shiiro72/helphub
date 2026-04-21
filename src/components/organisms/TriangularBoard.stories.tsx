@@ -43,6 +43,7 @@ const mockRequests: HelpRequest[] = [
     profiles: mockProfile,
     city: 'Brooklyn',
     address: 'Downtown',
+    request_location: '123 Main St, Brooklyn, NY',
   },
   {
     id: '2',
@@ -53,6 +54,7 @@ const mockRequests: HelpRequest[] = [
     profiles: { ...mockProfile, username: 'jane_doe', id: 'user2' },
     city: 'Manhattan',
     address: 'Upper East Side',
+    request_location: '456 Oak Ave, Manhattan, NY',
   },
   {
     id: '3',
@@ -63,6 +65,7 @@ const mockRequests: HelpRequest[] = [
     profiles: { ...mockProfile, username: 'dog_lover', id: 'user3' },
     city: 'Queens',
     address: 'Astoria',
+    request_location: '789 Pine Rd, Queens, NY',
   },
 ];
 
@@ -75,6 +78,7 @@ const mockOffers: HelpOffer[] = [
     date_posted: new Date().toISOString(),
     profiles: { ...mockProfile, username: 'code_master', id: 'user4' },
     city: 'Remote',
+    offer_location: 'Remote',
   },
   {
     id: 'o2',
@@ -85,6 +89,7 @@ const mockOffers: HelpOffer[] = [
     profiles: { ...mockProfile, username: 'green_thumb', id: 'user5' },
     city: 'Bronx',
     address: 'Little Italy',
+    offer_location: '321 Elm St, Bronx, NY',
   },
   {
     id: 'o3',
@@ -94,6 +99,7 @@ const mockOffers: HelpOffer[] = [
     date_posted: new Date().toISOString(),
     profiles: { ...mockProfile, username: 'guitar_hero', id: 'user6' },
     city: 'Staten Island',
+    offer_location: 'Staten Island, NY',
   },
 ];
 

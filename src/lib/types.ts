@@ -25,8 +25,8 @@ export interface HelpRequest {
   user_id: string;
   title: string;
   content: string;
-  image_url: string | null;
-  reward_offer: string | null;
+  image_url?: string | null;
+  reward_offer?: string | null;
   request_location: string | null;
   city?: string | null;
   county?: string | null;
@@ -55,7 +55,7 @@ export interface HelpOffer {
   user_id: string;
   title: string;
   content: string;
-  image_url: string | null;
+  image_url?: string | null;
   offer_location: string | null;
   city?: string | null;
   county?: string | null;
