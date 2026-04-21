@@ -4,13 +4,10 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/atoms/Button';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { HelpRequest, HelpOffer } from '@/lib/types';
-import { RequestCard } from '@/components/molecules/RequestCard';
-import { OfferCard } from '@/components/molecules/OfferCard';
+import { TriangularBoard } from '@/components/organisms/TriangularBoard';
 
 export default function Home() {
-  const t = useTranslations();
   const [latestRequests, setLatestRequests] = useState<HelpRequest[]>([]);
   const [latestOffers, setLatestOffers] = useState<HelpOffer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,74 +41,12 @@ export default function Home() {
     <div className="min-h-screen bg-brand-background">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-6 py-10">
-        <div className="space-y-20">
-          {/* Latest Requests Section */}
-          <section className="space-y-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold tracking-tight text-brand-text-main">
-                {t('browse_requests')}
-              </h2>
-              <Link href="/requests">
-                <Button variant="ghost" className="gap-2">
-                  {t('learn_more')}
-                  <ArrowRight size={16} />
-                </Button>
-              </Link>
-            </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-64 rounded-xl bg-brand-surface animate-pulse" />
-                ))}
-              </div>
-            ) : latestRequests.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {latestRequests.map((request) => (
-                  <RequestCard key={request.id} request={request} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-brand-text-secondary py-10 bg-brand-surface rounded-2xl border border-dashed border-brand-border">
-                {t('no_requests')}
-              </p>
-            )}
-          </section>
-
-          {/* Latest Offers Section */}
-          <section className="space-y-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold tracking-tight text-brand-text-main">
-                {t('browse_offers')}
-              </h2>
-              <Link href="/offers">
-                <Button variant="ghost" className="gap-2">
-                  {t('learn_more')}
-                  <ArrowRight size={16} />
-                </Button>
-              </Link>
-            </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-64 rounded-xl bg-brand-surface animate-pulse" />
-                ))}
-              </div>
-            ) : latestOffers.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {latestOffers.map((offer) => (
-                  <OfferCard key={offer.id} offer={offer} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-brand-text-secondary py-10 bg-brand-surface rounded-2xl border border-dashed border-brand-border">
-                {t('no_offers')}
-              </p>
-            )}
-          </section>
-        </div>
+      <main className="max-w-6xl mx-auto px-6">
+        <TriangularBoard
+          requests={latestRequests}
+          offers={latestOffers}
+          loading={loading}
+        />
       </main>
     </div>
   );
