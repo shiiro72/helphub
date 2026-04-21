@@ -47,8 +47,8 @@ export default function Home() {
     <div className="min-h-screen bg-brand-background">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-6 py-10">
-        <div className="space-y-20">
+      <main className="max-w-7xl mx-auto px-6 pt-4 pb-10">
+        <div className="space-y-12">
           {/* Desktop View: Triangular Board */}
           {!loading && (latestRequests.length > 0 || latestOffers.length > 0) && (
             <TriangularBoard requests={latestRequests} offers={latestOffers} />
