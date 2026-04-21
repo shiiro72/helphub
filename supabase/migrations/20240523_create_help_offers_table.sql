@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS help_offers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  content TEXT NOT NULL,
+  content TEXT,
   image_url TEXT,
   offer_location TEXT DEFAULT NULL,
   date_posted TIMESTAMPTZ DEFAULT now() NOT NULL

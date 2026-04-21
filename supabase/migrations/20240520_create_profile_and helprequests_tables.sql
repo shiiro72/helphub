@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS help_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  content TEXT NOT NULL,
+  content TEXT,
   image_url TEXT,
   reward_offer TEXT DEFAULT NULL,
   request_location TEXT DEFAULT NULL,
