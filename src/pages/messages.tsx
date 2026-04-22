@@ -261,8 +261,42 @@ export default function MessagesPage() {
       )
       .subscribe();
 
+    const sidebarChannel = supabase
+      .channel(`sidebar-updates:${Math.random().toString(36).slice(2)}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'conversations',
+          filter: `participant_1=eq.${user.id}`,
+        },
+        () => fetchConversations(user.id),
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'conversations',
+          filter: `participant_2=eq.${user.id}`,
+        },
+        () => fetchConversations(user.id),
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+        },
+        () => fetchConversations(user.id),
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(invChannel);
+      supabase.removeChannel(sidebarChannel);
     };
   }, [supabase, user, fetchConversations]);
 

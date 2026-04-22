@@ -32,16 +32,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [request, setRequest] = useState<HelpRequest | null>(null);
 
   const handleSendMessageLocally = (content: string) => {
-    // Optimistic update
-    const tempMsg: Message = {
-      id: Math.random().toString(),
-      conversation_id: conversation.id,
-      sender_id: currentUserId,
-      content,
-      is_read: false,
-      created_at: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, tempMsg]);
     onSendMessage(content);
   };
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
@@ -163,14 +153,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         .map((m) => m.id);
 
       if (unreadIds.length > 0) {
+        console.log('Marking messages as read:', unreadIds);
         await supabase.from('messages').update({ is_read: true }).in('id', unreadIds);
       }
     };
 
-    if (!loading) {
+    if (!loading && messages.length > 0) {
       markAllRead();
     }
-  }, [messages, loading, currentUserId]);
+  }, [messages, loading, currentUserId, conversation.id]);
 
   const otherParticipantId = conversation.is_group
     ? null

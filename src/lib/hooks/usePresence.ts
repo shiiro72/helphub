@@ -12,8 +12,7 @@ export function usePresence(user: User | null) {
       return;
     }
 
-    const channelId = Math.random().toString(36).slice(2);
-    const channel = supabase.channel(`global-presence:${channelId}`, {
+    const channel = supabase.channel('global-presence', {
       config: {
         presence: {
           key: user.id,
@@ -35,14 +34,16 @@ export function usePresence(user: User | null) {
           next.delete(key);
           return next;
         });
-      })
-      .subscribe(async (status: string) => {
-        if (status === 'SUBSCRIBED') {
-          await channel.track({
-            online_at: new Date().toISOString(),
-          });
-        }
       });
+
+    // Subscribe AFTER setting up listeners
+    channel.subscribe(async (status: string) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({
+          online_at: new Date().toISOString(),
+        });
+      }
+    });
 
     return () => {
       supabase.removeChannel(channel);
