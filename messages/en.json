@@ -99,6 +99,7 @@
   "ticket_message_placeholder": "Describe your issue or suggestion...",
   "ticket_sent_success": "Your support ticket has been sent. We will get back to you soon.",
   "ticket_sent_error": "Failed to send support ticket. Please try again.",
+  "rate_limit_error": "Too many requests. Please wait a few minutes before trying again.",
   "ban_user": "Ban & Delete",
   "banned_users": "Banned Users",
   "confirm_ban_user": "Are you sure you want to ban and delete this user? This action is permanent.",

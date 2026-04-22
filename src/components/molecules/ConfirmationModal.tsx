@@ -28,7 +28,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-brand-surface-container-lowest rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-brand-outline-variant">
         <div className="flex items-center justify-between p-6 border-b border-brand-outline-variant">
           <div className="flex items-center gap-2">

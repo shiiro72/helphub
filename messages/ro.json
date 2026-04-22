@@ -99,6 +99,7 @@
   "ticket_message_placeholder": "Descrie problema sau sugestia ta...",
   "ticket_sent_success": "Tichetul tău de suport a fost trimis. Te vom contacta în curând.",
   "ticket_sent_error": "Eroare la trimiterea tichetului. Te rugăm să încerci din nou.",
+  "rate_limit_error": "Prea multe solicitări. Te rugăm să aștepți câteva minute înainte de a încerca din nou.",
   "ban_user": "Banează și Șterge",
   "banned_users": "Utilizatori Banați",
   "confirm_ban_user": "Ești sigur că vrei să banezi și să ștergi acest utilizator? Această acțiune este permanentă.",

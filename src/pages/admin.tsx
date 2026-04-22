@@ -407,15 +407,7 @@ export default function AdminPage() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
-                        {user.image_url ? (
-                          <img
-                            src={user.image_url}
-                            alt={user.username}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <User size={24} className="text-zinc-500" />
-                        )}
+                        <User size={24} className="text-zinc-500" />
                       </div>
                       <div className="flex flex-col">
                         <span className="font-bold text-zinc-900 dark:text-zinc-100">

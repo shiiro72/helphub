@@ -192,12 +192,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           <div className="w-10 h-10 rounded-full bg-brand-primary flex items-center justify-center overflow-hidden">
             {conversation.is_group ? (
               <Users size={20} className="text-white" />
-            ) : conversation.profiles?.image_url ? (
-              <img
-                src={conversation.profiles.image_url}
-                alt={conversation.profiles.username}
-                className="w-full h-full object-cover"
-              />
             ) : (
               <User size={20} className="text-white" />
             )}
