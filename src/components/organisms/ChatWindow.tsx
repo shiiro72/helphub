@@ -115,9 +115,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         (payload: { new: Message }) => {
           const newMessage = payload.new as Message;
           console.log('Received new message via realtime:', newMessage);
+
           setMessages((prev) => {
-            if (prev.find((m) => m.id === newMessage.id)) return prev;
-            return [...prev, newMessage];
+            // Remove optimistic message if this is the confirmed one from the current user
+            const filtered =
+              newMessage.sender_id === currentUserId
+                ? prev.filter((m) => !m.id.startsWith('temp-'))
+                : prev;
+
+            if (filtered.find((m) => m.id === newMessage.id)) return filtered;
+            return [...filtered, newMessage];
           });
 
           // Mark as read if it's from the other person
