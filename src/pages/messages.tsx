@@ -181,7 +181,7 @@ export default function MessagesPage() {
           .neq('sender_id', currentUserId);
 
         const unreadCounts: Record<string, number> = {};
-        unreadData?.forEach((m: { conversation_id: string }) => {
+        unreadData?.forEach((m) => {
           unreadCounts[m.conversation_id] = (unreadCounts[m.conversation_id] || 0) + 1;
         });
 
@@ -426,15 +426,15 @@ export default function MessagesPage() {
         </div>
 
         {activeConversation && user && (
-          <div className="fixed inset-0 z-[60] md:hidden bg-white dark:bg-black">
-            <div className="h-full flex flex-col">
+          <div className="fixed inset-0 z-[60] md:hidden bg-white dark:bg-black overflow-hidden">
+            <div className="h-[100dvh] flex flex-col">
               <button
                 onClick={() => setActiveConversation(null)}
-                className="p-4 text-sm font-medium text-blue-600 flex items-center"
+                className="p-4 text-sm font-medium text-blue-600 flex items-center bg-white dark:bg-black border-b border-brand-border shrink-0"
               >
                 ← Back
               </button>
-              <div className="grow overflow-hidden">
+              <div className="flex-1 overflow-hidden">
                 <ChatWindow
                   conversation={activeConversation}
                   currentUserId={user.id}

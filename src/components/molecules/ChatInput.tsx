@@ -19,10 +19,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-chat-header px-4 py-3 flex items-center gap-2 border-t border-brand-border"
-    >
+    <form onSubmit={handleSubmit} className="bg-chat-header px-4 py-3 flex items-center gap-2">
       <input
         type="text"
         value={message}

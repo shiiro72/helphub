@@ -112,7 +112,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           table: 'messages',
           filter: `conversation_id=eq.${conversation.id}`,
         },
-        (payload: { new: Message }) => {
+        (payload) => {
           const newMessage = payload.new as Message;
           console.log('Received new message via realtime:', newMessage);
           setMessages((prev) => {
@@ -134,12 +134,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           table: 'messages',
           filter: `conversation_id=eq.${conversation.id}`,
         },
-        (payload: { new: Message }) => {
+        (payload) => {
           const updatedMessage = payload.new as Message;
           setMessages((prev) => prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m)));
         },
       )
-      .subscribe((status: string) => {
+      .subscribe((status) => {
         console.log(`Realtime subscription status for ${channelName}:`, status);
       });
 
@@ -329,13 +329,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {/* Input */}
-      {currentUserProfile?.is_restricted ? (
-        <div className="bg-brand-surface px-4 py-3 text-center text-sm text-brand-error border-t border-brand-border">
-          {t('messaging_restricted')}
-        </div>
-      ) : (
-        <ChatInput onSendMessage={handleSendMessageLocally} />
-      )}
+      <div className="shrink-0 bg-chat-header border-t border-brand-border pb-safe">
+        {currentUserProfile?.is_restricted ? (
+          <div className="px-4 py-3 text-center text-sm text-brand-error">
+            {t('messaging_restricted')}
+          </div>
+        ) : (
+          <ChatInput onSendMessage={handleSendMessageLocally} />
+        )}
+      </div>
 
       {/* Rating Modal */}
       <RatingModal
