@@ -63,7 +63,11 @@ export function AuthForm({ mode }: AuthFormProps) {
     });
 
     if (error) {
-      setError(error.message);
+      if (error.message.includes('rate limit') || error.status === 429) {
+        setError(t('rate_limit_error'));
+      } else {
+        setError(error.message);
+      }
     } else {
       alert('Password reset email sent! Check your inbox.');
     }
