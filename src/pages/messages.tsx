@@ -342,8 +342,8 @@ export default function MessagesPage() {
         <title>Messages | HelpHub</title>
       </Head>
       <Navbar />
-      <main className="grow flex overflow-hidden w-full shadow-2xl">
-        <div className="w-full md:w-72 lg:w-80 border-r border-zinc-200 dark:border-zinc-800 flex flex-col shrink-0">
+      <main className="grow flex overflow-hidden w-full">
+        <div className="w-full md:w-80 lg:w-96 border-r border-brand-border flex flex-col shrink-0">
           {invitations.length > 0 && (
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/50">
               <h3 className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-3">

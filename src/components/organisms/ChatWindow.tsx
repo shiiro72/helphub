@@ -189,6 +189,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* Header */}
       <div className="bg-chat-header p-3 flex justify-between items-center border-b border-brand-border">
         <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-brand-primary flex items-center justify-center overflow-hidden">
+            {conversation.is_group ? (
+              <Users size={20} className="text-white" />
+            ) : conversation.profiles?.image_url ? (
+              <img
+                src={conversation.profiles.image_url}
+                alt={conversation.profiles.username}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User size={20} className="text-white" />
+            )}
+          </div>
           <div>
             <div className="flex items-center gap-1">
               <h3 className="font-semibold text-brand-text-main">
@@ -196,6 +209,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   ? conversation.title
                   : conversation.profiles?.username || 'User'}
               </h3>
+              {!conversation.is_group && (
+                <VerificationBadge isVerified={conversation.profiles?.is_verified} size={14} />
+              )}
             </div>
             {conversation.is_group ? (
               <div className="flex items-center gap-1">
@@ -217,9 +233,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="text-xs font-bold text-brand-text-secondary hover:text-brand-text-main"
+            className="p-2 text-brand-text-secondary hover:text-brand-text-main"
           >
-            Options
+            <MoreVertical size={20} />
           </button>
           {showMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-brand-surface shadow-lg rounded-md overflow-hidden z-10 border border-brand-border">
@@ -260,14 +276,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="grow overflow-y-auto p-4 md:p-8 space-y-1">
+      <div ref={scrollRef} className="grow overflow-y-auto p-4 md:px-12 md:py-8 space-y-1">
         {loading ? (
           <div className="flex justify-center items-center h-full">
-            <p className="text-zinc-500">Loading messages...</p>
+            <p className="text-brand-text-secondary">Loading messages...</p>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex justify-center items-center h-full">
-            <p className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-4 py-1 rounded text-xs">
+            <p className="bg-brand-primary/10 text-brand-primary px-4 py-1 rounded text-xs">
               {t('start_chatting')}
             </p>
           </div>
