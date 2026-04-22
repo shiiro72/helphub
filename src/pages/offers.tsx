@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/organisms/Navbar";
 import { OfferBoard } from "@/components/organisms/OfferBoard";
+import { BoardToggle } from "@/components/molecules/BoardToggle";
 import { useTranslations } from 'next-intl';
 import { GetStaticProps } from 'next';
 
@@ -18,6 +19,9 @@ export default function OffersPage() {
           <p className="text-brand-text-secondary mt-2">
             Explore what others are offering and find the help you need.
           </p>
+          <div className="mt-6">
+            <BoardToggle />
+          </div>
         </div>
 
         <OfferBoard />

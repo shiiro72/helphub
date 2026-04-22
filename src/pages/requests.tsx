@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/organisms/Navbar";
 import { RequestBoard } from "@/components/organisms/RequestBoard";
+import { BoardToggle } from "@/components/molecules/BoardToggle";
 import { useTranslations } from 'next-intl';
 import { GetStaticProps } from 'next';
 
@@ -18,6 +19,9 @@ export default function RequestsPage() {
           <p className="text-brand-text-secondary mt-2">
             Explore help requests from the community and lend a hand.
           </p>
+          <div className="mt-6">
+            <BoardToggle />
+          </div>
         </div>
 
         <RequestBoard />
