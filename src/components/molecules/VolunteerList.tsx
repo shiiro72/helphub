@@ -164,15 +164,7 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-brand-border/30 flex items-center justify-center overflow-hidden">
-                        {v.profiles?.image_url ? (
-                          <img
-                            src={v.profiles.image_url}
-                            alt={v.profiles.username}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <User size={20} className="text-brand-text-secondary" />
-                        )}
+                        <User size={20} className="text-brand-text-secondary" />
                       </div>
                       <div>
                         <div className="flex items-center gap-1">
@@ -219,15 +211,7 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-brand-border/30 flex items-center justify-center overflow-hidden">
-                        {v.profiles?.image_url ? (
-                          <img
-                            src={v.profiles.image_url}
-                            alt={v.profiles.username}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <User size={20} className="text-brand-text-secondary" />
-                        )}
+                        <User size={20} className="text-brand-text-secondary" />
                       </div>
                       <div>
                         <div className="flex items-center gap-1">

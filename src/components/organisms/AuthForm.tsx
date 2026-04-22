@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Button } from '../atoms/Button';
 import { FormField } from '../molecules/FormField';
 import { createClient } from '@/lib/supabase/client';
-import { LogIn, UserPlus } from 'lucide-react';
+import { LogIn, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface AuthFormProps {
@@ -15,6 +15,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,16 +99,26 @@ export function AuthForm({ mode }: AuthFormProps) {
           }}
           required
         />
-        <FormField
-          id="password"
-          label={t('password_label')}
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div className="relative">
+          <FormField
+            id="password"
+            label={t('password_label')}
+            type={showPassword ? 'text' : 'password'}
+            placeholder="••••••••"
+            value={password}
+            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-[38px] text-brand-text-secondary hover:text-brand-text-main"
+            onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 

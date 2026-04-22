@@ -21,7 +21,6 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
   const t = useTranslations();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [username, setUsername] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,7 +44,6 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
         if (data) {
           setProfile(data);
           setUsername(data.username);
-          setImageUrl(data.image_url || '');
         }
         if (error) {
           setError(error.message);
@@ -72,7 +70,6 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
       .from('profiles')
       .update({
         username,
-        image_url: imageUrl || null,
       })
       .eq('id', profile?.id);
 
@@ -101,17 +98,23 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
   const handleDeleteConfirm = async () => {
     setLoading(true);
     setError(null);
-    const supabase = createClient();
 
-    // RLS and CASCADE should handle help_requests and help_offers deletion
-    const { error: deleteError } = await supabase.from('profiles').delete().eq('id', profile?.id);
+    try {
+      const response = await fetch('/api/user/delete-account', {
+        method: 'DELETE',
+      });
 
-    if (deleteError) {
-      setError(deleteError.message);
-      setLoading(false);
-    } else {
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete account');
+      }
+
+      const supabase = createClient();
       await supabase.auth.signOut();
       window.location.href = '/';
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(false);
     }
   };
 
@@ -160,15 +163,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                 </div>
               )}
               <div className="w-24 h-24 rounded-full bg-brand-surface-container flex items-center justify-center overflow-hidden border-2 border-brand-outline-variant">
-                {imageUrl ? (
-                  <div className="relative w-full h-full">
-                    <Image src={imageUrl} alt="Profile" fill className="object-cover" unoptimized />
-                  </div>
-                ) : (
-                  <User size={48} className="text-brand-text-secondary" />
-                )}
+                <User size={48} className="text-brand-text-secondary" />
               </div>
-              <p className="text-xs text-brand-text-secondary">{t('image_preview')}</p>
             </div>
 
             <div className="space-y-4">
@@ -181,17 +177,6 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                   autoComplete="username"
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="imageUrl">{t('image_url')}</Label>
-                <Input
-                  id="imageUrl"
-                  placeholder="https://example.com/image.jpg"
-                  value={imageUrl}
-                  autoComplete="off"
-                  onChange={(e) => setImageUrl(e.target.value)}
                 />
               </div>
             </div>
@@ -211,7 +196,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                 <Button
                   type="button"
                   variant="ghost"
-                  className="w-full text-brand-error hover:text-brand-error-container hover:bg-brand-error-container/10 gap-2"
+                  className="w-full text-brand-error hover:bg-brand-error hover:text-brand-on-error gap-2"
                   onClick={() => setIsDeleteConfirmOpen(true)}
                   disabled={loading}
                 >
@@ -236,11 +221,6 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
               <p>
                 <strong>{t('username')}:</strong> {username}
               </p>
-              {imageUrl && (
-                <p className="truncate">
-                  <strong>{t('image_url')}:</strong> {imageUrl}
-                </p>
-              )}
             </div>
           </div>
         }

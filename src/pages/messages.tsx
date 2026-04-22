@@ -357,15 +357,7 @@ export default function MessagesPage() {
                   >
                     <div className="flex items-start gap-3 mb-2">
                       <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden">
-                        {inv.inviter?.image_url ? (
-                          <img
-                            src={inv.inviter.image_url}
-                            alt={inv.inviter.username}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <User size={16} className="text-zinc-500" />
-                        )}
+                        <User size={16} className="text-zinc-500" />
                       </div>
                       <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-tight">
                         <span className="font-bold text-zinc-900 dark:text-zinc-100">

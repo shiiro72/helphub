@@ -37,12 +37,6 @@ export const ChatList: React.FC<ChatListProps> = ({
                 <div className="w-12 h-12 rounded-full bg-brand-primary flex items-center justify-center overflow-hidden">
                   {conv.is_group ? (
                     <Users size={24} className="text-white" />
-                  ) : conv.profiles?.image_url ? (
-                    <img
-                      src={conv.profiles.image_url}
-                      alt={conv.profiles.username}
-                      className="w-full h-full rounded-full object-cover"
-                    />
                   ) : (
                     <User size={24} className="text-white" />
                   )}
