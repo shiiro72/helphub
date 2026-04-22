@@ -32,6 +32,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [request, setRequest] = useState<HelpRequest | null>(null);
 
   const handleSendMessageLocally = (content: string) => {
+    // Optimistic update
+    const tempMsg: Message = {
+      id: `temp-${Math.random().toString(36).slice(2)}`,
+      conversation_id: conversation.id,
+      sender_id: currentUserId,
+      content,
+      is_read: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, tempMsg]);
     onSendMessage(content);
   };
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
@@ -146,22 +156,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [messages]);
 
   useEffect(() => {
-    // Mark all existing unread messages from the other person as read
+    // Mark all existing unread messages from the other person as read immediately
     const markAllRead = async () => {
-      const unreadIds = messages
-        .filter((m) => !m.is_read && m.sender_id !== currentUserId)
-        .map((m) => m.id);
+      const { error } = await supabase
+        .from('messages')
+        .update({ is_read: true })
+        .eq('conversation_id', conversation.id)
+        .neq('sender_id', currentUserId)
+        .eq('is_read', false);
 
-      if (unreadIds.length > 0) {
-        console.log('Marking messages as read:', unreadIds);
-        await supabase.from('messages').update({ is_read: true }).in('id', unreadIds);
+      if (error) {
+        console.error('Error marking messages as read:', error);
+      } else {
+        console.log(`Marked messages as read for conversation ${conversation.id}`);
       }
     };
 
-    if (!loading && messages.length > 0) {
-      markAllRead();
-    }
-  }, [messages, loading, currentUserId, conversation.id]);
+    markAllRead();
+  }, [conversation.id, currentUserId, supabase]);
 
   const otherParticipantId = conversation.is_group
     ? null

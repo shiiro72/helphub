@@ -52,7 +52,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1 min-w-0">
                     <h3
-                      className={`font-semibold text-brand-text-main truncate ${(conv.unreadCount || 0) > 0 ? 'font-bold' : 'font-normal'}`}
+                      className={`text-brand-text-main truncate ${(conv.unreadCount || 0) > 0 ? 'font-black' : 'font-medium'}`}
                     >
                       {conv.is_group ? conv.title : conv.profiles?.username || 'User'}
                     </h3>
@@ -72,7 +72,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                     className={`text-sm truncate grow ${
                       (conv.unreadCount || 0) > 0
                         ? 'text-brand-text-main font-bold'
-                        : 'text-zinc-500 dark:text-zinc-400'
+                        : 'text-brand-text-secondary/70'
                     }`}
                   >
                     {conv.lastMessage?.content || 'Click to chat'}

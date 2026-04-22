@@ -29,7 +29,7 @@ export function useUnreadMessages(user: User | null) {
     fetchUnreadCount();
 
     const channel = supabase
-      .channel('unread-count')
+      .channel(`unread-count-${user.id}`)
       .on(
         'postgres_changes',
         {

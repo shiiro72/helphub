@@ -28,7 +28,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwnMess
             {date}
           </span>
           {isOwnMessage && (
-            <span className={message.is_read ? 'text-blue-200' : 'text-brand-on-primary/50'}>
+            <span className={message.is_read ? 'text-sky-300' : 'text-brand-on-primary/50'}>
               {message.is_read ? <CheckCheck size={14} /> : <Check size={14} />}
             </span>
           )}
