@@ -181,7 +181,7 @@ export default function MessagesPage() {
           .neq('sender_id', currentUserId);
 
         const unreadCounts: Record<string, number> = {};
-        unreadData?.forEach((m) => {
+        unreadData?.forEach((m: { conversation_id: string }) => {
           unreadCounts[m.conversation_id] = (unreadCounts[m.conversation_id] || 0) + 1;
         });
 
