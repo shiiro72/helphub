@@ -12,7 +12,7 @@ export const BoardToggle: React.FC = () => {
 
   return (
     <div className="inline-flex p-1 bg-brand-border/10 rounded-xl border border-brand-border/20 shadow-sm">
-      <Link href="/requests" className="flex-1 min-w-45">
+      <Link href="/requests" className="flex-1 min-w-46">
         <span
           className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
             isRequests
@@ -27,7 +27,7 @@ export const BoardToggle: React.FC = () => {
           {t('browse_requests')}
         </span>
       </Link>
-      <Link href="/offers" className="flex-1 min-w-45">
+      <Link href="/offers" className="flex-1 min-w-46">
         <span
           className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
             isOffers
