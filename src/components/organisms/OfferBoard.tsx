@@ -68,7 +68,7 @@ export const OfferBoard: React.FC = () => {
     // Search filter
     const matchesSearch =
       offer.title.toLowerCase().includes(query.toLowerCase()) ||
-      offer.content.toLowerCase().includes(query.toLowerCase());
+      offer.content?.toLowerCase().includes(query.toLowerCase());
 
     // City filter
     const matchesCity = !city || (offer.city || '').toLowerCase().includes(city.toLowerCase());

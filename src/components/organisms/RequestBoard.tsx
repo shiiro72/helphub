@@ -68,7 +68,7 @@ export const RequestBoard: React.FC = () => {
     // Search filter
     const matchesSearch =
       req.title.toLowerCase().includes(query.toLowerCase()) ||
-      req.content.toLowerCase().includes(query.toLowerCase());
+      req.content?.toLowerCase().includes(query.toLowerCase());
 
     // City filter
     const matchesCity = !city || (req.city || '').toLowerCase().includes(city.toLowerCase());
