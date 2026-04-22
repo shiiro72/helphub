@@ -102,6 +102,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
     // Subscribe to new messages
     const channelName = `messages:${conversation.id}:${Math.random().toString(36).slice(2)}`;
+    console.log('Subscribing to realtime messages for conversation:', conversation.id);
     const channel = supabase
       .channel(channelName)
       .on(

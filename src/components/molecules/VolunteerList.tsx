@@ -62,26 +62,41 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // 1. Create the conversation
+      // 1. Check if group chat already exists for this request
+      const { data: existing } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('request_id', request.id)
+        .eq('is_group', true)
+        .maybeSingle();
+
+      if (existing) {
+        router.push(`/messages?conversationId=${existing.id}`);
+        onClose();
+        return;
+      }
+
+      // 2. Create the conversation
       const { data: conversation, error: convError } = await supabase
         .from('conversations')
         .insert({
           is_group: true,
           title: `Group Chat - ${request.title}`,
           request_id: request.id,
+          participant_1: user.id, // Set owner as participant_1 to satisfy RLS SELECT policy
         })
         .select()
         .single();
 
       if (convError) throw convError;
 
-      // 2. Add owner as member immediately
+      // 3. Add owner as member immediately
       await supabase.from('conversation_members').insert({
         conversation_id: conversation.id,
         user_id: user.id,
       });
 
-      // 3. Directly add all volunteers (confirmed and waitlisted) as members
+      // 4. Directly add all volunteers (confirmed and waitlisted) as members
       if (volunteers.length > 0) {
         const memberEntries = volunteers.map((v) => ({
           conversation_id: conversation.id,
@@ -95,7 +110,7 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
         if (memberError) throw memberError;
       }
 
-      // 4. Navigate to messages
+      // 5. Navigate to messages
       router.push(`/messages?conversationId=${conversation.id}`);
       onClose();
     } catch (error) {

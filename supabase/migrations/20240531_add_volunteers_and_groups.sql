@@ -1,7 +1,7 @@
--- Migration: Add volunteers, waitlist, and group messaging invitations support
+-- Migration: Add volunteers, waitlist, and group messaging support
 
 -- 1. Update help_requests table
-ALTER TABLE help_requests ADD COLUMN max_volunteers INTEGER DEFAULT NULL;
+ALTER TABLE help_requests ADD COLUMN IF NOT EXISTS max_volunteers INTEGER DEFAULT NULL;
 
 -- 2. Create help_request_volunteers table
 DO $$
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS conversation_members (
 -- Enable RLS for conversation_members
 ALTER TABLE conversation_members ENABLE ROW LEVEL SECURITY;
 
--- Initial policy for membership (updated in later migration to prevent recursion)
+-- Initial policy for membership (updated in later migration)
 CREATE POLICY "Users can view memberships they are part of." ON conversation_members
   FOR SELECT USING (auth.uid() = user_id);
 
