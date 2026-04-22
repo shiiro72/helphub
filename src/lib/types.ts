@@ -79,6 +79,13 @@ export interface Conversation {
   created_at: string;
   profiles?: Profile; // Other participant's profile (for 1-on-1)
   members?: Profile[]; // All members (for groups)
+  lastMessage?: {
+    content: string;
+    created_at: string;
+    sender_id: string;
+    is_read: boolean;
+  };
+  unreadCount?: number;
 }
 
 export interface ConversationMember {

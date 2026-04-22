@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Conversation, Message, Profile } from '@/lib/types';
+import { Conversation, Message, Profile, HelpRequest } from '@/lib/types';
 import { MessageBubble } from '../molecules/MessageBubble';
 import { ChatInput } from '../molecules/ChatInput';
-import { User, MoreVertical, Flag, Ban, Star, Users } from 'lucide-react';
+import { User, MoreVertical, Flag, Ban, Star, Users, ExternalLink } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { StarRating } from '../atoms/StarRating';
@@ -29,6 +29,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const t = useTranslations();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [request, setRequest] = useState<HelpRequest | null>(null);
 
   const handleSendMessageLocally = (content: string) => {
     // Optimistic update
@@ -63,6 +64,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [supabase, currentUserId]);
 
   useEffect(() => {
+    const fetchRequest = async () => {
+      if (conversation.request_id) {
+        const { data } = await supabase
+          .from('help_requests')
+          .select('*')
+          .eq('id', conversation.request_id)
+          .single();
+        setRequest(data);
+      }
+    };
+    fetchRequest();
+
     const fetchMessages = async () => {
       setLoading(true);
       try {
@@ -99,7 +112,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           table: 'messages',
           filter: `conversation_id=eq.${conversation.id}`,
         },
-        (payload: { new: Message }) => {
+        (payload) => {
           const newMessage = payload.new as Message;
           console.log('Received new message via realtime:', newMessage);
           setMessages((prev) => {
@@ -121,12 +134,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           table: 'messages',
           filter: `conversation_id=eq.${conversation.id}`,
         },
-        (payload: { new: Message }) => {
+        (payload) => {
           const updatedMessage = payload.new as Message;
           setMessages((prev) => prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m)));
         },
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`Realtime subscription status for ${channelName}:`, status);
+      });
 
     return () => {
       console.log('Unsubscribing from channel:', channelName);
@@ -269,8 +284,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
       </div>
 
+      {/* Request Preview for Group Chats */}
+      {conversation.is_group && request && (
+        <div className="bg-brand-surface border-b border-brand-border px-4 py-2 flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold uppercase text-brand-text-secondary">
+              Linked Request
+            </span>
+            <span className="text-sm font-medium text-brand-text-main truncate max-w-md">
+              {request.title}
+            </span>
+          </div>
+          <a
+            href={`/requests?id=${request.id}`}
+            className="text-brand-primary hover:text-brand-primary/80 transition-colors"
+            title="View Request"
+          >
+            <ExternalLink size={18} />
+          </a>
+        </div>
+      )}
+
       {/* Messages */}
-      <div ref={scrollRef} className="grow overflow-y-auto p-4 md:px-12 md:py-8 space-y-1">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:px-12 md:py-8 space-y-1">
         {loading ? (
           <div className="flex justify-center items-center h-full">
             <p className="text-brand-text-secondary">Loading messages...</p>

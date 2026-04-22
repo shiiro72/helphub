@@ -54,8 +54,6 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
   };
 
   const handleCreateGroupChat = async () => {
-    const confirmedVolunteers = volunteers.filter((v) => v.status === 'confirmed');
-    if (confirmedVolunteers.length === 0) return;
     setCreatingGroup(true);
 
     try {
@@ -69,7 +67,7 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
         .from('conversations')
         .insert({
           is_group: true,
-          title: `Group for: ${request.title}`,
+          title: `Group Chat - ${request.title}`,
           request_id: request.id,
         })
         .select()
@@ -83,19 +81,21 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
         user_id: user.id,
       });
 
-      // 3. Send invitations to confirmed volunteers
-      const invitationEntries = confirmedVolunteers.map((v) => ({
-        conversation_id: conversation.id,
-        inviter_id: user.id,
-        invitee_id: v.user_id,
-        status: 'pending',
-      }));
+      // 3. Send invitations to all volunteers (confirmed and waitlisted)
+      if (volunteers.length > 0) {
+        const invitationEntries = volunteers.map((v) => ({
+          conversation_id: conversation.id,
+          inviter_id: user.id,
+          invitee_id: v.user_id,
+          status: 'pending',
+        }));
 
-      const { error: invitationError } = await supabase
-        .from('conversation_invitations')
-        .insert(invitationEntries);
+        const { error: invitationError } = await supabase
+          .from('conversation_invitations')
+          .insert(invitationEntries);
 
-      if (invitationError) throw invitationError;
+        if (invitationError) throw invitationError;
+      }
 
       // 4. Navigate to messages
       router.push(`/messages?conversationId=${conversation.id}`);
@@ -129,17 +129,15 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
             {t('volunteers').toLowerCase()}
           </p>
         </div>
-        {confirmed.length > 0 && (
-          <Button
-            size="sm"
-            onClick={handleCreateGroupChat}
-            disabled={creatingGroup}
-            className="flex items-center gap-2"
-          >
-            {creatingGroup ? <Loader2 size={16} className="animate-spin" /> : <Users size={16} />}
-            {t('contact_volunteers')}
-          </Button>
-        )}
+        <Button
+          size="sm"
+          onClick={handleCreateGroupChat}
+          disabled={creatingGroup}
+          className="flex items-center gap-2"
+        >
+          {creatingGroup ? <Loader2 size={16} className="animate-spin" /> : <Users size={16} />}
+          {t('contact_volunteers')}
+        </Button>
       </div>
 
       <div className="grow overflow-y-auto min-h-[200px] space-y-6 pr-2">

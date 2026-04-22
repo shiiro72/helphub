@@ -11,6 +11,7 @@ import { GetStaticProps } from 'next';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/atoms/Button';
 import { User, Check, X } from 'lucide-react';
+import { usePresence } from '@/lib/hooks/usePresence';
 
 export default function MessagesPage() {
   const t = useTranslations();
@@ -18,7 +19,7 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [invitations, setInvitations] = useState<ConversationInvitation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
-  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+  const onlineUsers = usePresence(user);
   const router = useRouter();
   const { userId, conversationId } = router.query;
   const [supabase] = useState(() => createClient());
@@ -100,11 +101,14 @@ export default function MessagesPage() {
           `
         *,
         participant_1_profile:profiles!participant_1(*),
-        participant_2_profile:profiles!participant_2(*)
+        participant_2_profile:profiles!participant_2(*),
+        messages(content, created_at, sender_id, is_read)
       `,
         )
         .or(`participant_1.eq.${currentUserId},participant_2.eq.${currentUserId}`)
-        .eq('is_group', false);
+        .eq('is_group', false)
+        .order('created_at', { foreignTable: 'messages', ascending: false })
+        .limit(1, { foreignTable: 'messages' });
 
       // 2. Fetch group conversations via members table (avoid circular reference)
       const { data: memberData, error: memberError } = await supabase
@@ -124,11 +128,14 @@ export default function MessagesPage() {
             *,
             members:conversation_members!inner(
               profiles(*)
-            )
+            ),
+            messages(content, created_at, sender_id, is_read)
           `,
           )
           .in('id', conversationIds)
-          .eq('is_group', true);
+          .eq('is_group', true)
+          .order('created_at', { foreignTable: 'messages', ascending: false })
+          .limit(1, { foreignTable: 'messages' });
 
         if (groupError) {
           console.error('Error fetching group conversations:', groupError);
@@ -145,10 +152,14 @@ export default function MessagesPage() {
         );
 
         const processed = allConversations.map((conv) => {
+          const lastMessage = conv.messages?.[0];
+          const unreadCount = 0; // We will fetch this separately or rely on simple check
+
           if (conv.is_group) {
             return {
               ...conv,
               members: conv.members?.map((m: any) => m.profiles) || [],
+              lastMessage,
             } as Conversation;
           }
           const otherProfile =
@@ -158,9 +169,28 @@ export default function MessagesPage() {
           return {
             ...conv,
             profiles: otherProfile,
+            lastMessage,
           } as Conversation;
         });
-        setConversations(processed);
+
+        // 3. Fetch unread counts for each conversation
+        const { data: unreadData } = await supabase
+          .from('messages')
+          .select('conversation_id')
+          .eq('is_read', false)
+          .neq('sender_id', currentUserId);
+
+        const unreadCounts: Record<string, number> = {};
+        unreadData?.forEach((m) => {
+          unreadCounts[m.conversation_id] = (unreadCounts[m.conversation_id] || 0) + 1;
+        });
+
+        const withUnread = processed.map((conv) => ({
+          ...conv,
+          unreadCount: unreadCounts[conv.id] || 0,
+        }));
+
+        setConversations(withUnread);
 
         // Fetch invitations
         const { data: invData } = await supabase
@@ -220,38 +250,6 @@ export default function MessagesPage() {
   useEffect(() => {
     if (!user) return;
 
-    const presenceChannel = supabase.channel('online-users', {
-      config: {
-        presence: {
-          key: user.id,
-        },
-      },
-    });
-
-    presenceChannel
-      .on('presence', { event: 'sync' }, () => {
-        const state = presenceChannel.presenceState();
-        const onlineIds = new Set<string>(Object.keys(state));
-        setOnlineUsers(onlineIds);
-      })
-      .on('presence', { event: 'join' }, ({ key }: { key: string }) => {
-        setOnlineUsers((prev) => new Set([...Array.from(prev), key]));
-      })
-      .on('presence', { event: 'leave' }, ({ key }: { key: string }) => {
-        setOnlineUsers((prev) => {
-          const next = new Set(prev);
-          next.delete(key);
-          return next;
-        });
-      })
-      .subscribe(async (status: string) => {
-        if (status === 'SUBSCRIBED') {
-          await presenceChannel.track({
-            online_at: new Date().toISOString(),
-          });
-        }
-      });
-
     const invChannel = supabase
       .channel(`invitations:${Math.random().toString(36).slice(2)}`)
       .on(
@@ -264,7 +262,6 @@ export default function MessagesPage() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(presenceChannel);
       supabase.removeChannel(invChannel);
     };
   }, [supabase, user, fetchConversations]);
@@ -337,12 +334,12 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-50 dark:bg-black overflow-hidden">
+    <div className="flex flex-col h-[100dvh] bg-zinc-50 dark:bg-black overflow-hidden">
       <Head>
         <title>Messages | HelpHub</title>
       </Head>
       <Navbar />
-      <main className="grow flex overflow-hidden w-full">
+      <main className="grow flex overflow-hidden w-full relative">
         <div className="w-full md:w-80 lg:w-96 border-r border-brand-border flex flex-col shrink-0">
           {invitations.length > 0 && (
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/50">
