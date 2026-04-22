@@ -243,14 +243,15 @@ export default function MessagesPage() {
           next.delete(key);
           return next;
         });
-      })
-      .subscribe(async (status: string) => {
-        if (status === 'SUBSCRIBED') {
-          await presenceChannel.track({
-            online_at: new Date().toISOString(),
-          });
-        }
       });
+
+    presenceChannel.subscribe(async (status: string) => {
+      if (status === 'SUBSCRIBED') {
+        await presenceChannel.track({
+          online_at: new Date().toISOString(),
+        });
+      }
+    });
 
     const invChannel = supabase
       .channel(`invitations:${Math.random().toString(36).slice(2)}`)
@@ -337,12 +338,12 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-50 dark:bg-black overflow-hidden">
+    <div className="flex flex-col h-screen bg-zinc-50 dark:bg-black overflow-hidden fixed inset-0">
       <Head>
         <title>Messages | HelpHub</title>
       </Head>
       <Navbar />
-      <main className="grow flex overflow-hidden w-full">
+      <main className="grow flex overflow-hidden w-full relative">
         <div className="w-full md:w-80 lg:w-96 border-r border-brand-border flex flex-col shrink-0">
           {invitations.length > 0 && (
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/50">
