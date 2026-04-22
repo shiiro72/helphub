@@ -108,43 +108,35 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'messages',
           filter: `conversation_id=eq.${conversation.id}`,
         },
-        (payload: { new: Message }) => {
-          const newMessage = payload.new as Message;
-          console.log('Received new message via realtime:', newMessage);
+        (payload: any) => {
+          if (payload.eventType === 'INSERT') {
+            const newMessage = payload.new as Message;
+            console.log('Received new message via realtime:', newMessage);
 
-          setMessages((prev) => {
-            // Remove optimistic message if this is the confirmed one from the current user
-            const filtered =
-              newMessage.sender_id === currentUserId
-                ? prev.filter((m) => !m.id.startsWith('temp-'))
-                : prev;
+            setMessages((prev) => {
+              const filtered =
+                newMessage.sender_id === currentUserId
+                  ? prev.filter((m) => !m.id.startsWith('temp-'))
+                  : prev;
 
-            if (filtered.find((m) => m.id === newMessage.id)) return filtered;
-            return [...filtered, newMessage];
-          });
+              if (filtered.find((m) => m.id === newMessage.id)) return filtered;
+              return [...filtered, newMessage];
+            });
 
-          // Mark as read if it's from the other person
-          if (newMessage.sender_id !== currentUserId) {
-            markAsRead(newMessage.id);
+            if (newMessage.sender_id !== currentUserId) {
+              markAsRead(newMessage.id);
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedMessage = payload.new as Message;
+            setMessages((prev) =>
+              prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m)),
+            );
           }
-        },
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversation.id}`,
-        },
-        (payload: { new: Message }) => {
-          const updatedMessage = payload.new as Message;
-          setMessages((prev) => prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m)));
         },
       )
       .subscribe((status: string) => {

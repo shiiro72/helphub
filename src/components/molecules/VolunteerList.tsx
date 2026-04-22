@@ -65,12 +65,24 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
       // 1. Check if group chat already exists for this request
       const { data: existing } = await supabase
         .from('conversations')
-        .select('id')
+        .select('id, members:conversation_members(user_id)')
         .eq('request_id', request.id)
         .eq('is_group', true)
         .maybeSingle();
 
       if (existing) {
+        // Find volunteers who are not yet members
+        const currentMemberIds = new Set((existing.members as any[]).map((m) => m.user_id));
+        const newVolunteers = volunteers.filter((v) => !currentMemberIds.has(v.user_id));
+
+        if (newVolunteers.length > 0) {
+          const memberEntries = newVolunteers.map((v) => ({
+            conversation_id: existing.id,
+            user_id: v.user_id,
+          }));
+          await supabase.from('conversation_members').insert(memberEntries);
+        }
+
         router.push(`/messages?conversationId=${existing.id}`);
         onClose();
         return;
@@ -83,32 +95,35 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
           is_group: true,
           title: `Group Chat - ${request.title}`,
           request_id: request.id,
-          participant_1: user.id, // Set owner as participant_1 to satisfy RLS SELECT policy
+          participant_1: user.id,
         })
         .select()
         .single();
 
       if (convError) throw convError;
 
-      // 3. Add owner as member immediately
-      await supabase.from('conversation_members').insert({
-        conversation_id: conversation.id,
-        user_id: user.id,
-      });
-
-      // 4. Directly add all volunteers (confirmed and waitlisted) as members
-      if (volunteers.length > 0) {
-        const memberEntries = volunteers.map((v) => ({
+      // 3. Add owner and all volunteers as members directly
+      const memberEntries = [
+        { conversation_id: conversation.id, user_id: user.id },
+        ...volunteers.map((v) => ({
           conversation_id: conversation.id,
           user_id: v.user_id,
-        }));
+        })),
+      ];
 
-        const { error: memberError } = await supabase
-          .from('conversation_members')
-          .insert(memberEntries);
+      // Remove duplicates if owner is also a volunteer
+      const uniqueMemberEntries = Array.from(new Set(memberEntries.map((m) => m.user_id))).map(
+        (id) => ({
+          conversation_id: conversation.id,
+          user_id: id,
+        }),
+      );
 
-        if (memberError) throw memberError;
-      }
+      const { error: memberError } = await supabase
+        .from('conversation_members')
+        .insert(uniqueMemberEntries);
+
+      if (memberError) throw memberError;
 
       // 5. Navigate to messages
       router.push(`/messages?conversationId=${conversation.id}`);

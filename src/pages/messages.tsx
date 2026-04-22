@@ -209,20 +209,28 @@ export default function MessagesPage() {
           setInvitations(invData as unknown as ConversationInvitation[]);
         }
 
-        // If conversationId in query, set active
-        if (conversationId && typeof conversationId === 'string') {
-          const existing = processed.find((c) => c.id === conversationId);
-          if (existing) {
-            setActiveConversation(existing);
+        // If conversationId or userId in query, sync active conversation once on load
+        if (!activeConversation) {
+          if (conversationId && typeof conversationId === 'string') {
+            const existing = processed.find((c) => c.id === conversationId);
+            if (existing) {
+              setActiveConversation(existing);
+            }
+          } else if (userId && typeof userId === 'string' && userId !== currentUserId) {
+            const existing = processed.find(
+              (c) => !c.is_group && (c.participant_1 === userId || c.participant_2 === userId),
+            );
+            if (existing) {
+              setActiveConversation(existing);
+            } else {
+              startNewConversation(currentUserId, userId);
+            }
           }
-        } else if (userId && typeof userId === 'string' && userId !== currentUserId) {
-          const existing = processed.find(
-            (c) => !c.is_group && (c.participant_1 === userId || c.participant_2 === userId),
-          );
-          if (existing) {
-            setActiveConversation(existing);
-          } else {
-            startNewConversation(currentUserId, userId);
+        } else {
+          // If we already have an active conversation, just update its data if it changed
+          const updated = processed.find((c) => c.id === activeConversation.id);
+          if (updated) {
+            setActiveConversation(updated);
           }
         }
       }
@@ -428,7 +436,10 @@ export default function MessagesPage() {
             <ChatList
               conversations={conversations}
               activeId={activeConversation?.id}
-              onSelect={setActiveConversation}
+              onSelect={(conv) => {
+                setActiveConversation(conv);
+                router.push(`/messages?conversationId=${conv.id}`, undefined, { shallow: true });
+              }}
               onlineUsers={onlineUsers}
             />
           </div>
