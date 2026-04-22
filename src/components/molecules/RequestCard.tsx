@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   MapPin,
-  Calendar,
   User,
   MessageSquare,
   Clock,

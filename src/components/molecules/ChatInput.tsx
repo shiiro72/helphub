@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Smile } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { Button } from '../atoms/Button';
 
 interface ChatInputProps {
@@ -23,12 +23,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
       onSubmit={handleSubmit}
       className="bg-chat-header px-4 py-3 flex items-center gap-2 border-t border-zinc-200 dark:border-zinc-800"
     >
-      <button
-        type="button"
-        className="p-2 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
-      >
-        <Smile size={24} />
-      </button>
       <input
         type="text"
         value={message}

@@ -59,12 +59,11 @@ export const RequestBoard: React.FC = () => {
     filters: {
       query: string;
       city: string;
-      dateRange: string;
       startDate: string;
       startTime: string;
     },
   ) => {
-    const { query, city, dateRange, startDate, startTime } = filters;
+    const { query, city, startDate, startTime } = filters;
 
     // Search filter
     const matchesSearch =
@@ -73,22 +72,6 @@ export const RequestBoard: React.FC = () => {
 
     // City filter
     const matchesCity = !city || (req.city || '').toLowerCase().includes(city.toLowerCase());
-
-    // Date filter (posted)
-    let matchesDate = true;
-    if (dateRange !== 'all') {
-      const postDate = new Date(req.date_posted);
-      const now = new Date();
-      if (dateRange === 'today') {
-        matchesDate = postDate.toDateString() === now.toDateString();
-      } else if (dateRange === 'week') {
-        const weekAgo = new Date(now.setDate(now.getDate() - 7));
-        matchesDate = postDate >= weekAgo;
-      } else if (dateRange === 'month') {
-        const monthAgo = new Date(now.setMonth(now.getMonth() - 1));
-        matchesDate = postDate >= monthAgo;
-      }
-    }
 
     // Start date & time filter (required start)
     let matchesStartDate = true;
@@ -107,7 +90,7 @@ export const RequestBoard: React.FC = () => {
       isNotExpired = endDateTime > now;
     }
 
-    return matchesSearch && matchesCity && matchesDate && matchesStartDate && isNotExpired;
+    return matchesSearch && matchesCity && matchesStartDate && isNotExpired;
   };
 
   return (

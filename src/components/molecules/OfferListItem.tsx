@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, User, MessageSquare, Clock, Edit2, Trash2 } from 'lucide-react';
+import { User, MessageSquare, Clock, Edit2, Trash2 } from 'lucide-react';
 import { HelpOffer } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
@@ -24,11 +24,6 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
   const { user } = useAuth();
 
   const isOwner = user?.id === offer.user_id;
-  const date = new Date(offer.date_posted).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
 
   const formatDatetime = (dt: string | null | undefined) => {
     if (!dt) return null;
@@ -90,11 +85,6 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
               size={10}
               className="text-brand-primary"
             />
-          </div>
-
-          <div className="flex items-center text-xs text-brand-text-secondary">
-            <Calendar size={12} className="mr-1.5" />
-            <span>{date}</span>
           </div>
 
           {startStr && (
