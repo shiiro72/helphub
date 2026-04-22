@@ -15,6 +15,6 @@ CREATE POLICY "Participants can update message read status." ON messages
     )
   )
   WITH CHECK (
-    -- Only allow updating the is_read column by the recipient (not the sender)
+    -- Only allow updating by the recipient (not the sender)
     auth.uid() <> sender_id
   );
