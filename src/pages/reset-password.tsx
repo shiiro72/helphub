@@ -22,7 +22,7 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     // Check if we have a session (user clicked reset link)
     const supabase = createClient();
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    supabase.auth.onAuthStateChange(async (event: string) => {
       if (event === 'PASSWORD_RECOVERY') {
         // We stay on the page
       }
@@ -68,9 +68,7 @@ export default function ResetPasswordPage() {
             <h1 className="text-2xl font-bold tracking-tight text-brand-text-main">
               Reset Your Password
             </h1>
-            <p className="text-sm text-brand-text-secondary">
-              Enter your new password below.
-            </p>
+            <p className="text-sm text-brand-text-secondary">Enter your new password below.</p>
           </div>
 
           {success ? (
