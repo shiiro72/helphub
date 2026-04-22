@@ -12,14 +12,16 @@ export default function RequestsPage() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold text-brand-text-main tracking-tight">
-            {t('browse_requests')}
-          </h1>
-          <p className="text-brand-text-secondary mt-2">
-            Explore help requests from the community and lend a hand.
-          </p>
-          <div className="mt-6">
+        <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-3xl font-bold text-brand-text-main tracking-tight">
+              {t('browse_requests')}
+            </h1>
+            <p className="text-brand-text-secondary mt-2">
+              Explore help requests from the community and lend a hand.
+            </p>
+          </div>
+          <div className="shrink-0">
             <BoardToggle />
           </div>
         </div>
