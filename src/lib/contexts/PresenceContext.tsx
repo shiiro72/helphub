@@ -1,8 +1,19 @@
-import { useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { User } from '@supabase/supabase-js';
+import { useAuth } from '@/lib/hooks/useAuth';
 
-export function usePresence(user: User | null) {
+interface PresenceContextType {
+  onlineUsers: Set<string>;
+}
+
+const PresenceContext = createContext<PresenceContextType>({
+  onlineUsers: new Set(),
+});
+
+export const usePresence = () => useContext(PresenceContext);
+
+export const PresenceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
   const [supabase] = useState(() => createClient());
 
@@ -36,7 +47,6 @@ export function usePresence(user: User | null) {
         });
       });
 
-    // Subscribe AFTER setting up listeners
     channel.subscribe(async (status: string) => {
       if (status === 'SUBSCRIBED') {
         await channel.track({
@@ -50,5 +60,9 @@ export function usePresence(user: User | null) {
     };
   }, [supabase, user]);
 
-  return onlineUsers;
-}
+  return (
+    <PresenceContext.Provider value={{ onlineUsers }}>
+      {children}
+    </PresenceContext.Provider>
+  );
+};

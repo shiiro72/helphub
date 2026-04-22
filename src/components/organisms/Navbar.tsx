@@ -11,13 +11,11 @@ import { VerificationBadge } from '../atoms/VerificationBadge';
 import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '../molecules/LanguageSwitcher';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { usePresence } from '@/lib/hooks/usePresence';
 import { useUnreadMessages } from '@/lib/hooks/useUnreadMessages';
 
 export function Navbar() {
   const t = useTranslations();
   const { user, loading: authLoading } = useAuth();
-  usePresence(user);
   const unreadCount = useUnreadMessages(user);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);

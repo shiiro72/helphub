@@ -11,7 +11,7 @@ import { GetStaticProps } from 'next';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/atoms/Button';
 import { User, Check, X } from 'lucide-react';
-import { usePresence } from '@/lib/hooks/usePresence';
+import { usePresence } from '@/lib/contexts/PresenceContext';
 
 export default function MessagesPage() {
   const t = useTranslations();
@@ -19,7 +19,7 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [invitations, setInvitations] = useState<ConversationInvitation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
-  const onlineUsers = usePresence(user);
+  const { onlineUsers } = usePresence();
   const router = useRouter();
   const { userId, conversationId } = router.query;
   const [supabase] = useState(() => createClient());
@@ -286,7 +286,7 @@ export default function MessagesPage() {
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'messages',
         },
