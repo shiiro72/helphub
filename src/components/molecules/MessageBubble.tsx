@@ -1,4 +1,5 @@
 import React from 'react';
+import { Check, CheckCheck } from 'lucide-react';
 import { Message } from '@/lib/types';
 
 interface MessageBubbleProps {
@@ -26,6 +27,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwnMess
           <span className={`text-[10px] uppercase ${isOwnMessage ? 'text-brand-on-primary/70' : 'text-brand-text-secondary'}`}>
             {date}
           </span>
+          {isOwnMessage && (
+            <span className={message.is_read ? 'text-brand-on-primary' : 'text-brand-on-primary/50'}>
+              {message.is_read ? <CheckCheck size={14} /> : <Check size={14} />}
+            </span>
+          )}
         </div>
       </div>
     </div>

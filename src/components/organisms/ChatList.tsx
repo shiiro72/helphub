@@ -17,26 +17,26 @@ export const ChatList: React.FC<ChatListProps> = ({
   onlineUsers,
 }) => {
   return (
-    <div className="flex flex-col h-full bg-chat-sidebar overflow-y-auto border-r border-zinc-200 dark:border-zinc-800">
-      <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 bg-chat-header">
-        <h2 className="text-xl font-bold">Chats</h2>
+    <div className="flex flex-col h-full bg-chat-sidebar overflow-y-auto border-r border-brand-border">
+      <div className="p-4 border-b border-brand-border bg-chat-header">
+        <h2 className="text-xl font-bold text-brand-text-main">Chats</h2>
       </div>
       <div className="grow overflow-y-auto">
         {conversations.length === 0 ? (
-          <div className="p-8 text-center text-zinc-500">No conversations yet.</div>
+          <div className="p-8 text-center text-brand-text-secondary">No conversations yet.</div>
         ) : (
           conversations.map((conv) => (
             <button
               key={conv.id}
               onClick={() => onSelect(conv)}
-              className={`w-full flex items-center p-4 border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-chat-item-hover transition-colors ${
+              className={`w-full flex items-center p-4 border-b border-brand-border/30 hover:bg-chat-item-hover transition-colors ${
                 activeId === conv.id ? 'bg-chat-item-active' : ''
               }`}
             >
               <div className="relative mr-4 shrink-0">
-                <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
+                <div className="w-12 h-12 rounded-full bg-brand-primary flex items-center justify-center overflow-hidden">
                   {conv.is_group ? (
-                    <Users size={24} className="text-zinc-500" />
+                    <Users size={24} className="text-white" />
                   ) : conv.profiles?.image_url ? (
                     <img
                       src={conv.profiles.image_url}
@@ -44,7 +44,7 @@ export const ChatList: React.FC<ChatListProps> = ({
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <User size={24} className="text-zinc-500" />
+                    <User size={24} className="text-white" />
                   )}
                 </div>
                 {!conv.is_group && onlineUsers?.has(conv.profiles?.id || '') && (
@@ -57,7 +57,7 @@ export const ChatList: React.FC<ChatListProps> = ({
               <div className="grow text-left overflow-hidden">
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1 min-w-0">
-                    <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                    <h3 className="font-semibold text-brand-text-main truncate">
                       {conv.is_group ? conv.title : conv.profiles?.username || 'User'}
                     </h3>
                     {!conv.is_group && (

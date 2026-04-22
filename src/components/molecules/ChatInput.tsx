@@ -21,7 +21,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-chat-header px-4 py-3 flex items-center gap-2 border-t border-zinc-200 dark:border-zinc-800"
+      className="bg-chat-header px-4 py-3 flex items-center gap-2 border-t border-brand-border"
     >
       <input
         type="text"
@@ -30,7 +30,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
         placeholder="Type a message"
         disabled={disabled}
         autoComplete="off"
-        className="grow bg-chat-input border-none rounded-lg px-4 py-2 text-sm focus:ring-0 placeholder-zinc-500 text-zinc-900 dark:text-zinc-100"
+        className="grow bg-chat-input border-none rounded-lg px-4 py-2 text-sm focus:ring-0 placeholder-brand-text-secondary/50 text-brand-text-main"
       />
       <Button
         type="submit"
