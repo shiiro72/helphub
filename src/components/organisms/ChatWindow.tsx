@@ -185,7 +185,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-chat-bg">
+    <div className="flex flex-col h-full w-full bg-chat-bg">
       {/* Header */}
       <div className="bg-chat-header p-3 flex justify-between items-center border-b border-brand-border">
         <div className="flex items-center gap-3">
