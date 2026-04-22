@@ -49,6 +49,27 @@ export function AuthForm({ mode }: AuthFormProps) {
     setLoading(false);
   };
 
+  const handleResetPassword = async () => {
+    if (!email) {
+      setError('Please enter your email address to reset your password.');
+      return;
+    }
+    const supabase = createClient();
+    setLoading(true);
+    setError(null);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login?mode=reset`,
+    });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      alert('Password reset email sent! Check your inbox.');
+    }
+    setLoading(false);
+  };
+
   const handleGoogleLogin = async () => {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
@@ -121,6 +142,19 @@ export function AuthForm({ mode }: AuthFormProps) {
         </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
+
+        {mode === 'login' && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={handleResetPassword}
+              className="text-xs text-brand-text-secondary hover:text-brand-text-main hover:underline"
+              disabled={loading}
+            >
+              Forgot password?
+            </button>
+          </div>
+        )}
 
         <Button type="submit" size="full" disabled={loading}>
           {loading ? (

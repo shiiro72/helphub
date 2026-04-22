@@ -196,7 +196,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                 <Button
                   type="button"
                   variant="ghost"
-                  className="w-full text-brand-error hover:bg-brand-error hover:text-brand-on-error gap-2"
+                  className="w-full text-brand-error hover:bg-brand-error/10 gap-2"
                   onClick={() => setIsDeleteConfirmOpen(true)}
                   disabled={loading}
                 >
