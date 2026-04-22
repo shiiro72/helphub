@@ -298,7 +298,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="start_datetime" required>
+              <Label htmlFor="start_datetime">
                 {t('start_datetime_label')}
               </Label>
               <Input
@@ -306,7 +306,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
                 type="datetime-local"
                 value={startDatetime}
                 onChange={(e) => setStartDatetime(e.target.value)}
-                required
+                onClick={(e) => e.currentTarget.showPicker?.()}
               />
             </div>
             <div className="space-y-2">
@@ -316,6 +316,7 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
                 type="datetime-local"
                 value={endDatetime}
                 onChange={(e) => setEndDatetime(e.target.value)}
+                onClick={(e) => e.currentTarget.showPicker?.()}
               />
             </div>
           </div>

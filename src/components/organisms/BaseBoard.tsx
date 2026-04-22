@@ -21,7 +21,6 @@ interface BaseBoardProps<T> {
     filters: {
       query: string;
       city: string;
-      dateRange: string;
       startDate: string;
       startTime: string;
     },
@@ -49,11 +48,10 @@ export function BaseBoard<
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [cityFilter, setCityFilter] = useState('');
-  const [dateRange, setDateRange] = useState('all'); // 'all', 'today', 'week', 'month'
   const [startDateFilter, setStartDateFilter] = useState('');
   const [startTimeFilter, setStartTimeFilter] = useState('');
-  const [sortBy, setSortBy] = useState<'date_posted' | 'start_datetime'>('date_posted');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortBy, setSortBy] = useState<'start_datetime'>('start_datetime');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -63,7 +61,7 @@ export function BaseBoard<
       const { data, error } = await supabase
         .from(table)
         .select('*, profiles(*)')
-        .order('date_posted', { ascending: false });
+        .order('start_datetime', { ascending: false });
 
       if (error) {
         console.error(`Error fetching ${table}:`, error);
@@ -82,7 +80,6 @@ export function BaseBoard<
       filterFn(item, {
         query: searchQuery,
         city: cityFilter,
-        dateRange,
         startDate: startDateFilter,
         startTime: startTimeFilter,
       }),
@@ -153,28 +150,13 @@ export function BaseBoard<
 
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase text-brand-text-secondary">
-              {t('posted_date')}
-            </label>
-            <select
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="w-full h-10 px-3 py-2 bg-brand-background border border-brand-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all text-brand-text-main"
-            >
-              <option value="all">{t('all_time')}</option>
-              <option value="today">{t('today')}</option>
-              <option value="week">{t('past_week')}</option>
-              <option value="month">{t('past_month')}</option>
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase text-brand-text-secondary">
               {t('start_date_time')}
             </label>
             <Input
               type="date"
               value={startDateFilter}
               onChange={(e) => setStartDateFilter(e.target.value)}
+              onClick={(e) => e.currentTarget.showPicker?.()}
               className="bg-brand-background text-sm"
               title="Filter by required start date"
             />
@@ -182,6 +164,7 @@ export function BaseBoard<
               type="time"
               value={startTimeFilter}
               onChange={(e) => setStartTimeFilter(e.target.value)}
+              onClick={(e) => e.currentTarget.showPicker?.()}
               className="bg-brand-background text-sm"
               title="Filter by required start time"
             />
@@ -192,7 +175,6 @@ export function BaseBoard<
             onClick={() => {
               setSearchQuery('');
               setCityFilter('');
-              setDateRange('all');
               setStartDateFilter('');
               setStartTimeFilter('');
             }}
@@ -212,17 +194,9 @@ export function BaseBoard<
                 {t('sort_by')}:
               </span>
               <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'date_posted' | 'start_datetime')}
-                className="bg-transparent text-sm focus:outline-none px-2 py-1 text-brand-text-main"
-              >
-                <option value="date_posted">{t('posted_date')}</option>
-                <option value="start_datetime">{t('start_date')}</option>
-              </select>
-              <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-                className="bg-transparent text-sm focus:outline-none border-l border-brand-border px-2 py-1 text-brand-text-main"
+                className="bg-transparent text-sm focus:outline-none px-2 py-1 text-brand-text-main"
               >
                 <option value="asc">{t('ascending')}</option>
                 <option value="desc">{t('descending')}</option>

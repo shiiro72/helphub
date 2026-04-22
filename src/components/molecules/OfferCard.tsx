@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Calendar, User, MessageSquare, Clock, Edit2, Trash2 } from 'lucide-react';
+import { MapPin, User, MessageSquare, Clock, Edit2, Trash2 } from 'lucide-react';
 import { HelpOffer } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';

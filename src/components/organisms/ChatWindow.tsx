@@ -29,6 +29,20 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const t = useTranslations();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleSendMessageLocally = (content: string) => {
+    // Optimistic update
+    const tempMsg: Message = {
+      id: Math.random().toString(),
+      conversation_id: conversation.id,
+      sender_id: currentUserId,
+      content,
+      is_read: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, tempMsg]);
+    onSendMessage(content);
+  };
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -173,50 +187,28 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   return (
     <div className="flex flex-col h-full bg-chat-bg">
       {/* Header */}
-      <div className="bg-chat-header p-3 flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800">
+      <div className="bg-chat-header p-3 flex justify-between items-center border-b border-brand-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
-            {conversation.is_group ? (
-              <Users size={20} className="text-zinc-500" />
-            ) : conversation.profiles?.image_url ? (
-              <img
-                src={conversation.profiles.image_url}
-                alt={conversation.profiles.username}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <User size={20} className="text-zinc-500" />
-            )}
-          </div>
           <div>
             <div className="flex items-center gap-1">
-              <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+              <h3 className="font-semibold text-brand-text-main">
                 {conversation.is_group
                   ? conversation.title
                   : conversation.profiles?.username || 'User'}
               </h3>
-              {!conversation.is_group && (
-                <VerificationBadge isVerified={conversation.profiles?.is_verified} size={14} />
-              )}
             </div>
             {conversation.is_group ? (
               <div className="flex items-center gap-1">
-                <span className="text-[10px] text-zinc-500">
+                <span className="text-[10px] text-brand-text-secondary">
                   {conversation.members?.length || 0} members
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <StarRating
-                  rating={conversation.profiles?.trust_rank || 0}
-                  totalRatings={conversation.profiles?.total_ratings || 0}
-                  size={12}
-                  showCount
-                />
                 <span
-                  className={`text-[10px] ${isOnline ? 'text-green-500 font-medium' : 'text-zinc-500'}`}
+                  className={`text-[10px] ${isOnline ? 'text-brand-success font-medium' : 'text-brand-text-secondary'}`}
                 >
-                  • {isOnline ? 'online' : 'offline'}
+                  {isOnline ? 'online' : 'offline'}
                 </span>
               </div>
             )}
@@ -225,12 +217,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="p-2 text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+            className="text-xs font-bold text-brand-text-secondary hover:text-brand-text-main"
           >
-            <MoreVertical size={20} />
+            Options
           </button>
           {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-chat-menu-bg shadow-lg rounded-md overflow-hidden z-10 border border-zinc-200 dark:border-zinc-800">
+            <div className="absolute right-0 mt-2 w-48 bg-brand-surface shadow-lg rounded-md overflow-hidden z-10 border border-brand-border">
               {!conversation.is_group ? (
                 <>
                   <button
@@ -238,18 +230,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                       if (otherParticipantId) onBlock(otherParticipantId);
                       setShowMenu(false);
                     }}
-                    className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-red-500"
+                    className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-error"
                   >
-                    <Ban size={16} /> Block User
+                    Block User
                   </button>
                   <button
                     onClick={() => {
                       setShowRatingModal(true);
                       setShowMenu(false);
                     }}
-                    className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+                    className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
                   >
-                    <Star size={16} /> Rate User
+                    Rate User
                   </button>
                 </>
               ) : null}
@@ -258,9 +250,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   if (otherParticipantId) onReport(otherParticipantId);
                   setShowMenu(false);
                 }}
-                className="w-full px-4 py-3 text-left text-sm hover:bg-chat-menu-hover flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+                className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
               >
-                <Flag size={16} /> Report User
+                Report User
               </button>
             </div>
           )}
@@ -292,11 +284,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* Input */}
       {currentUserProfile?.is_restricted ? (
-        <div className="bg-zinc-100 dark:bg-zinc-900 px-4 py-3 text-center text-sm text-red-500 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="bg-brand-surface px-4 py-3 text-center text-sm text-brand-error border-t border-brand-border">
           {t('messaging_restricted')}
         </div>
       ) : (
-        <ChatInput onSendMessage={onSendMessage} />
+        <ChatInput onSendMessage={handleSendMessageLocally} />
       )}
 
       {/* Rating Modal */}
