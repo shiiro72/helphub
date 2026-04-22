@@ -290,7 +290,9 @@ export default function MessagesPage() {
           schema: 'public',
           table: 'messages',
         },
-        () => fetchConversations(user.id),
+        () => {
+          setTimeout(() => fetchConversations(user.id), 500);
+        },
       )
       .subscribe();
 

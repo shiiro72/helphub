@@ -59,5 +59,9 @@ CREATE POLICY "Participants can insert messages." ON messages
         auth.uid() = conversations.participant_2 OR
         public.is_member_of_conversation(conversations.id)
       )
+    ) AND
+    NOT EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND is_restricted = true
     )
   );

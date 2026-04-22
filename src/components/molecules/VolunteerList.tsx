@@ -81,20 +81,18 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
         user_id: user.id,
       });
 
-      // 3. Send invitations to all volunteers (confirmed and waitlisted)
+      // 3. Directly add all volunteers (confirmed and waitlisted) as members
       if (volunteers.length > 0) {
-        const invitationEntries = volunteers.map((v) => ({
+        const memberEntries = volunteers.map((v) => ({
           conversation_id: conversation.id,
-          inviter_id: user.id,
-          invitee_id: v.user_id,
-          status: 'pending',
+          user_id: v.user_id,
         }));
 
-        const { error: invitationError } = await supabase
-          .from('conversation_invitations')
-          .insert(invitationEntries);
+        const { error: memberError } = await supabase
+          .from('conversation_members')
+          .insert(memberEntries);
 
-        if (invitationError) throw invitationError;
+        if (memberError) throw memberError;
       }
 
       // 4. Navigate to messages

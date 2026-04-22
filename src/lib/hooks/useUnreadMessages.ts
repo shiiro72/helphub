@@ -37,8 +37,10 @@ export function useUnreadMessages(user: User | null) {
           schema: 'public',
           table: 'messages',
         },
-        () => {
-          fetchUnreadCount();
+        (payload: any) => {
+          console.log('Unread count message update:', payload);
+          // Small delay to allow RLS/DB to catch up
+          setTimeout(fetchUnreadCount, 500);
         },
       )
       .subscribe();
