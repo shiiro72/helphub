@@ -11,10 +11,12 @@ import { VerificationBadge } from '../atoms/VerificationBadge';
 import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '../molecules/LanguageSwitcher';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useUnreadMessages } from '@/lib/hooks/useUnreadMessages';
 
 export function Navbar() {
   const t = useTranslations();
   const { user, loading: authLoading } = useAuth();
+  const unreadCount = useUnreadMessages(user);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -60,7 +62,18 @@ export function Navbar() {
                 <NavLink href="/requests">{t('browse_requests')}</NavLink>
                 <NavLink href="/offers">{t('browse_offers')}</NavLink>
                 {user && <NavLink href="/archive">{t('archive')}</NavLink>}
-                {user && <NavLink href="/messages">{t('messages')}</NavLink>}
+                {user && (
+                  <NavLink href="/messages">
+                    <div className="flex items-center gap-1.5">
+                      {t('messages')}
+                      {unreadCount > 0 && (
+                        <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-brand-error rounded-full">
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </NavLink>
+                )}
                 {profile?.role === 'admin' && (
                   <NavLink href="/admin">
                     <div className="flex items-center gap-1">
@@ -145,7 +158,14 @@ export function Navbar() {
 
             {user && (
               <NavLink href="/messages" mobile onClick={() => setIsMenuOpen(false)}>
-                {t('messages')}
+                <div className="flex items-center justify-between w-full">
+                  {t('messages')}
+                  {unreadCount > 0 && (
+                    <span className="flex items-center justify-center min-w-[20px] h-[20px] px-1 text-[11px] font-bold text-white bg-brand-error rounded-full">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </div>
               </NavLink>
             )}
 

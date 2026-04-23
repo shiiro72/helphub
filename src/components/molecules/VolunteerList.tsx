@@ -54,8 +54,6 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
   };
 
   const handleCreateGroupChat = async () => {
-    const confirmedVolunteers = volunteers.filter((v) => v.status === 'confirmed');
-    if (confirmedVolunteers.length === 0) return;
     setCreatingGroup(true);
 
     try {
@@ -64,40 +62,70 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // 1. Create the conversation
+      // 1. Check if group chat already exists for this request
+      const { data: existing } = await supabase
+        .from('conversations')
+        .select('id, members:conversation_members(user_id)')
+        .eq('request_id', request.id)
+        .eq('is_group', true)
+        .maybeSingle();
+
+      if (existing) {
+        // Find volunteers who are not yet members
+        const currentMemberIds = new Set((existing.members as any[]).map((m) => m.user_id));
+        const newVolunteers = volunteers.filter((v) => !currentMemberIds.has(v.user_id));
+
+        if (newVolunteers.length > 0) {
+          const memberEntries = newVolunteers.map((v) => ({
+            conversation_id: existing.id,
+            user_id: v.user_id,
+          }));
+          await supabase.from('conversation_members').insert(memberEntries);
+        }
+
+        router.push(`/messages?conversationId=${existing.id}`);
+        onClose();
+        return;
+      }
+
+      // 2. Create the conversation
       const { data: conversation, error: convError } = await supabase
         .from('conversations')
         .insert({
           is_group: true,
-          title: `Group for: ${request.title}`,
+          title: `Group Chat - ${request.title}`,
           request_id: request.id,
+          participant_1: user.id,
         })
         .select()
         .single();
 
       if (convError) throw convError;
 
-      // 2. Add owner as member immediately
-      await supabase.from('conversation_members').insert({
-        conversation_id: conversation.id,
-        user_id: user.id,
-      });
+      // 3. Add owner and all volunteers as members directly
+      const memberEntries = [
+        { conversation_id: conversation.id, user_id: user.id },
+        ...volunteers.map((v) => ({
+          conversation_id: conversation.id,
+          user_id: v.user_id,
+        })),
+      ];
 
-      // 3. Send invitations to confirmed volunteers
-      const invitationEntries = confirmedVolunteers.map((v) => ({
-        conversation_id: conversation.id,
-        inviter_id: user.id,
-        invitee_id: v.user_id,
-        status: 'pending',
-      }));
+      // Remove duplicates if owner is also a volunteer
+      const uniqueMemberEntries = Array.from(new Set(memberEntries.map((m) => m.user_id))).map(
+        (id) => ({
+          conversation_id: conversation.id,
+          user_id: id,
+        }),
+      );
 
-      const { error: invitationError } = await supabase
-        .from('conversation_invitations')
-        .insert(invitationEntries);
+      const { error: memberError } = await supabase
+        .from('conversation_members')
+        .insert(uniqueMemberEntries);
 
-      if (invitationError) throw invitationError;
+      if (memberError) throw memberError;
 
-      // 4. Navigate to messages
+      // 5. Navigate to messages
       router.push(`/messages?conversationId=${conversation.id}`);
       onClose();
     } catch (error) {
@@ -129,17 +157,15 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
             {t('volunteers').toLowerCase()}
           </p>
         </div>
-        {confirmed.length > 0 && (
-          <Button
-            size="sm"
-            onClick={handleCreateGroupChat}
-            disabled={creatingGroup}
-            className="flex items-center gap-2"
-          >
-            {creatingGroup ? <Loader2 size={16} className="animate-spin" /> : <Users size={16} />}
-            {t('contact_volunteers')}
-          </Button>
-        )}
+        <Button
+          size="sm"
+          onClick={handleCreateGroupChat}
+          disabled={creatingGroup}
+          className="flex items-center gap-2"
+        >
+          {creatingGroup ? <Loader2 size={16} className="animate-spin" /> : <Users size={16} />}
+          {t('contact_volunteers')}
+        </Button>
       </div>
 
       <div className="grow overflow-y-auto min-h-[200px] space-y-6 pr-2">

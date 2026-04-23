@@ -20,7 +20,7 @@ CREATE POLICY "Members can view co-members." ON conversation_members
     public.is_member_of_conversation(conversation_id)
   );
 
--- 3. Update conversations policies to use the function
+-- 3. Update conversations policies to use the function and handle group access
 DROP POLICY IF EXISTS "Users can view their own conversations." ON conversations;
 
 CREATE POLICY "Users can view their own conversations." ON conversations
@@ -31,9 +31,9 @@ CREATE POLICY "Users can view their own conversations." ON conversations
   );
 
 -- 4. Update messages policies to use the function
-DROP POLICY IF EXISTS "Participants can view messages in their conversations." ON messages;
+DROP POLICY IF EXISTS "Participants can view messages." ON messages;
 
-CREATE POLICY "Participants can view messages in their conversations." ON messages
+CREATE POLICY "Participants can view messages." ON messages
   FOR SELECT USING (
     EXISTS (
       SELECT 1 FROM conversations
@@ -46,9 +46,9 @@ CREATE POLICY "Participants can view messages in their conversations." ON messag
     )
   );
 
-DROP POLICY IF EXISTS "Participants can insert messages in their conversations." ON messages;
+DROP POLICY IF EXISTS "Participants can insert messages." ON messages;
 
-CREATE POLICY "Participants can insert messages in their conversations." ON messages
+CREATE POLICY "Participants can insert messages." ON messages
   FOR INSERT WITH CHECK (
     auth.uid() = sender_id AND
     EXISTS (
@@ -59,5 +59,9 @@ CREATE POLICY "Participants can insert messages in their conversations." ON mess
         auth.uid() = conversations.participant_2 OR
         public.is_member_of_conversation(conversations.id)
       )
+    ) AND
+    NOT EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND is_restricted = true
     )
   );

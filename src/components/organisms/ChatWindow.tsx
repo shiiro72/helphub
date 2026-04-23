@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Conversation, Message, Profile } from '@/lib/types';
+import { Conversation, Message, Profile, HelpRequest } from '@/lib/types';
 import { MessageBubble } from '../molecules/MessageBubble';
 import { ChatInput } from '../molecules/ChatInput';
-import { User, MoreVertical, Flag, Ban, Star, Users } from 'lucide-react';
+import { User, MoreVertical, Flag, Ban, Star, Users, ExternalLink } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { StarRating } from '../atoms/StarRating';
@@ -29,11 +29,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const t = useTranslations();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [request, setRequest] = useState<HelpRequest | null>(null);
 
   const handleSendMessageLocally = (content: string) => {
     // Optimistic update
     const tempMsg: Message = {
-      id: Math.random().toString(),
+      id: `temp-${Math.random().toString(36).slice(2)}`,
       conversation_id: conversation.id,
       sender_id: currentUserId,
       content,
@@ -63,6 +64,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [supabase, currentUserId]);
 
   useEffect(() => {
+    const fetchRequest = async () => {
+      if (conversation.request_id) {
+        const { data } = await supabase
+          .from('help_requests')
+          .select('*')
+          .eq('id', conversation.request_id)
+          .single();
+        setRequest(data);
+      }
+    };
+    fetchRequest();
+
     const fetchMessages = async () => {
       setLoading(true);
       try {
@@ -89,44 +102,46 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
     // Subscribe to new messages
     const channelName = `messages:${conversation.id}:${Math.random().toString(36).slice(2)}`;
+    console.log('Subscribing to realtime messages for conversation:', conversation.id);
     const channel = supabase
       .channel(channelName)
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'messages',
           filter: `conversation_id=eq.${conversation.id}`,
         },
-        (payload: { new: Message }) => {
-          const newMessage = payload.new as Message;
-          console.log('Received new message via realtime:', newMessage);
-          setMessages((prev) => {
-            if (prev.find((m) => m.id === newMessage.id)) return prev;
-            return [...prev, newMessage];
-          });
+        (payload: any) => {
+          if (payload.eventType === 'INSERT') {
+            const newMessage = payload.new as Message;
+            console.log('Received new message via realtime:', newMessage);
 
-          // Mark as read if it's from the other person
-          if (newMessage.sender_id !== currentUserId) {
-            markAsRead(newMessage.id);
+            setMessages((prev) => {
+              const filtered =
+                newMessage.sender_id === currentUserId
+                  ? prev.filter((m) => !m.id.startsWith('temp-'))
+                  : prev;
+
+              if (filtered.find((m) => m.id === newMessage.id)) return filtered;
+              return [...filtered, newMessage];
+            });
+
+            if (newMessage.sender_id !== currentUserId) {
+              markAsRead(newMessage.id);
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedMessage = payload.new as Message;
+            setMessages((prev) =>
+              prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m)),
+            );
           }
         },
       )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'messages',
-          filter: `conversation_id=eq.${conversation.id}`,
-        },
-        (payload: { new: Message }) => {
-          const updatedMessage = payload.new as Message;
-          setMessages((prev) => prev.map((m) => (m.id === updatedMessage.id ? updatedMessage : m)));
-        },
-      )
-      .subscribe();
+      .subscribe((status: string) => {
+        console.log(`Realtime subscription status for ${channelName}:`, status);
+      });
 
     return () => {
       console.log('Unsubscribing from channel:', channelName);
@@ -141,21 +156,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [messages]);
 
   useEffect(() => {
-    // Mark all existing unread messages from the other person as read
+    // Mark all existing unread messages from the other person as read immediately
     const markAllRead = async () => {
-      const unreadIds = messages
-        .filter((m) => !m.is_read && m.sender_id !== currentUserId)
-        .map((m) => m.id);
+      const { error } = await supabase
+        .from('messages')
+        .update({ is_read: true })
+        .eq('conversation_id', conversation.id)
+        .neq('sender_id', currentUserId)
+        .eq('is_read', false);
 
-      if (unreadIds.length > 0) {
-        await supabase.from('messages').update({ is_read: true }).in('id', unreadIds);
+      if (error) {
+        console.error('Error marking messages as read:', error);
+      } else {
+        console.log(`Marked messages as read for conversation ${conversation.id}`);
       }
     };
 
-    if (!loading) {
-      markAllRead();
-    }
-  }, [messages, loading, currentUserId]);
+    markAllRead();
+  }, [conversation.id, currentUserId, supabase]);
 
   const otherParticipantId = conversation.is_group
     ? null
@@ -269,8 +287,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
       </div>
 
+      {/* Request Preview for Group Chats */}
+      {conversation.is_group && request && (
+        <div className="bg-brand-surface border-b border-brand-border px-4 py-2 flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold uppercase text-brand-text-secondary">
+              Linked Request
+            </span>
+            <span className="text-sm font-medium text-brand-text-main truncate max-w-md">
+              {request.title}
+            </span>
+          </div>
+          <a
+            href={`/requests?id=${request.id}`}
+            className="text-brand-primary hover:text-brand-primary/80 transition-colors"
+            title="View Request"
+          >
+            <ExternalLink size={18} />
+          </a>
+        </div>
+      )}
+
       {/* Messages */}
-      <div ref={scrollRef} className="grow overflow-y-auto p-4 md:px-12 md:py-8 space-y-1">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:px-12 md:py-8 space-y-1">
         {loading ? (
           <div className="flex justify-center items-center h-full">
             <p className="text-brand-text-secondary">Loading messages...</p>
@@ -293,13 +332,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {/* Input */}
-      {currentUserProfile?.is_restricted ? (
-        <div className="bg-brand-surface px-4 py-3 text-center text-sm text-brand-error border-t border-brand-border">
-          {t('messaging_restricted')}
-        </div>
-      ) : (
-        <ChatInput onSendMessage={handleSendMessageLocally} />
-      )}
+      <div className="shrink-0 bg-chat-header border-t border-brand-border pb-safe">
+        {currentUserProfile?.is_restricted ? (
+          <div className="px-4 py-3 text-center text-sm text-brand-error">
+            {t('messaging_restricted')}
+          </div>
+        ) : (
+          <ChatInput onSendMessage={handleSendMessageLocally} />
+        )}
+      </div>
 
       {/* Rating Modal */}
       <RatingModal

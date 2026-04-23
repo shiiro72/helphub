@@ -51,7 +51,9 @@ export const ChatList: React.FC<ChatListProps> = ({
               <div className="grow text-left overflow-hidden">
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1 min-w-0">
-                    <h3 className="font-semibold text-brand-text-main truncate">
+                    <h3
+                      className={`text-brand-text-main truncate ${(conv.unreadCount || 0) > 0 ? 'font-black' : 'font-medium'}`}
+                    >
                       {conv.is_group ? conv.title : conv.profiles?.username || 'User'}
                     </h3>
                     {!conv.is_group && (
@@ -65,7 +67,22 @@ export const ChatList: React.FC<ChatListProps> = ({
                     })}
                   </span>
                 </div>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">Click to chat</p>
+                <div className="flex justify-between items-center gap-2">
+                  <p
+                    className={`text-sm truncate grow ${
+                      (conv.unreadCount || 0) > 0
+                        ? 'text-brand-text-main font-bold'
+                        : 'text-brand-text-secondary/70'
+                    }`}
+                  >
+                    {conv.lastMessage?.content || 'Click to chat'}
+                  </p>
+                  {(conv.unreadCount || 0) > 0 && (
+                    <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-brand-error rounded-full shrink-0">
+                      {conv.unreadCount! > 99 ? '99+' : conv.unreadCount}
+                    </span>
+                  )}
+                </div>
               </div>
             </button>
           ))
