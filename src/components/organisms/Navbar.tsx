@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Button } from '../atoms/Button';
 import { NavLink } from '../molecules/NavLink';
 import { createClient } from '@/lib/supabase/client';
-import { LogOut, User, Menu, X, Settings, Shield, MessageCircle } from 'lucide-react';
+import { LogOut, User, Menu, X, Shield, MessageCircle } from 'lucide-react';
 import { ProfileSettingsModal } from './ProfileSettingsModal';
 import { SupportTicketModal } from './SupportTicketModal';
 import { Profile } from '@/lib/types';
@@ -51,14 +51,14 @@ export function Navbar() {
   return (
     <>
       <nav className="border-b border-brand-border bg-brand-surface/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-50">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-8">
               <Link href="/" className="text-xl font-bold tracking-tighter">
                 HelpHub
               </Link>
 
-              <div className="hidden md:flex items-center gap-6">
+              <div className="hidden lg:flex items-center gap-6">
                 <NavLink href="/requests">{t('browse_requests')}</NavLink>
                 <NavLink href="/offers">{t('browse_offers')}</NavLink>
                 {user && <NavLink href="/my-posts">{t('my_posts')}</NavLink>}
@@ -86,7 +86,7 @@ export function Navbar() {
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden lg:flex items-center space-x-4">
               <LanguageSwitcher variant="desktop" />
               {user ? (
                 <>
@@ -98,7 +98,11 @@ export function Navbar() {
                       <User size={18} />
                       <span className="flex items-center gap-1">
                         {profile?.username || user.user_metadata?.full_name || user.email}
-                        <VerificationBadge isVerified={profile?.is_verified} size={14} className="text-brand-primary" />
+                        <VerificationBadge
+                          isVerified={profile?.is_verified}
+                          size={14}
+                          className="text-brand-primary"
+                        />
                       </span>
                     </button>
                   </div>
@@ -128,10 +132,11 @@ export function Navbar() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="md:hidden flex items-center">
+            <div className="lg:hidden flex items-center">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="text-brand-text-secondary hover:text-brand-text-main"
+                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -141,91 +146,101 @@ export function Navbar() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-brand-border p-4 space-y-3 bg-brand-surface">
-            <NavLink href="/requests" mobile onClick={() => setIsMenuOpen(false)}>
-              {t('browse_requests')}
-            </NavLink>
-
-            <NavLink href="/offers" mobile onClick={() => setIsMenuOpen(false)}>
-              {t('browse_offers')}
-            </NavLink>
-
-            {user && (
-              <NavLink href="/my-posts" mobile onClick={() => setIsMenuOpen(false)}>
-                {t('my_posts')}
+          <>
+            <div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden top-16"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <div className="lg:hidden border-t border-brand-border p-4 space-y-3 bg-brand-surface backdrop-blur-md relative z-50 shadow-xl">
+              <NavLink href="/requests" mobile onClick={() => setIsMenuOpen(false)}>
+                {t('browse_requests')}
               </NavLink>
-            )}
 
-            {user && (
-              <NavLink href="/messages" mobile onClick={() => setIsMenuOpen(false)}>
-                <div className="flex items-center justify-between w-full">
-                  {t('messages')}
-                  {unreadCount > 0 && (
-                    <span className="flex items-center justify-center min-w-[20px] h-[20px] px-1 text-[11px] font-bold text-white bg-brand-error rounded-full">
-                      {unreadCount > 99 ? '99+' : unreadCount}
+              <NavLink href="/offers" mobile onClick={() => setIsMenuOpen(false)}>
+                {t('browse_offers')}
+              </NavLink>
+
+              {user && (
+                <NavLink href="/my-posts" mobile onClick={() => setIsMenuOpen(false)}>
+                  {t('my_posts')}
+                </NavLink>
+              )}
+
+              {user && (
+                <NavLink href="/messages" mobile onClick={() => setIsMenuOpen(false)}>
+                  <div className="flex items-center justify-between w-full">
+                    {t('messages')}
+                    {unreadCount > 0 && (
+                      <span className="flex items-center justify-center min-w-[20px] h-[20px] px-1 text-[11px] font-bold text-white bg-brand-error rounded-full">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
+                  </div>
+                </NavLink>
+              )}
+
+              {profile?.role === 'admin' && (
+                <NavLink href="/admin" mobile onClick={() => setIsMenuOpen(false)}>
+                  <div className="flex items-center gap-1">
+                    <Shield size={16} />
+                    {t('admin_board')}
+                  </div>
+                </NavLink>
+              )}
+
+              <LanguageSwitcher variant="mobile" onLanguageChange={() => setIsMenuOpen(false)} />
+
+              {user ? (
+                <>
+                  <button
+                    onClick={() => {
+                      setIsSettingsOpen(true);
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-brand-text-secondary hover:text-brand-text-main transition-colors"
+                  >
+                    <User size={18} />
+                    <span className="flex items-center gap-1">
+                      {profile?.username || user.user_metadata?.full_name || user.email}
+                      <VerificationBadge
+                        isVerified={profile?.is_verified}
+                        size={14}
+                        className="text-brand-primary"
+                      />
                     </span>
-                  )}
-                </div>
-              </NavLink>
-            )}
-
-            {profile?.role === 'admin' && (
-              <NavLink href="/admin" mobile onClick={() => setIsMenuOpen(false)}>
-                <div className="flex items-center gap-1">
-                  <Shield size={16} />
-                  {t('admin_board')}
-                </div>
-              </NavLink>
-            )}
-
-            <LanguageSwitcher variant="mobile" onLanguageChange={() => setIsMenuOpen(false)} />
-
-            {user ? (
-              <>
-                <button
-                  onClick={() => {
-                    setIsSettingsOpen(true);
-                    setIsMenuOpen(false);
-                  }}
-                  className="flex items-center gap-2 px-2 py-1 text-sm font-medium text-brand-text-secondary hover:text-brand-text-main transition-colors"
-                >
-                  <User size={18} />
-                  <span className="flex items-center gap-1">
-                    {profile?.username || user.user_metadata?.full_name || user.email}
-                    <VerificationBadge isVerified={profile?.is_verified} size={14} className="text-brand-primary" />
-                  </span>
-                </button>
-                <Button
-                  variant="outline"
-                  size="full"
-                  onClick={() => {
-                    setIsSupportOpen(true);
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <MessageCircle size={16} className="mr-2" />
-                  {t('support')}
-                </Button>
-                <Button variant="outline" size="full" onClick={handleLogout}>
-                  <LogOut size={16} className="mr-2" />
-                  {t('logout')}
-                </Button>
-              </>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <Link href="/login" className="w-full">
-                  <Button variant="outline" size="full">
-                    {t('login')}
+                  </button>
+                  <Button
+                    variant="outline"
+                    size="full"
+                    onClick={() => {
+                      setIsSupportOpen(true);
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <MessageCircle size={16} className="mr-2" />
+                    {t('support')}
                   </Button>
-                </Link>
-                <Link href="/register" className="w-full">
-                  <Button variant="primary" size="full">
-                    {t('signup')}
+                  <Button variant="outline" size="full" onClick={handleLogout}>
+                    <LogOut size={16} className="mr-2" />
+                    {t('logout')}
                   </Button>
-                </Link>
-              </div>
-            )}
-          </div>
+                </>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <Link href="/login" className="w-full">
+                    <Button variant="outline" size="full">
+                      {t('login')}
+                    </Button>
+                  </Link>
+                  <Link href="/register" className="w-full">
+                    <Button variant="primary" size="full">
+                      {t('signup')}
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </>
         )}
 
         {profile?.is_restricted && (

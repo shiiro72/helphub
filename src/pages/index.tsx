@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/atoms/Button';
 import Link from 'next/link';
-import { Heart, HandHelping, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { HelpRequest, HelpOffer } from '@/lib/types';
@@ -50,12 +50,12 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-6 pt-4 pb-10">
         <div className="space-y-12">
           {/* Desktop View: Triangular Board */}
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <TriangularBoard requests={latestRequests} offers={latestOffers} loading={loading} />
           </div>
 
           {/* Mobile View: Traditional Grids */}
-          <div className="md:hidden space-y-16">
+          <div className="lg:hidden space-y-16">
             {/* Latest Requests Section */}
             <section className="space-y-8">
               <div className="flex items-center justify-between">
