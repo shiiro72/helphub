@@ -65,10 +65,15 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
 
   return (
     <div
-      className={`rounded-xl border p-4 shadow-sm hover:shadow-md transition-all flex items-center gap-4 ${
+      className={`rounded-xl border p-4 shadow-sm hover:shadow-md transition-all flex items-center gap-4 relative overflow-hidden ${
         isMatch ? 'bg-yellow-50/50 border-yellow-200' : 'bg-brand-surface border-brand-border'
       }`}
     >
+      <div className="absolute top-0 right-0">
+        <div className="bg-brand-primary text-white text-[8px] font-bold px-2 py-0.5 rounded-bl-md">
+          {t('request').toUpperCase()}
+        </div>
+      </div>
       <div className="grow min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <div className="flex items-center gap-2">

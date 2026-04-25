@@ -17,6 +17,7 @@ import { ConfirmationModal } from '@/components/molecules/ConfirmationModal';
 
 type MyPostItem = (HelpRequest | HelpOffer) & { type: 'request' | 'offer' };
 type StatusFilter = 'all' | 'active' | 'archived';
+type TypeFilter = 'all' | 'request' | 'offer';
 
 export default function MyPostsPage() {
   const t = useTranslations();
@@ -24,6 +25,7 @@ export default function MyPostsPage() {
   const { user, loading: authLoading } = useAuth();
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [items, setItems] = useState<MyPostItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -122,13 +124,13 @@ export default function MyPostsPage() {
 
     if (!matchesSearch) return false;
 
-    if (statusFilter === 'all') return true;
-
     const now = new Date();
     const isExpired = item.end_datetime ? new Date(item.end_datetime) < now : false;
 
-    if (statusFilter === 'active') return !isExpired;
-    if (statusFilter === 'archived') return isExpired;
+    if (statusFilter === 'active' && isExpired) return false;
+    if (statusFilter === 'archived' && !isExpired) return false;
+
+    if (typeFilter !== 'all' && item.type !== typeFilter) return false;
 
     return true;
   });
@@ -162,20 +164,38 @@ export default function MyPostsPage() {
                 />
               </div>
 
-              <div className="flex items-center gap-2 bg-brand-border/30 p-1 rounded-lg self-start">
-                {(['all', 'active', 'archived'] as StatusFilter[]).map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => setStatusFilter(status)}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      statusFilter === status
-                        ? 'bg-brand-surface shadow-sm text-brand-text-main'
-                        : 'text-brand-text-secondary hover:text-brand-text-main'
-                    }`}
-                  >
-                    {t(status)}
-                  </button>
-                ))}
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2 bg-brand-border/30 p-1 rounded-lg">
+                  {(['all', 'active', 'archived'] as StatusFilter[]).map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setStatusFilter(status)}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                        statusFilter === status
+                          ? 'bg-brand-surface shadow-sm text-brand-text-main'
+                          : 'text-brand-text-secondary hover:text-brand-text-main'
+                      }`}
+                    >
+                      {t(status)}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 bg-brand-border/30 p-1 rounded-lg">
+                  {(['all', 'request', 'offer'] as TypeFilter[]).map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setTypeFilter(type)}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                        typeFilter === type
+                          ? 'bg-brand-surface shadow-sm text-brand-text-main'
+                          : 'text-brand-text-secondary hover:text-brand-text-main'
+                      }`}
+                    >
+                      {type === 'all' ? t('all_types') : type === 'request' ? t('requests') : t('offers')}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -257,7 +277,7 @@ export default function MyPostsPage() {
             </div>
           ) : (
             <div className="text-center py-20 border-2 border-dashed border-brand-border rounded-2xl">
-              <p className="text-brand-text-secondary">{t('no_requests')}</p>
+              <p className="text-brand-text-secondary">{t('no_posts')}</p>
             </div>
           )}
         </div>
