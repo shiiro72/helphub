@@ -87,7 +87,7 @@ export default function ResetPasswordPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={!showPassword ? 'text-brand-text-secondary' : 'text-brand-text-main'}
+                  className={!showPassword ? 'text-brand-outline-variant' : 'text-brand-text-main'}
                   required
                 />
                 <button
@@ -108,7 +108,7 @@ export default function ResetPasswordPage() {
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={!showConfirmPassword ? 'text-brand-text-secondary' : 'text-brand-text-main'}
+                  className={!showConfirmPassword ? 'text-brand-outline-variant' : 'text-brand-text-main'}
                   required
                 />
                 <button

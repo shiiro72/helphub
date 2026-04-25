@@ -147,7 +147,7 @@ export function Navbar() {
               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden top-16"
               onClick={() => setIsMenuOpen(false)}
             />
-            <div className="lg:hidden border-t border-brand-border p-4 space-y-3 bg-brand-surface-container relative z-50 shadow-xl">
+            <div className="lg:hidden border-t border-brand-border p-4 space-y-3 bg-brand-surface/80 backdrop-blur-md relative z-50 shadow-xl">
               <NavLink href="/requests" mobile onClick={() => setIsMenuOpen(false)}>
               {t('browse_requests')}
             </NavLink>
