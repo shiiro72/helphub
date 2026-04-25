@@ -76,7 +76,7 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
               <Highlight text={request.title} query={searchQuery} />
             </h3>
             {request.reward_offer && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-brand-secondary text-brand-text-main font-medium whitespace-nowrap">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-brand-secondary text-white font-medium whitespace-nowrap">
                 {t('reward')}: {request.reward_offer}
               </span>
             )}
