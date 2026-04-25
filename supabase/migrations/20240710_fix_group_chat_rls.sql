@@ -44,3 +44,12 @@ CREATE POLICY "Users can view their own conversations." ON conversations
     auth.uid() = participant_2 OR
     public.is_member_of_conversation(id)
   );
+
+-- Add DELETE policy for conversations
+-- Allows only the creator (participant_1) to delete the conversation
+DROP POLICY IF EXISTS "Creators can delete their own conversations." ON conversations;
+
+CREATE POLICY "Creators can delete their own conversations." ON conversations
+  FOR DELETE USING (
+    auth.uid() = participant_1
+  );
