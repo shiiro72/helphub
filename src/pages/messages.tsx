@@ -127,12 +127,16 @@ export default function MessagesPage() {
           const joinedMembers =
             (conv.members as unknown as { profiles: Profile }[])?.map((m) => m.profiles) || [];
 
-          // Ensure participant_1 (creator) is in members list for group chats
-          const creator = conv.participant_1_profile as unknown as Profile;
-          const members = [...joinedMembers];
-          if (creator && !members.find((m) => m.id === creator.id)) {
-            members.unshift(creator);
-          }
+          // Ensure participant_1 (creator) and participant_2 are in members list for group chats
+          const p1 = conv.participant_1_profile as unknown as Profile;
+          const p2 = conv.participant_2_profile as unknown as Profile;
+
+          const membersMap = new Map<string, Profile>();
+          joinedMembers.forEach(m => membersMap.set(m.id, m));
+          if (p1) membersMap.set(p1.id, p1);
+          if (p2) membersMap.set(p2.id, p2);
+
+          const members = Array.from(membersMap.values());
 
           return {
             ...conv,

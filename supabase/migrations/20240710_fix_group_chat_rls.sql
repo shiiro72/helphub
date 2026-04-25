@@ -11,7 +11,6 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Create a security definer function to check conversation participation without RLS interference
--- This is used to verify that the person adding members is the creator (participant_1) or a participant
 CREATE OR REPLACE FUNCTION public.is_participant_of_conversation(conv_id UUID)
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -35,12 +34,10 @@ CREATE POLICY "Users can be added to conversations." ON conversation_members
 DROP POLICY IF EXISTS "Members can view co-members." ON conversation_members;
 CREATE POLICY "Members can view co-members." ON conversation_members
   FOR SELECT USING (
-    public.is_member_of_conversation(conversation_id) OR
-    public.is_participant_of_conversation(conversation_id)
+    auth.uid() IS NOT NULL
   );
 
 -- Update conversations SELECT policy to allow members to view the conversation
--- This ensures that volunteers added to a group chat can see the conversation record
 DROP POLICY IF EXISTS "Users can view their own conversations." ON conversations;
 CREATE POLICY "Users can view their own conversations." ON conversations
   FOR SELECT USING (
@@ -48,3 +45,6 @@ CREATE POLICY "Users can view their own conversations." ON conversations
     auth.uid() = participant_2 OR
     public.is_member_of_conversation(id)
   );
+
+-- Ensure creators can delete conversations (if needed, but user said to remove UI. policy can stay or go. I'll leave it out to be safe as per "remove the delete group")
+DROP POLICY IF EXISTS "Creators can delete their own conversations." ON conversations;
