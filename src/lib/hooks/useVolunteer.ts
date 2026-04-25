@@ -94,6 +94,21 @@ export const useVolunteer = (requestId: string) => {
       .eq('user_id', userId);
 
     if (!error) {
+      // Find existing group chat for this request and add the newly promoted volunteer
+      const { data: conversation } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('request_id', requestId)
+        .eq('is_group', true)
+        .maybeSingle();
+
+      if (conversation) {
+        await supabase.from('conversation_members').upsert({
+          conversation_id: conversation.id,
+          user_id: userId
+        });
+      }
+
       fetchVolunteerStatus();
     }
     setIsLoading(false);

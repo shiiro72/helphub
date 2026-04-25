@@ -124,10 +124,19 @@ export default function MessagesPage() {
         const lastMessage = conv.messages?.[0];
 
         if (conv.is_group) {
+          const joinedMembers =
+            (conv.members as unknown as { profiles: Profile }[])?.map((m) => m.profiles) || [];
+
+          // Ensure participant_1 (creator) is in members list for group chats
+          const creator = conv.participant_1_profile as unknown as Profile;
+          const members = [...joinedMembers];
+          if (creator && !members.find((m) => m.id === creator.id)) {
+            members.unshift(creator);
+          }
+
           return {
             ...conv,
-            members:
-              (conv.members as unknown as { profiles: Profile }[])?.map((m) => m.profiles) || [],
+            members,
             lastMessage,
           } as Conversation;
         }
@@ -179,7 +188,6 @@ export default function MessagesPage() {
     [supabase],
   );
 
-  // Sync active conversation when conversations list updates or when initial sync is needed
   useEffect(() => {
     if (!user || conversations.length === 0) return;
 
@@ -204,7 +212,6 @@ export default function MessagesPage() {
       }
     }
 
-    // Update active conversation with fresh data from the list
     if (activeConversation) {
       const updated = conversations.find((c) => c.id === activeConversation.id);
       if (updated && JSON.stringify(updated) !== JSON.stringify(activeConversation)) {

@@ -62,6 +62,9 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
       } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // Only include confirmed volunteers
+      const confirmedVolunteers = volunteers.filter((v) => v.status === 'confirmed');
+
       // 1. Check if group chat already exists for this request
       const { data: existing } = await supabase
         .from('conversations')
@@ -71,11 +74,11 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
         .maybeSingle();
 
       if (existing) {
-        // Find volunteers who are not yet members
+        // Find confirmed volunteers who are not yet members
         const currentMemberIds = new Set(
           (existing.members as { user_id: string }[]).map((m) => m.user_id),
         );
-        const newVolunteers = volunteers.filter((v) => !currentMemberIds.has(v.user_id));
+        const newVolunteers = confirmedVolunteers.filter((v) => !currentMemberIds.has(v.user_id));
 
         if (newVolunteers.length > 0) {
           const memberEntries = newVolunteers.map((v) => ({
@@ -104,16 +107,17 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
 
       if (convError) throw convError;
 
-      // 3. Add owner and all volunteers as members directly
+      // 3. Add owner and all confirmed volunteers as members directly
       const memberEntries = [
-        { conversation_id: conversation.id, user_id: user.id },
-        ...volunteers.map((v) => ({
+        { conversation_id: conversation.id, user_id: user.id }, // Owner (participant_1)
+        { conversation_id: conversation.id, user_id: request.user_id }, // Request creator (poster)
+        ...confirmedVolunteers.map((v) => ({
           conversation_id: conversation.id,
           user_id: v.user_id,
         })),
       ];
 
-      // Remove duplicates if owner is also a volunteer
+      // Remove duplicates
       const uniqueMemberEntries = Array.from(new Set(memberEntries.map((m) => m.user_id))).map(
         (id) => ({
           conversation_id: conversation.id,
