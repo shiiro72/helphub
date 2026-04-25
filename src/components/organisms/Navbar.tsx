@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Button } from '../atoms/Button';
 import { NavLink } from '../molecules/NavLink';
 import { createClient } from '@/lib/supabase/client';
-import { LogOut, User, Menu, X, Settings, Shield, MessageCircle } from 'lucide-react';
+import { LogOut, User, Menu, X, Shield, MessageCircle } from 'lucide-react';
 import { ProfileSettingsModal } from './ProfileSettingsModal';
 import { SupportTicketModal } from './SupportTicketModal';
 import { Profile } from '@/lib/types';
@@ -58,7 +58,7 @@ export function Navbar() {
                 HelpHub
               </Link>
 
-              <div className="hidden md:flex items-center gap-6">
+              <div className="hidden lg:flex items-center gap-6">
                 <NavLink href="/requests">{t('browse_requests')}</NavLink>
                 <NavLink href="/offers">{t('browse_offers')}</NavLink>
                 {user && <NavLink href="/archive">{t('archive')}</NavLink>}
@@ -86,7 +86,7 @@ export function Navbar() {
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden lg:flex items-center space-x-4">
               <LanguageSwitcher variant="desktop" />
               {user ? (
                 <>
@@ -128,10 +128,11 @@ export function Navbar() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="md:hidden flex items-center">
+            <div className="lg:hidden flex items-center">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="text-brand-text-secondary hover:text-brand-text-main"
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -141,8 +142,13 @@ export function Navbar() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-brand-border p-4 space-y-3 bg-brand-surface">
-            <NavLink href="/requests" mobile onClick={() => setIsMenuOpen(false)}>
+          <>
+            <div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <div className="lg:hidden border-t border-brand-border p-4 space-y-3 bg-brand-surface relative z-50">
+              <NavLink href="/requests" mobile onClick={() => setIsMenuOpen(false)}>
               {t('browse_requests')}
             </NavLink>
 
@@ -224,8 +230,9 @@ export function Navbar() {
                   </Button>
                 </Link>
               </div>
-            )}
-          </div>
+              )}
+            </div>
+          </>
         )}
 
         {profile?.is_restricted && (

@@ -18,7 +18,7 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
 
   if (loading) {
     return (
-      <div className="relative w-full h-[850px] overflow-hidden bg-brand-background hidden md:block">
+      <div className="relative w-full h-[850px] overflow-hidden bg-brand-background hidden lg:block">
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-brand-text-secondary">
           <Loader2 className="w-12 h-12 animate-spin text-brand-primary/40" />
           <p className="text-xl font-medium animate-pulse">{t('processing')}</p>
@@ -28,7 +28,7 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
   }
 
   return (
-    <div className="relative w-full h-[850px] overflow-hidden bg-brand-background hidden md:block">
+    <div className="relative w-full h-[850px] overflow-hidden bg-brand-background hidden lg:block">
       {/* Diagonal Line - Stretched and rising */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none z-10"
