@@ -16,16 +16,16 @@ import { PostHelpModal } from '@/components/organisms/PostHelpModal';
 import { ConfirmationModal } from '@/components/molecules/ConfirmationModal';
 
 type MyPostItem = (HelpRequest | HelpOffer) & { type: 'request' | 'offer' };
-type StatusFilter = 'all' | 'active' | 'archived';
-type TypeFilter = 'all' | 'request' | 'offer';
+type StatusFilter = 'active' | 'archived';
+type TypeFilter = 'request' | 'offer';
 
 export default function MyPostsPage() {
   const t = useTranslations();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [view, setView] = useState<'grid' | 'list'>('grid');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [activeStatuses, setActiveStatuses] = useState<StatusFilter[]>(['active']);
+  const [activeTypes, setActiveTypes] = useState<TypeFilter[]>(['request', 'offer']);
   const [items, setItems] = useState<MyPostItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -126,14 +126,27 @@ export default function MyPostsPage() {
 
     const now = new Date();
     const isExpired = item.end_datetime ? new Date(item.end_datetime) < now : false;
+    const status = isExpired ? 'archived' : 'active';
 
-    if (statusFilter === 'active' && isExpired) return false;
-    if (statusFilter === 'archived' && !isExpired) return false;
-
-    if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+    if (activeStatuses.length > 0 && !activeStatuses.includes(status)) return false;
+    if (activeTypes.length > 0 && !activeTypes.includes(item.type)) return false;
 
     return true;
   });
+
+  const toggleStatus = (status: StatusFilter) => {
+    setActiveStatuses((prev) => {
+      const next = prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status];
+      return next.length === 0 ? ['active', 'archived'] : next;
+    });
+  };
+
+  const toggleType = (type: TypeFilter) => {
+    setActiveTypes((prev) => {
+      const next = prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type];
+      return next.length === 0 ? ['request', 'offer'] : next;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-brand-background">
@@ -165,12 +178,12 @@ export default function MyPostsPage() {
               </div>
 
               <div className="flex items-center gap-2 bg-brand-border/30 p-1 rounded-lg w-fit">
-                {(['all', 'active', 'archived'] as StatusFilter[]).map((status) => (
+                {(['active', 'archived'] as StatusFilter[]).map((status) => (
                   <button
                     key={status}
-                    onClick={() => setStatusFilter(status)}
+                    onClick={() => toggleStatus(status)}
                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      statusFilter === status
+                      activeStatuses.includes(status) && activeStatuses.length < 2
                         ? 'bg-brand-surface shadow-sm text-brand-text-main'
                         : 'text-brand-text-secondary hover:text-brand-text-main'
                     }`}
@@ -179,21 +192,17 @@ export default function MyPostsPage() {
                   </button>
                 ))}
                 <div className="w-px h-6 bg-brand-border mx-1" />
-                {(['all', 'request', 'offer'] as TypeFilter[]).map((type) => (
+                {(['request', 'offer'] as TypeFilter[]).map((type) => (
                   <button
                     key={type}
-                    onClick={() => setTypeFilter(type)}
+                    onClick={() => toggleType(type)}
                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      typeFilter === type
+                      activeTypes.includes(type) && activeTypes.length < 2
                         ? 'bg-brand-surface shadow-sm text-brand-text-main'
                         : 'text-brand-text-secondary hover:text-brand-text-main'
                     }`}
                   >
-                    {type === 'all'
-                      ? t('all_types')
-                      : type === 'request'
-                        ? t('requests')
-                        : t('offers')}
+                    {type === 'request' ? t('requests') : t('offers')}
                   </button>
                 ))}
               </div>
