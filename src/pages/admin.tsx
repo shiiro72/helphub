@@ -137,7 +137,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black">
+    <div className="min-h-screen bg-brand-background">
       <Head>
         <title>{`${t('admin_board')} | HelpHub`}</title>
       </Head>
@@ -148,24 +148,24 @@ export default function AdminPage() {
           <div className="p-2 bg-brand-success/10 rounded-lg">
             <Shield className="text-brand-success" size={28} />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+          <h1 className="text-3xl font-bold tracking-tight text-brand-text-main">
             {t('admin_board')}
           </h1>
         </div>
 
-        <div className="flex gap-4 border-b border-zinc-200 dark:border-zinc-800 mb-6">
+        <div className="flex gap-4 border-b border-brand-border mb-6">
           <button
             onClick={() => setActiveTab('reports')}
             className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
               activeTab === 'reports'
                 ? 'text-brand-success'
-                : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                : 'text-brand-text-secondary hover:text-brand-text-main'
             }`}
           >
             <div className="flex items-center gap-2">
               <Flag size={18} />
               {t('reports')}
-              <span className="ml-1 px-2 py-0.5 text-xs bg-zinc-100 dark:bg-zinc-800 rounded-full">
+              <span className="ml-1 px-2 py-0.5 text-xs bg-brand-surface-container-low rounded-full">
                 {reports.length}
               </span>
             </div>
@@ -178,13 +178,13 @@ export default function AdminPage() {
             className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
               activeTab === 'tickets'
                 ? 'text-brand-success'
-                : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                : 'text-brand-text-secondary hover:text-brand-text-main'
             }`}
           >
             <div className="flex items-center gap-2">
               <MessageSquare size={18} />
               {t('support_tickets')}
-              <span className="ml-1 px-2 py-0.5 text-xs bg-zinc-100 dark:bg-zinc-800 rounded-full">
+              <span className="ml-1 px-2 py-0.5 text-xs bg-brand-surface-container-low rounded-full">
                 {tickets.length}
               </span>
             </div>
@@ -197,13 +197,13 @@ export default function AdminPage() {
             className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
               activeTab === 'banned'
                 ? 'text-brand-success'
-                : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                : 'text-brand-text-secondary hover:text-brand-text-main'
             }`}
           >
             <div className="flex items-center gap-2">
               <Ban size={18} />
               {t('banned_users')}
-              <span className="ml-1 px-2 py-0.5 text-xs bg-zinc-100 dark:bg-zinc-800 rounded-full">
+              <span className="ml-1 px-2 py-0.5 text-xs bg-brand-surface-container-low rounded-full">
                 {bannedUsers.length}
               </span>
             </div>
@@ -216,13 +216,13 @@ export default function AdminPage() {
             className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
               activeTab === 'flagged'
                 ? 'text-brand-success'
-                : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
+                : 'text-brand-text-secondary hover:text-brand-text-main'
             }`}
           >
             <div className="flex items-center gap-2">
               <Flag size={18} />
               {t('flagged_users')}
-              <span className="ml-1 px-2 py-0.5 text-xs bg-zinc-100 dark:bg-zinc-800 rounded-full">
+              <span className="ml-1 px-2 py-0.5 text-xs bg-brand-surface-container-low rounded-full">
                 {flaggedUsers.length}
               </span>
             </div>
@@ -239,27 +239,27 @@ export default function AdminPage() {
         ) : activeTab === 'reports' ? (
           <div className="space-y-4">
             {reports.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500">{t('no_reports')}</div>
+              <div className="text-center py-12 text-brand-text-secondary">{t('no_reports')}</div>
             ) : (
               reports.map((report) => (
                 <div
                   key={report.id}
-                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm"
+                  className="bg-brand-surface-container-lowest border border-brand-border rounded-xl p-5 shadow-sm"
                 >
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="grow">
                       <div className="flex items-center gap-4 mb-3">
                         <div className="flex flex-col">
-                          <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">
+                          <span className="text-xs text-brand-text-secondary uppercase tracking-wider font-bold">
                             {t('reporter')}
                           </span>
-                          <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                          <span className="font-medium text-brand-text-main">
                             {report.reporter?.username || 'Unknown'}
                           </span>
                         </div>
-                        <div className="h-8 w-px bg-zinc-200 dark:bg-zinc-800" />
+                        <div className="h-8 w-px bg-brand-border" />
                         <div className="flex flex-col">
-                          <span className="text-xs text-zinc-500 uppercase tracking-wider font-bold">
+                          <span className="text-xs text-brand-text-secondary uppercase tracking-wider font-bold">
                             {t('reported_user')}
                           </span>
                           <span className="font-medium text-red-600 dark:text-red-400">
@@ -267,8 +267,8 @@ export default function AdminPage() {
                           </span>
                         </div>
                       </div>
-                      <div className="bg-zinc-50 dark:bg-zinc-950 p-4 rounded-lg border border-zinc-100 dark:border-zinc-800">
-                        <p className="text-zinc-700 dark:text-zinc-300 italic">"{report.reason}"</p>
+                      <div className="bg-brand-surface-container-low p-4 rounded-lg border border-brand-border/40">
+                        <p className="text-brand-text-main italic">"{report.reason}"</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end shrink-0 gap-3">
@@ -281,7 +281,7 @@ export default function AdminPage() {
                         <Ban size={16} className="mr-2" />
                         {t('ban_user')}
                       </Button>
-                      <div className="flex items-center gap-1 text-xs text-zinc-500 mb-2">
+                      <div className="flex items-center gap-1 text-xs text-brand-text-secondary mb-2">
                         <Clock size={14} />
                         {new Date(report.created_at).toLocaleString()}
                       </div>
@@ -294,17 +294,17 @@ export default function AdminPage() {
         ) : activeTab === 'tickets' ? (
           <div className="space-y-4">
             {tickets.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500">{t('no_tickets')}</div>
+              <div className="text-center py-12 text-brand-text-secondary">{t('no_tickets')}</div>
             ) : (
               tickets.map((ticket) => (
                 <div
                   key={ticket.id}
-                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm"
+                  className="bg-brand-surface-container-lowest border border-brand-border rounded-xl p-5 shadow-sm"
                 >
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="grow">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                        <h3 className="text-lg font-bold text-brand-text-main">
                           {ticket.subject}
                         </h3>
                         <span
@@ -317,14 +317,14 @@ export default function AdminPage() {
                           {ticket.status}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-zinc-500 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-brand-text-secondary mb-4">
                         <User size={14} />
                         {ticket.profiles?.username || 'Unknown'}
                         <span className="mx-1">•</span>
                         <Clock size={14} />
                         {new Date(ticket.created_at).toLocaleString()}
                       </div>
-                      <p className="text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-950 p-4 rounded-lg border border-zinc-100 dark:border-zinc-800">
+                      <p className="text-brand-text-main bg-brand-surface-container-low p-4 rounded-lg border border-brand-border/40">
                         {ticket.message}
                       </p>
                     </div>
@@ -359,31 +359,31 @@ export default function AdminPage() {
         ) : activeTab === 'banned' ? (
           <div className="space-y-4">
             {bannedUsers.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500">{t('no_banned_users')}</div>
+              <div className="text-center py-12 text-brand-text-secondary">{t('no_banned_users')}</div>
             ) : (
               bannedUsers.map((user) => (
                 <div
                   key={user.id}
-                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm"
+                  className="bg-brand-surface-container-lowest border border-brand-border rounded-xl p-5 shadow-sm"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
                         <Ban className="text-red-500" size={18} />
-                        <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                        <span className="font-bold text-brand-text-main">
                           {user.username || 'Anonymous'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-zinc-500">
+                      <div className="flex items-center gap-2 text-sm text-brand-text-secondary">
                         <Mail size={14} />
                         {user.email}
                       </div>
-                      <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-950 p-3 rounded border border-zinc-100 dark:border-zinc-800">
+                      <div className="mt-2 text-sm text-brand-text-secondary bg-brand-surface-container-low p-3 rounded border border-brand-border/40">
                         <span className="font-medium mr-1">{t('reason')}:</span>
                         {user.reason || t('no_reason_provided')}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end text-xs text-zinc-500">
+                    <div className="flex flex-col items-end text-xs text-brand-text-secondary">
                       <div className="flex items-center gap-1">
                         <Clock size={14} />
                         {new Date(user.banned_at).toLocaleString()}
@@ -397,20 +397,20 @@ export default function AdminPage() {
         ) : (
           <div className="space-y-4">
             {flaggedUsers.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500">{t('no_flagged_users')}</div>
+              <div className="text-center py-12 text-brand-text-secondary">{t('no_flagged_users')}</div>
             ) : (
               flaggedUsers.map((user) => (
                 <div
                   key={user.id}
-                  className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm"
+                  className="bg-brand-surface-container-lowest border border-brand-border rounded-xl p-5 shadow-sm"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
-                        <User size={24} className="text-zinc-500" />
+                      <div className="w-12 h-12 rounded-full bg-brand-surface-container-high flex items-center justify-center overflow-hidden">
+                        <User size={24} className="text-brand-text-secondary" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                        <span className="font-bold text-brand-text-main">
                           {user.username}
                         </span>
                         <span className="text-xs text-red-500 font-medium uppercase tracking-wider">

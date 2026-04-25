@@ -378,7 +378,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-zinc-50 dark:bg-black overflow-hidden">
+    <div className="flex flex-col h-[100dvh] bg-brand-background overflow-hidden">
       <Head>
         <title>Messages | HelpHub</title>
       </Head>
@@ -394,14 +394,14 @@ export default function MessagesPage() {
                 {invitations.map((inv) => (
                   <div
                     key={inv.id}
-                    className="bg-white dark:bg-zinc-900 p-3 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800"
+                    className="bg-brand-surface-container-lowest p-3 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800"
                   >
                     <div className="flex items-start gap-3 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden">
-                        <User size={16} className="text-zinc-500" />
+                      <div className="w-8 h-8 rounded-full bg-brand-surface-container flex items-center justify-center shrink-0 overflow-hidden">
+                        <User size={16} className="text-brand-text-secondary" />
                       </div>
-                      <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-tight">
-                        <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                      <p className="text-xs text-brand-text-secondary leading-tight">
+                        <span className="font-bold text-brand-text-main">
                           {inv.inviter?.username}
                         </span>{' '}
                         {t('group_chat_invitation')}{' '}
@@ -464,20 +464,20 @@ export default function MessagesPage() {
               <div className="w-24 h-24 rounded-full bg-brand-success flex items-center justify-center mb-6">
                 <span className="text-white text-4xl font-bold">HH</span>
               </div>
-              <h2 className="text-2xl font-light text-zinc-900 dark:text-zinc-100 mb-2">
+              <h2 className="text-2xl font-bold text-brand-primary mb-2">
                 {t('messages_welcome_title')}
               </h2>
-              <p className="text-zinc-500 max-w-sm">{t('messages_welcome_desc')}</p>
+              <p className="text-brand-text-secondary max-w-sm">{t('messages_welcome_desc')}</p>
             </div>
           )}
         </div>
 
         {activeConversation && user && (
-          <div className="fixed inset-0 z-[60] md:hidden bg-white dark:bg-black overflow-hidden">
+          <div className="fixed inset-0 z-[60] md:hidden bg-brand-surface overflow-hidden">
             <div className="h-[100dvh] flex flex-col">
               <button
                 onClick={() => setActiveConversation(null)}
-                className="p-4 text-sm font-medium text-blue-600 flex items-center bg-white dark:bg-black border-b border-brand-border shrink-0"
+                className="p-4 text-sm font-medium text-brand-primary flex items-center bg-brand-surface border-b border-brand-border shrink-0"
               >
                 ← Back
               </button>
