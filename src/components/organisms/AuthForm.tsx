@@ -123,6 +123,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             value={password}
             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             onChange={(e) => setPassword(e.target.value)}
+            className={!showPassword ? 'text-brand-text-secondary' : 'text-brand-text-main'}
             required
           />
           <button

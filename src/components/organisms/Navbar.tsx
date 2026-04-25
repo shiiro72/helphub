@@ -51,7 +51,7 @@ export function Navbar() {
   return (
     <>
       <nav className="border-b border-brand-border bg-brand-surface/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-50">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-8">
               <Link href="/" className="text-xl font-bold tracking-tighter">
@@ -144,10 +144,10 @@ export function Navbar() {
         {isMenuOpen && (
           <>
             <div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden top-16"
               onClick={() => setIsMenuOpen(false)}
             />
-            <div className="lg:hidden border-t border-brand-border p-4 space-y-3 bg-brand-surface relative z-50">
+            <div className="lg:hidden border-t border-brand-border p-4 space-y-3 bg-brand-surface-container relative z-50 shadow-xl">
               <NavLink href="/requests" mobile onClick={() => setIsMenuOpen(false)}>
               {t('browse_requests')}
             </NavLink>
