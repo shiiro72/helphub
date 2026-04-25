@@ -72,7 +72,9 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
 
       if (existing) {
         // Find volunteers who are not yet members
-        const currentMemberIds = new Set((existing.members as any[]).map((m) => m.user_id));
+        const currentMemberIds = new Set(
+          (existing.members as { user_id: string }[]).map((m) => m.user_id),
+        );
         const newVolunteers = volunteers.filter((v) => !currentMemberIds.has(v.user_id));
 
         if (newVolunteers.length > 0) {
