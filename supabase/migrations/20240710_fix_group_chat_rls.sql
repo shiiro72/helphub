@@ -23,10 +23,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
--- Update conversation_members INSERT policy to use the new security definer functions
--- This allows creators (participants) to add members even before they are members themselves
+-- Update conversation_members policies
 DROP POLICY IF EXISTS "Users can be added to conversations." ON conversation_members;
-
 CREATE POLICY "Users can be added to conversations." ON conversation_members
   FOR INSERT WITH CHECK (
     auth.uid() = user_id OR
@@ -34,22 +32,19 @@ CREATE POLICY "Users can be added to conversations." ON conversation_members
     public.is_participant_of_conversation(conversation_id)
   );
 
+DROP POLICY IF EXISTS "Members can view co-members." ON conversation_members;
+CREATE POLICY "Members can view co-members." ON conversation_members
+  FOR SELECT USING (
+    public.is_member_of_conversation(conversation_id) OR
+    public.is_participant_of_conversation(conversation_id)
+  );
+
 -- Update conversations SELECT policy to allow members to view the conversation
 -- This ensures that volunteers added to a group chat can see the conversation record
 DROP POLICY IF EXISTS "Users can view their own conversations." ON conversations;
-
 CREATE POLICY "Users can view their own conversations." ON conversations
   FOR SELECT USING (
     auth.uid() = participant_1 OR
     auth.uid() = participant_2 OR
     public.is_member_of_conversation(id)
-  );
-
--- Add DELETE policy for conversations
--- Allows only the creator (participant_1) to delete the conversation
-DROP POLICY IF EXISTS "Creators can delete their own conversations." ON conversations;
-
-CREATE POLICY "Creators can delete their own conversations." ON conversations
-  FOR DELETE USING (
-    auth.uid() = participant_1
   );

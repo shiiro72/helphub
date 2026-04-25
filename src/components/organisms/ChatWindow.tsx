@@ -10,16 +10,13 @@ import {
   Star,
   Users,
   ExternalLink,
-  Trash2,
   X,
-  MessageSquare,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { StarRating } from '../atoms/StarRating';
 import { RatingModal } from '../molecules/RatingModal';
 import { useTranslations } from 'next-intl';
-import { Button } from '../atoms/Button';
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -207,22 +204,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   };
 
-  const handleDeleteGroup = async () => {
-    if (!confirm(t('delete_group_confirmation') || 'Are you sure you want to delete this group?'))
-      return;
-
-    const { error } = await supabase.from('conversations').delete().eq('id', conversation.id);
-
-    if (error) {
-      console.error('Error deleting group:', error);
-      alert('Failed to delete group.');
-    } else {
-      window.location.reload(); // Simple way to refresh state on delete
-    }
-  };
-
-  const isAdmin = conversation.participant_1 === currentUserId;
-
   return (
     <div className="flex flex-col h-full w-full bg-chat-bg relative">
       {/* Header */}
@@ -249,7 +230,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             {conversation.is_group ? (
               <div className="flex items-center gap-1">
                 <span className="text-[10px] text-brand-text-secondary">
-                  {conversation.members?.length || 0} {t('members') || 'members'}
+                  {conversation.members?.length || 0} {t('members')}
                 </span>
               </div>
             ) : (
@@ -282,20 +263,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
                   >
                     <Users size={16} />
-                    {t('see_members') || 'See Members'}
+                    {t('see_members')}
                   </button>
-                  {isAdmin && (
-                    <button
-                      onClick={() => {
-                        handleDeleteGroup();
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-error"
-                    >
-                      <Trash2 size={16} />
-                      {t('delete_group') || 'Delete Group'}
-                    </button>
-                  )}
                 </>
               ) : (
                 <>
@@ -307,7 +276,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-error"
                   >
                     <Ban size={16} />
-                    {t('block_user') || 'Block User'}
+                    {t('block_user')}
                   </button>
                   <button
                     onClick={() => {
@@ -317,7 +286,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
                   >
                     <Star size={16} />
-                    {t('rate_user') || 'Rate User'}
+                    {t('rate_user')}
                   </button>
                   <button
                     onClick={() => {
@@ -327,7 +296,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
                   >
                     <Flag size={16} />
-                    {t('report_user') || 'Report User'}
+                    {t('report_user')}
                   </button>
                 </>
               )}
@@ -341,7 +310,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         <div className="bg-brand-surface border-b border-brand-border px-4 py-2 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[10px] font-bold uppercase text-brand-text-secondary">
-              {t('linked_request') || 'Linked Request'}
+              {t('linked_request')}
             </span>
             <span className="text-sm font-medium text-brand-text-main truncate max-w-md">
               {request.title}
@@ -350,7 +319,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           <a
             href={`/requests?id=${request.id}`}
             className="text-brand-primary hover:text-brand-primary/80 transition-colors"
-            title={t('view_request') || 'View Request'}
+            title={t('view_request')}
           >
             <ExternalLink size={18} />
           </a>
@@ -361,7 +330,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:px-12 md:py-8 space-y-1">
         {loading ? (
           <div className="flex justify-center items-center h-full">
-            <p className="text-brand-text-secondary">{t('loading_messages') || 'Loading messages...'}</p>
+            <p className="text-brand-text-secondary">{t('loading_messages')}</p>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex justify-center items-center h-full">
@@ -396,7 +365,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-brand-surface w-full max-w-md rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]">
             <div className="p-4 border-b border-brand-border flex justify-between items-center bg-brand-surface sticky top-0 z-10">
-              <h2 className="text-lg font-bold text-brand-text-main">{t('group_members') || 'Group Members'}</h2>
+              <h2 className="text-lg font-bold text-brand-text-main">{t('group_members')}</h2>
               <button onClick={() => setShowMembersModal(false)} className="text-brand-text-secondary hover:text-brand-text-main">
                 <X size={20} />
               </button>
