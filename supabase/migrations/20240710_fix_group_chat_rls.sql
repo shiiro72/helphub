@@ -33,3 +33,14 @@ CREATE POLICY "Users can be added to conversations." ON conversation_members
     public.is_member_of_conversation(conversation_id) OR
     public.is_participant_of_conversation(conversation_id)
   );
+
+-- Update conversations SELECT policy to allow members to view the conversation
+-- This ensures that volunteers added to a group chat can see the conversation record
+DROP POLICY IF EXISTS "Users can view their own conversations." ON conversations;
+
+CREATE POLICY "Users can view their own conversations." ON conversations
+  FOR SELECT USING (
+    auth.uid() = participant_1 OR
+    auth.uid() = participant_2 OR
+    public.is_member_of_conversation(id)
+  );
