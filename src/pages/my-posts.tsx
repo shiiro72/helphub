@@ -24,8 +24,8 @@ export default function MyPostsPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [view, setView] = useState<'grid' | 'list'>('grid');
-  const [activeStatuses, setActiveStatuses] = useState<StatusFilter[]>(['active']);
-  const [activeTypes, setActiveTypes] = useState<TypeFilter[]>(['request', 'offer']);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter | null>('active');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter | null>(null);
   const [items, setItems] = useState<MyPostItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -128,24 +128,18 @@ export default function MyPostsPage() {
     const isExpired = item.end_datetime ? new Date(item.end_datetime) < now : false;
     const status = isExpired ? 'archived' : 'active';
 
-    if (activeStatuses.length > 0 && !activeStatuses.includes(status)) return false;
-    if (activeTypes.length > 0 && !activeTypes.includes(item.type)) return false;
+    if (statusFilter && status !== statusFilter) return false;
+    if (typeFilter && item.type !== typeFilter) return false;
 
     return true;
   });
 
   const toggleStatus = (status: StatusFilter) => {
-    setActiveStatuses((prev) => {
-      const next = prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status];
-      return next.length === 0 ? ['active', 'archived'] : next;
-    });
+    setStatusFilter((prev) => (prev === status ? null : status));
   };
 
   const toggleType = (type: TypeFilter) => {
-    setActiveTypes((prev) => {
-      const next = prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type];
-      return next.length === 0 ? ['request', 'offer'] : next;
-    });
+    setTypeFilter((prev) => (prev === type ? null : type));
   };
 
   return (
@@ -183,7 +177,7 @@ export default function MyPostsPage() {
                     key={status}
                     onClick={() => toggleStatus(status)}
                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      activeStatuses.includes(status) && activeStatuses.length < 2
+                      statusFilter === status
                         ? 'bg-brand-surface shadow-sm text-brand-text-main'
                         : 'text-brand-text-secondary hover:text-brand-text-main'
                     }`}
@@ -197,7 +191,7 @@ export default function MyPostsPage() {
                     key={type}
                     onClick={() => toggleType(type)}
                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      activeTypes.includes(type) && activeTypes.length < 2
+                      typeFilter === type
                         ? 'bg-brand-surface shadow-sm text-brand-text-main'
                         : 'text-brand-text-secondary hover:text-brand-text-main'
                     }`}
