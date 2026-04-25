@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { User, MessageSquare, Clock, Edit2, Trash2 } from 'lucide-react';
 import { HelpOffer } from '@/lib/types';
 import Link from 'next/link';
@@ -56,8 +56,8 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
               <Highlight text={offer.title} query={searchQuery} />
             </h3>
             {offer.reward_offer && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-brand-secondary text-brand-text-main font-medium whitespace-nowrap">
-                Reward: {offer.reward_offer}
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-brand-secondary text-white font-medium whitespace-nowrap">
+                {t('reward')}: {offer.reward_offer}
               </span>
             )}
           </div>

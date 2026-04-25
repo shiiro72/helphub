@@ -71,9 +71,16 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
     >
       <div className="grow min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <h3 className="text-base font-bold text-brand-text-main truncate">
-            <Highlight text={request.title} query={searchQuery} />
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-bold text-brand-text-main truncate">
+              <Highlight text={request.title} query={searchQuery} />
+            </h3>
+            {request.reward_offer && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-brand-secondary text-white font-medium whitespace-nowrap">
+                {t('reward')}: {request.reward_offer}
+              </span>
+            )}
+          </div>
           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-brand-background text-brand-text-secondary font-medium whitespace-nowrap">
             {request.city
               ? `${request.city}${request.country ? `, ${request.country}` : ''}`
