@@ -164,38 +164,38 @@ export default function MyPostsPage() {
                 />
               </div>
 
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-2 bg-brand-border/30 p-1 rounded-lg">
-                  {(['all', 'active', 'archived'] as StatusFilter[]).map((status) => (
-                    <button
-                      key={status}
-                      onClick={() => setStatusFilter(status)}
-                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                        statusFilter === status
-                          ? 'bg-brand-surface shadow-sm text-brand-text-main'
-                          : 'text-brand-text-secondary hover:text-brand-text-main'
-                      }`}
-                    >
-                      {t(status)}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-2 bg-brand-border/30 p-1 rounded-lg">
-                  {(['all', 'request', 'offer'] as TypeFilter[]).map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => setTypeFilter(type)}
-                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                        typeFilter === type
-                          ? 'bg-brand-surface shadow-sm text-brand-text-main'
-                          : 'text-brand-text-secondary hover:text-brand-text-main'
-                      }`}
-                    >
-                      {type === 'all' ? t('all_types') : type === 'request' ? t('requests') : t('offers')}
-                    </button>
-                  ))}
-                </div>
+              <div className="flex items-center gap-2 bg-brand-border/30 p-1 rounded-lg w-fit">
+                {(['all', 'active', 'archived'] as StatusFilter[]).map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setStatusFilter(status)}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                      statusFilter === status
+                        ? 'bg-brand-surface shadow-sm text-brand-text-main'
+                        : 'text-brand-text-secondary hover:text-brand-text-main'
+                    }`}
+                  >
+                    {t(status)}
+                  </button>
+                ))}
+                <div className="w-px h-6 bg-brand-border mx-1" />
+                {(['all', 'request', 'offer'] as TypeFilter[]).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setTypeFilter(type)}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                      typeFilter === type
+                        ? 'bg-brand-surface shadow-sm text-brand-text-main'
+                        : 'text-brand-text-secondary hover:text-brand-text-main'
+                    }`}
+                  >
+                    {type === 'all'
+                      ? t('all_types')
+                      : type === 'request'
+                        ? t('requests')
+                        : t('offers')}
+                  </button>
+                ))}
               </div>
             </div>
 

@@ -45,15 +45,10 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
 
   return (
     <div
-      className={`rounded-xl border p-4 shadow-sm hover:shadow-md transition-all flex items-center gap-4 relative overflow-hidden ${
+      className={`rounded-xl border p-4 shadow-sm hover:shadow-md transition-all flex items-center gap-4 ${
         isMatch ? 'bg-yellow-50/50 border-yellow-200' : 'bg-brand-surface border-brand-border'
       }`}
     >
-      <div className="absolute top-0 right-0">
-        <div className="bg-brand-secondary text-white text-[8px] font-bold px-2 py-0.5 rounded-bl-md">
-          {t('offer').toUpperCase()}
-        </div>
-      </div>
       <div className="grow min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <div className="flex items-center gap-2">

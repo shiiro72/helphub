@@ -67,17 +67,12 @@ export const RequestCard: React.FC<RequestCardProps> = ({
 
   return (
     <div
-      className={`rounded-2xl border p-5 shadow-ambient hover:shadow-lg transition-all flex flex-col h-full relative overflow-hidden ${
+      className={`rounded-2xl border p-5 shadow-ambient hover:shadow-lg transition-all flex flex-col h-full ${
         isMatch
           ? 'bg-brand-secondary-container/10 border-brand-secondary-container'
           : 'bg-brand-surface-container-lowest border-brand-outline-variant'
       }`}
     >
-      <div className="absolute top-0 right-0">
-        <div className="bg-brand-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg">
-          {t('request').toUpperCase()}
-        </div>
-      </div>
       <div className="flex justify-between items-start mb-4">
         <div className="grow min-w-0">
           <h3 className="text-lg font-bold text-brand-text-main line-clamp-1">
