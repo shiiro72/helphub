@@ -127,7 +127,6 @@ export default function MessagesPage() {
           const joinedMembers =
             (conv.members as unknown as { profiles: Profile }[])?.map((m) => m.profiles) || [];
 
-          // Ensure participant_1 (creator) and participant_2 are in members list for group chats
           const p1 = conv.participant_1_profile as unknown as Profile;
           const p2 = conv.participant_2_profile as unknown as Profile;
 
@@ -193,7 +192,7 @@ export default function MessagesPage() {
   );
 
   useEffect(() => {
-    if (!user || conversations.length === 0) return;
+    if (!user) return;
 
     if (!initialSyncDone.current) {
       initialSyncDone.current = true;
@@ -201,7 +200,6 @@ export default function MessagesPage() {
         const existing = conversations.find((c) => c.id === conversationId);
         if (existing) {
           setActiveConversation(existing);
-          return;
         }
       } else if (userId && typeof userId === 'string' && userId !== user.id) {
         const existing = conversations.find(
@@ -212,11 +210,8 @@ export default function MessagesPage() {
         } else {
           startNewConversation(user.id, userId);
         }
-        return;
       }
-    }
-
-    if (activeConversation) {
+    } else if (activeConversation) {
       const updated = conversations.find((c) => c.id === activeConversation.id);
       if (updated && JSON.stringify(updated) !== JSON.stringify(activeConversation)) {
         setActiveConversation(updated);

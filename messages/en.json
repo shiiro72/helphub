@@ -152,6 +152,8 @@
   "linked_request": "Linked Request",
   "view_request": "View Request",
   "loading_messages": "Loading messages...",
+  "delete_group_confirmation": "Are you sure you want to delete this group?",
+  "delete_group": "Delete Group",
   "members": "members",
   "block_user": "Block User",
   "report_user": "Report User"
