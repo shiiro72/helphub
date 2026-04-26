@@ -180,5 +180,17 @@
   "user_unblocked": "User unblocked",
   "error_reporting_user": "Error reporting user",
   "user_reported": "User reported",
-  "group_chat_error": "Failed to create group chat. Please try again."
+  "group_chat_error": "Failed to create group chat. Please try again.",
+  "cannot_volunteer_blocked": "You cannot volunteer to this post because a block exists between you and the requester.",
+  "see_members": "See Members",
+  "group_members": "Group Members",
+  "linked_request": "Linked Request",
+  "view_request": "View Request",
+  "loading_messages": "Loading messages...",
+  "delete_group_confirmation": "Are you sure you want to delete this group?",
+  "delete_group": "Delete Group",
+  "members": "members",
+  "block_user": "Block User",
+  "report_user": "Report User",
+  "message_user": "Message User"
 }

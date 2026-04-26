@@ -52,6 +52,28 @@ export const useVolunteer = (requestId: string) => {
       return;
     }
 
+    // Check if the poster is blocked
+    const { data: request } = await supabase
+      .from('help_requests')
+      .select('user_id')
+      .eq('id', requestId)
+      .single();
+
+    if (request) {
+      const { data: block } = await supabase
+        .from('blocks')
+        .select('*')
+        .or(
+          `and(blocker_id.eq.${user.id},blocked_id.eq.${request.user_id}),and(blocker_id.eq.${request.user_id},blocked_id.eq.${user.id})`,
+        )
+        .maybeSingle();
+
+      if (block) {
+        showToast(t('cannot_volunteer_blocked'), 'error');
+        return;
+      }
+    }
+
     setIsLoading(true);
     if (isVolunteering) {
       const { error } = await supabase
@@ -96,6 +118,21 @@ export const useVolunteer = (requestId: string) => {
       .eq('user_id', userId);
 
     if (!error) {
+      // Find existing group chat for this request and add the newly promoted volunteer
+      const { data: conversation } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('request_id', requestId)
+        .eq('is_group', true)
+        .maybeSingle();
+
+      if (conversation) {
+        await supabase.from('conversation_members').upsert({
+          conversation_id: conversation.id,
+          user_id: userId
+        });
+      }
+
       fetchVolunteerStatus();
     }
     setIsLoading(false);

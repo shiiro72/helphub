@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Head from 'next/head';
 import { Navbar } from '@/components/organisms/Navbar';
 import { ChatList } from '@/components/organisms/ChatList';
 import { ChatWindow } from '@/components/organisms/ChatWindow';
 import { createClient } from '@/lib/supabase/client';
-import { Conversation, ConversationInvitation, Profile } from '@/lib/types';
-import { User as SupabaseUser } from '@supabase/supabase-js';
+import { Conversation, ConversationInvitation, Message, Profile } from '@/lib/types';
+import { User as SupabaseUser, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { useRouter } from 'next/router';
 import { GetStaticProps } from 'next';
 import { useTranslations } from 'next-intl';
@@ -30,11 +30,15 @@ export default function MessagesPage() {
   const { userId, conversationId } = router.query;
   const [supabase] = useState(() => createClient());
 
+  const isStartingConversation = useRef(false);
+
   const startNewConversation = useCallback(
     async (currentUserId: string, otherUserId: string) => {
+      if (isStartingConversation.current) return;
+      isStartingConversation.current = true;
+
       const [p1, p2] = [currentUserId, otherUserId].sort();
 
-      // Check if conversation already exists to avoid unique constraint error
       const { data: existing } = await supabase
         .from('conversations')
         .select(
@@ -60,6 +64,7 @@ export default function MessagesPage() {
           return [conv, ...prev];
         });
         setActiveConversation(conv);
+        isStartingConversation.current = false;
         return;
       }
 
@@ -69,7 +74,10 @@ export default function MessagesPage() {
         .eq('id', otherUserId)
         .single();
 
-      if (!profile) return;
+      if (!profile) {
+        isStartingConversation.current = false;
+        return;
+      }
 
       const { data, error } = await supabase
         .from('conversations')
@@ -94,6 +102,7 @@ export default function MessagesPage() {
         setConversations((prev) => [newConv, ...prev]);
         setActiveConversation(newConv);
       }
+      isStartingConversation.current = false;
     },
     [supabase],
   );
@@ -115,155 +124,134 @@ export default function MessagesPage() {
       }
       setBlockedUserIds(bIds);
 
-      // 1. Fetch direct conversations
-      const { data: directData, error: directError } = await supabase
+      const { data, error } = await supabase
         .from('conversations')
         .select(
           `
-        *,
-        participant_1_profile:profiles!participant_1(*),
-        participant_2_profile:profiles!participant_2(*),
-        messages(content, created_at, sender_id, is_read)
-      `,
+          *,
+          participant_1_profile:profiles!participant_1(*),
+          participant_2_profile:profiles!participant_2(*),
+          members:conversation_members(
+            profiles(*)
+          ),
+          messages(content, created_at, sender_id, is_read)
+        `,
         )
-        .or(`participant_1.eq.${currentUserId},participant_2.eq.${currentUserId}`)
-        .eq('is_group', false)
         .order('created_at', { foreignTable: 'messages', ascending: false })
         .limit(1, { foreignTable: 'messages' });
 
-      // 2. Fetch group conversations via members table (avoid circular reference)
-      const { data: memberData, error: memberError } = await supabase
-        .from('conversation_members')
-        .select('conversation_id')
-        .eq('user_id', currentUserId);
-
-      let groupConversations: any[] = [];
-      if (memberData && memberData.length > 0) {
-        const conversationIds = memberData.map(
-          (m: { conversation_id: string }) => m.conversation_id,
-        );
-        const { data: groupData, error: groupError } = await supabase
-          .from('conversations')
-          .select(
-            `
-            *,
-            members:conversation_members!inner(
-              profiles(*)
-            ),
-            messages(content, created_at, sender_id, is_read)
-          `,
-          )
-          .in('id', conversationIds)
-          .eq('is_group', true)
-          .order('created_at', { foreignTable: 'messages', ascending: false })
-          .limit(1, { foreignTable: 'messages' });
-
-        if (groupError) {
-          console.error('Error fetching group conversations:', groupError);
-        } else {
-          groupConversations = groupData || [];
-        }
+      if (error) {
+        console.error('Error fetching conversations:', error);
+        return;
       }
 
-      if (directError || memberError) {
-        console.error('Error fetching conversations:', directError || memberError);
-      } else {
-        const allConversations = [...(directData || []), ...groupConversations].sort(
-          (a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime(),
-        );
+      const allConversations = (data || []).sort(
+        (a: any, b: any) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime(),
+      );
 
-        const processed = allConversations
-          .filter((conv) => {
-            if (conv.is_group) return true;
-            const otherId =
-              conv.participant_1 === currentUserId ? conv.participant_2 : conv.participant_1;
-            return !bIds.has(otherId!);
-          })
-          .map((conv) => {
-            const lastMessage = conv.messages?.[0];
+      const processed = allConversations.map((conv: any) => {
+        const lastMessage = conv.messages?.[0];
 
-            if (conv.is_group) {
-              return {
-                ...conv,
-                members: conv.members?.map((m: any) => m.profiles) || [],
-                lastMessage,
-              } as Conversation;
-            }
-            const otherProfile =
-              conv.participant_1 === currentUserId
-                ? conv.participant_2_profile
-                : conv.participant_1_profile;
-            return {
-              ...conv,
-              profiles: otherProfile,
-              lastMessage,
-            } as Conversation;
-          });
+        if (conv.is_group) {
+          const joinedMembers =
+            (conv.members as unknown as { profiles: Profile }[])?.map((m) => m.profiles) || [];
 
-        // 3. Fetch unread counts for each conversation
-        const { data: unreadData } = await supabase
-          .from('messages')
-          .select('conversation_id')
-          .eq('is_read', false)
-          .neq('sender_id', currentUserId);
+          const p1 = conv.participant_1_profile as unknown as Profile;
+          const p2 = conv.participant_2_profile as unknown as Profile;
 
-        const unreadCounts: Record<string, number> = {};
-        unreadData?.forEach((m: { conversation_id: string }) => {
-          unreadCounts[m.conversation_id] = (unreadCounts[m.conversation_id] || 0) + 1;
-        });
+          const membersMap = new Map<string, Profile>();
+          joinedMembers.forEach(m => membersMap.set(m.id, m));
+          if (p1) membersMap.set(p1.id, p1);
+          if (p2) membersMap.set(p2.id, p2);
 
-        const withUnread = processed.map((conv) => ({
+          const members = Array.from(membersMap.values());
+
+          return {
+            ...conv,
+            members,
+            lastMessage,
+          } as Conversation;
+        }
+        const otherProfile =
+          conv.participant_1 === currentUserId
+            ? conv.participant_2_profile
+            : conv.participant_1_profile;
+        return {
           ...conv,
-          unreadCount: unreadCounts[conv.id] || 0,
-        }));
+          profiles: otherProfile,
+          lastMessage,
+        } as Conversation;
+      });
 
-        setConversations(withUnread);
+      const { data: unreadData } = await supabase
+        .from('messages')
+        .select('conversation_id')
+        .eq('is_read', false)
+        .neq('sender_id', currentUserId);
 
-        // Fetch invitations
-        const { data: invData } = await supabase
-          .from('conversation_invitations')
-          .select(
-            `
+      const unreadCounts: Record<string, number> = {};
+      unreadData?.forEach((m: { conversation_id: string }) => {
+        unreadCounts[m.conversation_id] = (unreadCounts[m.conversation_id] || 0) + 1;
+      });
+
+      const withUnread = processed.map((conv: any) => ({
+        ...conv,
+        unreadCount: unreadCounts[conv.id] || 0,
+      }));
+
+      setConversations(withUnread);
+
+      const { data: invData } = await supabase
+        .from('conversation_invitations')
+        .select(
+          `
           *,
           conversations (*),
           inviter:profiles!inviter_id (*)
         `,
-          )
-          .eq('invitee_id', currentUserId)
-          .eq('status', 'pending');
+        )
+        .eq('invitee_id', currentUserId)
+        .eq('status', 'pending');
 
-        if (invData) {
-          setInvitations(invData as unknown as ConversationInvitation[]);
-        }
-
-        // If conversationId or userId in query, sync active conversation once on load
-        if (!activeConversation) {
-          if (conversationId && typeof conversationId === 'string') {
-            const existing = processed.find((c) => c.id === conversationId);
-            if (existing) {
-              setActiveConversation(existing);
-            }
-          } else if (userId && typeof userId === 'string' && userId !== currentUserId) {
-            const existing = processed.find(
-              (c) => !c.is_group && (c.participant_1 === userId || c.participant_2 === userId),
-            );
-            if (existing) {
-              setActiveConversation(existing);
-            } else {
-              startNewConversation(currentUserId, userId);
-            }
-          }
-        } else {
-          // If we already have an active conversation, just update its data if it changed
-          const updated = processed.find((c) => c.id === activeConversation.id);
-          if (updated) {
-            setActiveConversation(updated);
-          }
-        }
+      if (invData) {
+        setInvitations(invData as unknown as ConversationInvitation[]);
       }
     },
-    [supabase, userId, conversationId, startNewConversation, activeConversation],
+    [supabase],
   );
+
+  // Sync active conversation only when necessary
+  useEffect(() => {
+    if (!user || !router.isReady) return;
+
+    if (conversationId && typeof conversationId === 'string') {
+      const existing = conversations.find((c) => c.id === conversationId);
+      if (existing && existing.id !== activeConversation?.id) {
+        setActiveConversation(existing);
+      }
+    } else if (userId && typeof userId === 'string' && userId !== user.id) {
+      const existing = conversations.find(
+        (c) => !c.is_group && (c.participant_1 === userId || c.participant_2 === userId),
+      );
+      if (existing) {
+        if (existing.id !== activeConversation?.id) {
+          setActiveConversation(existing);
+        }
+      } else {
+        startNewConversation(user.id, userId);
+      }
+    }
+  }, [conversations.length, user, conversationId, userId, startNewConversation, router.isReady]);
+
+  // Handle data updates for current active conversation without loop
+  useEffect(() => {
+    if (activeConversation) {
+      const updated = conversations.find((c) => c.id === activeConversation.id);
+      if (updated && (updated.unreadCount !== activeConversation.unreadCount || updated.last_message_at !== activeConversation.last_message_at)) {
+         setActiveConversation(updated);
+      }
+    }
+  }, [conversations, activeConversation?.id]);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -280,13 +268,15 @@ export default function MessagesPage() {
       }
     };
     checkUser();
-  }, [supabase, router.isReady, fetchConversations, userId, conversationId]);
+  }, [supabase, router.isReady, fetchConversations]);
 
   useEffect(() => {
     if (!user) return;
 
+    const channelSuffix = Math.random().toString(36).slice(2);
+
     const invChannel = supabase
-      .channel(`invitations:${Math.random().toString(36).slice(2)}`)
+      .channel(`invitations:${channelSuffix}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'conversation_invitations' },
@@ -297,14 +287,13 @@ export default function MessagesPage() {
       .subscribe();
 
     const sidebarChannel = supabase
-      .channel(`sidebar-updates:${Math.random().toString(36).slice(2)}`)
+      .channel(`sidebar-updates:${channelSuffix}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'conversations',
-          filter: `participant_1=eq.${user.id}`,
         },
         () => fetchConversations(user.id),
       )
@@ -313,8 +302,7 @@ export default function MessagesPage() {
         {
           event: '*',
           schema: 'public',
-          table: 'conversations',
-          filter: `participant_2=eq.${user.id}`,
+          table: 'conversation_members',
         },
         () => fetchConversations(user.id),
       )
@@ -325,8 +313,10 @@ export default function MessagesPage() {
           schema: 'public',
           table: 'messages',
         },
-        () => {
-          setTimeout(() => fetchConversations(user.id), 500);
+        (payload: RealtimePostgresChangesPayload<Message>) => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            setTimeout(() => fetchConversations(user.id), 500);
+          }
         },
       )
       .subscribe();

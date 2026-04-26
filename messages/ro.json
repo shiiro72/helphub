@@ -180,5 +180,17 @@
   "user_unblocked": "Utilizator deblocat",
   "error_reporting_user": "Eroare la raportarea utilizatorului",
   "user_reported": "Utilizator raportat",
-  "group_chat_error": "Eroare la crearea chat-ului de grup. Te rugăm să încerci din nou."
+  "group_chat_error": "Eroare la crearea chat-ului de grup. Te rugăm să încerci din nou.",
+  "cannot_volunteer_blocked": "Nu poți să te înscrii ca voluntar la această postare deoarece există o blocare între tine și cel care a făcut cererea.",
+  "see_members": "Vezi Membrii",
+  "group_members": "Membrii Grupului",
+  "linked_request": "Cerere Asociată",
+  "view_request": "Vezi Cererea",
+  "loading_messages": "Se încarcă mesajele...",
+  "delete_group_confirmation": "Ești sigur că vrei să ștergi acest grup?",
+  "delete_group": "Șterge Grupul",
+  "members": "membri",
+  "block_user": "Blochează Utilizatorul",
+  "report_user": "Raportează Utilizatorul",
+  "message_user": "Trimite Mesaj"
 }
