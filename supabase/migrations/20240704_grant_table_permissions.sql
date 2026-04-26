@@ -7,6 +7,9 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.help_requests TO anon, authentica
 -- Grant permissions on help_offers
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.help_offers TO anon, authenticated;
 
+-- Grant permissions on help_request_volunteers
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.help_request_volunteers TO anon, authenticated;
+
 -- Grant permissions on profiles
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.profiles TO anon, authenticated;
 
@@ -24,6 +27,12 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.messages TO anon, authenticated;
 
 -- Grant permissions on ratings
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.ratings TO anon, authenticated;
+
+-- Grant permissions on reports
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.reports TO anon, authenticated;
+
+-- Grant permissions on blocks
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.blocks TO anon, authenticated;
 
 -- Grant permissions on support_tickets
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.support_tickets TO anon, authenticated;
