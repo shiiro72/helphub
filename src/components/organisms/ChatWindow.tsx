@@ -204,7 +204,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           table: 'blocks',
         },
         () => {
-          checkBlock();
+          // Add a small delay to allow database synchronization
+          setTimeout(() => checkBlock(), 500);
         },
       )
       .subscribe();
