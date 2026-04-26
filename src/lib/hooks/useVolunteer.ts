@@ -3,10 +3,12 @@ import { createClient } from '@/lib/supabase/client';
 import { useAuth } from './useAuth';
 import { useTranslations } from 'next-intl';
 import { VolunteerStatus } from '../types';
+import { useToast } from '../contexts/ToastContext';
 
 export const useVolunteer = (requestId: string) => {
   const t = useTranslations();
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [isVolunteering, setIsVolunteering] = useState(false);
   const [volunteerStatus, setVolunteerStatus] = useState<VolunteerStatus | null>(null);
   const [volunteerCount, setVolunteerCount] = useState(0);
@@ -46,7 +48,7 @@ export const useVolunteer = (requestId: string) => {
 
   const toggleVolunteer = async (maxVolunteers: number | null) => {
     if (!user) {
-      alert(t('login_required'));
+      showToast(t('login_required'), 'warning');
       return;
     }
 

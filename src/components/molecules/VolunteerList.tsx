@@ -4,10 +4,10 @@ import { createClient } from '@/lib/supabase/client';
 import { User, MessageSquare, Users, Loader2, ArrowUpCircle } from 'lucide-react';
 import { Button } from '../atoms/Button';
 import { VerificationBadge } from '../atoms/VerificationBadge';
-import { StarRating } from '../atoms/StarRating';
 import { useRouter } from 'next/router';
 import { useTranslations } from 'next-intl';
 import { useVolunteer } from '@/lib/hooks/useVolunteer';
+import { useToast } from '@/lib/contexts/ToastContext';
 
 interface VolunteerListProps {
   request: HelpRequest;
@@ -17,6 +17,7 @@ interface VolunteerListProps {
 export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }) => {
   const t = useTranslations();
   const router = useRouter();
+  const { showToast } = useToast();
   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [loading, setLoading] = useState(true);
   const [creatingGroup, setCreatingGroup] = useState(false);
@@ -130,7 +131,7 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
       onClose();
     } catch (error) {
       console.error('Error creating group chat:', error);
-      alert('Failed to create group chat. Please try again.');
+      showToast(t('group_chat_error'), 'error');
     } finally {
       setCreatingGroup(false);
     }
@@ -203,12 +204,6 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
                             className="text-brand-primary"
                           />
                         </div>
-                        <StarRating
-                          rating={v.profiles?.trust_rank || 0}
-                          totalRatings={v.profiles?.total_ratings || 0}
-                          size={10}
-                          showCount
-                        />
                       </div>
                     </div>
                     <Button
@@ -250,12 +245,6 @@ export const VolunteerList: React.FC<VolunteerListProps> = ({ request, onClose }
                             className="text-brand-primary"
                           />
                         </div>
-                        <StarRating
-                          rating={v.profiles?.trust_rank || 0}
-                          totalRatings={v.profiles?.total_ratings || 0}
-                          size={10}
-                          showCount
-                        />
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

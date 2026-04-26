@@ -7,17 +7,20 @@ import { useRouter } from 'next/router';
 import { GetStaticProps } from 'next';
 import { useTranslations } from 'next-intl';
 import { User, Flag, MessageSquare, Clock, CheckCircle, Shield, Ban, Mail } from 'lucide-react';
+import { useToast } from '@/lib/contexts/ToastContext';
 import { Button } from '@/components/atoms/Button';
 
 export default function AdminPage() {
   const t = useTranslations();
   const router = useRouter();
+  const { showToast } = useToast();
   const [reports, setReports] = useState<Report[]>([]);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
   const [flaggedUsers, setFlaggedUsers] = useState<Profile[]>([]);
+  const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'reports' | 'tickets' | 'banned' | 'flagged'>(
+  const [activeTab, setActiveTab] = useState<'reports' | 'tickets' | 'banned' | 'flagged' | 'users'>(
     'reports',
   );
   const [supabase] = useState(() => createClient());
@@ -81,10 +84,17 @@ export default function AdminPage() {
       .eq('is_restricted', true)
       .order('created_at', { ascending: false });
 
+    // Fetch all users
+    const { data: usersData } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
     setReports(reportsData || []);
     setTickets(ticketsData || []);
     setBannedUsers(bannedData || []);
     setFlaggedUsers(flaggedData || []);
+    setAllUsers(usersData || []);
     setLoading(false);
   }, [supabase, router]);
 
@@ -101,10 +111,10 @@ export default function AdminPage() {
     });
 
     if (error) {
-      alert(t('error_banning_user'));
+      showToast(t('error_banning_user'), 'error');
       console.error(error);
     } else {
-      alert(t('user_banned_success'));
+      showToast(t('user_banned_success'), 'success');
       fetchData();
     }
   };
@@ -116,9 +126,9 @@ export default function AdminPage() {
       .eq('id', userId);
 
     if (error) {
-      alert(t('error_unrestricting_user'));
+      showToast(t('error_unrestricting_user'), 'error');
     } else {
-      alert(t('user_unrestricted_success'));
+      showToast(t('user_unrestricted_success'), 'success');
       fetchData();
     }
   };
@@ -130,9 +140,21 @@ export default function AdminPage() {
       .eq('id', ticketId);
 
     if (error) {
-      alert(t('error_updating_ticket'));
+      showToast(t('error_updating_ticket'), 'error');
     } else {
+      showToast(t('ticket_status_updated'), 'success');
       setTickets((prev) => prev.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t)));
+    }
+  };
+
+  const handleDeleteReport = async (reportId: string) => {
+    if (!confirm('Are you sure you want to delete this report?')) return;
+    const { error } = await supabase.from('reports').delete().eq('id', reportId);
+    if (error) {
+      showToast(t('error_deleting_report'), 'error');
+    } else {
+      showToast(t('report_deleted'), 'success');
+      setReports((prev) => prev.filter((r) => r.id !== reportId));
     }
   };
 
@@ -230,6 +252,25 @@ export default function AdminPage() {
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
             )}
           </button>
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
+              activeTab === 'users'
+                ? 'text-brand-success'
+                : 'text-brand-text-secondary hover:text-brand-text-main'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <User size={18} />
+              {t('users')}
+              <span className="ml-1 px-2 py-0.5 text-xs bg-brand-surface-container-low rounded-full">
+                {allUsers.length}
+              </span>
+            </div>
+            {activeTab === 'users' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
+            )}
+          </button>
         </div>
 
         {loading ? (
@@ -272,15 +313,25 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end shrink-0 gap-3">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30 border-red-100 dark:border-red-900"
-                        onClick={() => handleBanUser(report.reported_id, report.reason)}
-                      >
-                        <Ban size={16} className="mr-2" />
-                        {t('ban_user')}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-brand-text-secondary"
+                          onClick={() => handleDeleteReport(report.id)}
+                        >
+                          {t('delete')}
+                        </Button>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          className="bg-brand-error text-brand-on-error hover:bg-brand-error/90 border-none shadow-sm"
+                          onClick={() => handleBanUser(report.reported_id, report.reason)}
+                        >
+                          <Ban size={16} className="mr-2" />
+                          {t('ban_user')}
+                        </Button>
+                      </div>
                       <div className="flex items-center gap-1 text-xs text-brand-text-secondary mb-2">
                         <Clock size={14} />
                         {new Date(report.created_at).toLocaleString()}
@@ -308,10 +359,10 @@ export default function AdminPage() {
                           {ticket.subject}
                         </h3>
                         <span
-                          className={`px-2 py-1 text-xs font-bold uppercase rounded ${
+                          className={`px-2.5 py-1 text-[10px] font-black uppercase rounded-full border ${
                             ticket.status === 'open'
-                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                              : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                              ? 'bg-blue-50 text-blue-600 border-blue-100'
+                              : 'bg-emerald-50 text-emerald-600 border-emerald-100'
                           }`}
                         >
                           {ticket.status}
@@ -394,7 +445,7 @@ export default function AdminPage() {
               ))
             )}
           </div>
-        ) : (
+        ) : activeTab === 'flagged' ? (
           <div className="space-y-4">
             {flaggedUsers.length === 0 ? (
               <div className="text-center py-12 text-brand-text-secondary">{t('no_flagged_users')}</div>
@@ -428,13 +479,52 @@ export default function AdminPage() {
                         {t('unrestrict_user')}
                       </Button>
                       <Button
-                        variant="secondary"
+                        variant="primary"
                         size="sm"
-                        className="bg-red-50 text-red-600 border-red-100"
+                        className="bg-brand-error text-brand-on-error hover:bg-brand-error/90 border-none shadow-sm"
                         onClick={() => handleBanUser(user.id, 'Repeatedly reported & flagged')}
                       >
                         <Ban size={16} className="mr-2" />
                         {t('ban_user')}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {allUsers.length === 0 ? (
+              <div className="text-center py-12 text-brand-text-secondary">{t('no_users')}</div>
+            ) : (
+              allUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="bg-brand-surface-container-lowest border border-brand-border rounded-xl p-5 shadow-sm"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-brand-surface-container-high flex items-center justify-center overflow-hidden">
+                        <User size={24} className="text-brand-text-secondary" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-brand-text-main">
+                          {user.username}
+                        </span>
+                        <span className="text-xs text-brand-text-secondary">
+                          {user.role}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/messages?userId=${user.id}`)}
+                      >
+                        <MessageSquare size={16} className="mr-2" />
+                        {t('message')}
                       </Button>
                     </div>
                   </div>

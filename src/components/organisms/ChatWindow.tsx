@@ -5,8 +5,6 @@ import { ChatInput } from '../molecules/ChatInput';
 import { User, MoreVertical, Flag, Ban, Star, Users, ExternalLink } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VerificationBadge } from '../atoms/VerificationBadge';
-import { StarRating } from '../atoms/StarRating';
-import { RatingModal } from '../molecules/RatingModal';
 import { useTranslations } from 'next-intl';
 
 interface ChatWindowProps {
@@ -46,8 +44,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   };
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   const [showMenu, setShowMenu] = useState(false);
-  const [showRatingModal, setShowRatingModal] = useState(false);
-  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [supabase] = useState(() => createClient());
 
@@ -55,13 +52,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     await supabase.from('messages').update({ is_read: true }).eq('id', messageId);
   };
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const { data } = await supabase.from('profiles').select('*').eq('id', currentUserId).single();
-      setCurrentUserProfile(data);
-    };
-    fetchProfile();
-  }, [supabase, currentUserId]);
 
   useEffect(() => {
     const fetchRequest = async () => {
@@ -181,26 +171,26 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       ? conversation.participant_2
       : conversation.participant_1;
 
-  const handleRateUser = async (rating: number, tags: string[], comment: string) => {
-    setIsSubmittingRating(true);
-    try {
-      const { error } = await supabase.from('ratings').upsert({
-        rater_id: currentUserId,
-        rated_id: otherParticipantId,
-        rating,
-        tags,
-        comment,
-      });
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data } = await supabase.from('profiles').select('*').eq('id', currentUserId).single();
+      setCurrentUserProfile(data);
+    };
+    fetchProfile();
 
-      if (error) throw error;
-      setShowRatingModal(false);
-    } catch (error) {
-      console.error('Error submitting rating:', error);
-      alert('Failed to submit rating. Please try again.');
-    } finally {
-      setIsSubmittingRating(false);
-    }
-  };
+    const checkBlock = async () => {
+      if (!otherParticipantId) return;
+      const { data } = await supabase
+        .from('blocks')
+        .select('*')
+        .or(
+          `and(blocker_id.eq.${currentUserId},blocked_id.eq.${otherParticipantId}),and(blocker_id.eq.${otherParticipantId},blocked_id.eq.${currentUserId})`,
+        )
+        .maybeSingle();
+      setIsBlocked(!!data);
+    };
+    checkBlock();
+  }, [supabase, currentUserId, otherParticipantId]);
 
   return (
     <div className="flex flex-col h-full w-full bg-chat-bg">
@@ -261,15 +251,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-error"
                   >
                     Block User
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowRatingModal(true);
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
-                  >
-                    Rate User
                   </button>
                 </>
               ) : null}
@@ -333,7 +314,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* Input */}
       <div className="shrink-0 bg-chat-header border-t border-brand-border pb-safe">
-        {currentUserProfile?.is_restricted ? (
+        {isBlocked ? (
+          <div className="px-4 py-3 text-center text-sm text-brand-text-secondary italic">
+            {t('cannot_message_blocked')}
+          </div>
+        ) : currentUserProfile?.is_restricted ? (
           <div className="px-4 py-3 text-center text-sm text-brand-error">
             {t('messaging_restricted')}
           </div>
@@ -342,14 +327,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         )}
       </div>
 
-      {/* Rating Modal */}
-      <RatingModal
-        isOpen={showRatingModal}
-        onClose={() => setShowRatingModal(false)}
-        onSubmit={handleRateUser}
-        userName={conversation.profiles?.username || 'User'}
-        isSubmitting={isSubmittingRating}
-      />
     </div>
   );
 };

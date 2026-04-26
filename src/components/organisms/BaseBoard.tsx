@@ -53,11 +53,33 @@ export function BaseBoard<
   const [sortBy, setSortBy] = useState<'start_datetime'>('start_datetime');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [error, setError] = useState<string | null>(null);
+  const [blockedUserIds, setBlockedUserIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchItems = async () => {
       setLoading(true);
       const supabase = createClient();
+
+      // Fetch blocked users to filter them out
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: blocks } = await supabase
+          .from('blocks')
+          .select('blocked_id, blocker_id')
+          .or(`blocker_id.eq.${user.id},blocked_id.eq.${user.id}`);
+
+        if (blocks) {
+          const ids = new Set<string>();
+          blocks.forEach((b: any) => {
+            if (b.blocker_id === user.id) ids.add(b.blocked_id);
+            else ids.add(b.blocker_id);
+          });
+          setBlockedUserIds(ids);
+        }
+      }
+
       const { data, error } = await supabase
         .from(table)
         .select('*, profiles(*)')
@@ -76,14 +98,15 @@ export function BaseBoard<
   }, [table, refreshTrigger]);
 
   const filteredItems = items
-    .filter((item) =>
-      filterFn(item, {
+    .filter((item: any) => {
+      if (blockedUserIds.has(item.user_id)) return false;
+      return filterFn(item, {
         query: searchQuery,
         city: cityFilter,
         startDate: startDateFilter,
         startTime: startTimeFilter,
-      }),
-    )
+      });
+    })
     .sort((a, b) => {
       const valA = a[sortBy] ? new Date(a[sortBy] as string).getTime() : 0;
       const valB = b[sortBy] ? new Date(b[sortBy] as string).getTime() : 0;

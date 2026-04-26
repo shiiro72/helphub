@@ -17,6 +17,8 @@ import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { VolunteerList } from './VolunteerList';
 import { useVolunteer } from '@/lib/hooks/useVolunteer';
+import { useUserReports } from '@/lib/hooks/useUserReports';
+import { AlertTriangle } from 'lucide-react';
 
 interface RequestListItemProps {
   request: HelpRequest;
@@ -33,6 +35,7 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
 }) => {
   const t = useTranslations();
   const { user } = useAuth();
+  const { isFlagged } = useUserReports(request.user_id);
   const [showVolunteerModal, setShowVolunteerModal] = useState(false);
 
   const isOwner = user?.id === request.user_id;
@@ -105,6 +108,14 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
               size={10}
               className="text-brand-primary"
             />
+            {isFlagged && (
+              <span title="This user has multiple reports">
+                <AlertTriangle
+                  size={12}
+                  className="text-amber-500 ml-1"
+                />
+              </span>
+            )}
           </div>
 
           {startStr && (

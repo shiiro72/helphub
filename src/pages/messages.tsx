@@ -12,13 +12,16 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/atoms/Button';
 import { User, Check, X } from 'lucide-react';
 import { usePresence } from '@/lib/contexts/PresenceContext';
+import { useToast } from '@/lib/contexts/ToastContext';
 
 export default function MessagesPage() {
   const t = useTranslations();
+  const { showToast } = useToast();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [invitations, setInvitations] = useState<ConversationInvitation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
+  const [blockedUserIds, setBlockedUserIds] = useState<Set<string>>(new Set());
   const { onlineUsers } = usePresence();
   const router = useRouter();
   const { userId, conversationId } = router.query;
@@ -94,6 +97,21 @@ export default function MessagesPage() {
 
   const fetchConversations = useCallback(
     async (currentUserId: string) => {
+      // 0. Fetch blocked users
+      const { data: blocks } = await supabase
+        .from('blocks')
+        .select('blocked_id, blocker_id')
+        .or(`blocker_id.eq.${currentUserId},blocked_id.eq.${currentUserId}`);
+
+      const bIds = new Set<string>();
+      if (blocks) {
+        blocks.forEach((b: any) => {
+          if (b.blocker_id === currentUserId) bIds.add(b.blocked_id);
+          else bIds.add(b.blocker_id);
+        });
+      }
+      setBlockedUserIds(bIds);
+
       // 1. Fetch direct conversations
       const { data: directData, error: directError } = await supabase
         .from('conversations')
@@ -151,27 +169,33 @@ export default function MessagesPage() {
           (a, b) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime(),
         );
 
-        const processed = allConversations.map((conv) => {
-          const lastMessage = conv.messages?.[0];
-          const unreadCount = 0; // We will fetch this separately or rely on simple check
+        const processed = allConversations
+          .filter((conv) => {
+            if (conv.is_group) return true;
+            const otherId =
+              conv.participant_1 === currentUserId ? conv.participant_2 : conv.participant_1;
+            return !bIds.has(otherId!);
+          })
+          .map((conv) => {
+            const lastMessage = conv.messages?.[0];
 
-          if (conv.is_group) {
+            if (conv.is_group) {
+              return {
+                ...conv,
+                members: conv.members?.map((m: any) => m.profiles) || [],
+                lastMessage,
+              } as Conversation;
+            }
+            const otherProfile =
+              conv.participant_1 === currentUserId
+                ? conv.participant_2_profile
+                : conv.participant_1_profile;
             return {
               ...conv,
-              members: conv.members?.map((m: any) => m.profiles) || [],
+              profiles: otherProfile,
               lastMessage,
             } as Conversation;
-          }
-          const otherProfile =
-            conv.participant_1 === currentUserId
-              ? conv.participant_2_profile
-              : conv.participant_1_profile;
-          return {
-            ...conv,
-            profiles: otherProfile,
-            lastMessage,
-          } as Conversation;
-        });
+          });
 
         // 3. Fetch unread counts for each conversation
         const { data: unreadData } = await supabase
@@ -235,7 +259,7 @@ export default function MessagesPage() {
         }
       }
     },
-    [supabase, userId, conversationId, startNewConversation],
+    [supabase, userId, conversationId, startNewConversation, activeConversation],
   );
 
   useEffect(() => {
@@ -331,9 +355,9 @@ export default function MessagesPage() {
       .insert({ blocker_id: user.id, blocked_id: blockedId });
 
     if (error) {
-      alert('Error blocking user');
+      showToast(t('error_blocking_user'), 'error');
     } else {
-      alert('User blocked');
+      showToast(t('user_blocked'), 'success');
       setActiveConversation(null);
       fetchConversations(user.id);
     }
@@ -351,9 +375,9 @@ export default function MessagesPage() {
     });
 
     if (error) {
-      alert('Error reporting user');
+      showToast(t('error_reporting_user'), 'error');
     } else {
-      alert('User reported');
+      showToast(t('user_reported'), 'success');
     }
   };
 

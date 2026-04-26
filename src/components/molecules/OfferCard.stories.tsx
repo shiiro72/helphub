@@ -29,8 +29,6 @@ const mockOffer = {
     image_url: null,
     role: 'user' as const,
     is_restricted: false,
-    trust_rank: 4.8,
-    total_ratings: 15,
     created_at: new Date().toISOString(),
   },
 };

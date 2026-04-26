@@ -10,7 +10,6 @@ import { ConfirmationModal } from '../molecules/ConfirmationModal';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { ErrorBanner } from '../molecules/ErrorBanner';
 import { useTranslations } from 'next-intl';
-import { StarRating } from '../atoms/StarRating';
 
 interface ProfileSettingsModalProps {
   isOpen: boolean;
@@ -152,16 +151,6 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
             <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
 
             <div className="flex flex-col items-center gap-4 mb-6">
-              {profile && (
-                <div className="mb-2">
-                  <StarRating
-                    rating={profile.trust_rank || 0}
-                    totalRatings={profile.total_ratings || 0}
-                    size={20}
-                    showCount
-                  />
-                </div>
-              )}
               <div className="w-24 h-24 rounded-full bg-brand-surface-container flex items-center justify-center overflow-hidden border-2 border-brand-outline-variant">
                 <User size={48} className="text-brand-text-secondary" />
               </div>
