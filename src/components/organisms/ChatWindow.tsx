@@ -22,8 +22,8 @@ interface ChatWindowProps {
   conversation: Conversation;
   currentUserId: string;
   onSendMessage: (content: string) => void;
-  onBlock: (userId: string) => void;
-  onUnblock: (userId: string) => void;
+  onBlock: (userId: string) => Promise<void>;
+  onUnblock: (userId: string) => Promise<void>;
   onReport: (userId: string) => void;
   isOnline?: boolean;
 }
@@ -252,7 +252,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             ) : (
               <div className="flex items-center gap-2">
                 <span
-                  className={`text-[10px] ${isOnline ? 'text-brand-success font-medium' : 'text-brand-text-secondary'}`}
+                  className={`text-[10px] ${isOnline ? 'text-brand-primary font-medium' : 'text-brand-text-secondary'}`}
                 >
                   {isOnline ? 'online' : 'offline'}
                 </span>
@@ -286,19 +286,25 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 <>
                   {isBlocked ? (
                     <button
-                      onClick={() => {
-                        if (otherParticipantId) onUnblock(otherParticipantId);
+                      onClick={async () => {
+                        if (otherParticipantId) {
+                          setIsBlocked(false);
+                          await onUnblock(otherParticipantId);
+                        }
                         setShowMenu(false);
                       }}
-                      className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-success"
+                      className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-primary"
                     >
                       <User size={16} />
                       Unblock User
                     </button>
                   ) : (
                     <button
-                      onClick={() => {
-                        if (otherParticipantId) onBlock(otherParticipantId);
+                      onClick={async () => {
+                        if (otherParticipantId) {
+                          setIsBlocked(true);
+                          await onBlock(otherParticipantId);
+                        }
                         setShowMenu(false);
                       }}
                       className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-error"

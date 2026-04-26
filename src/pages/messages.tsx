@@ -509,10 +509,10 @@ export default function MessagesPage() {
             />
           ) : (
             <div className="flex flex-col items-center justify-center w-full text-center p-8">
-              <div className="w-24 h-24 rounded-full bg-brand-success flex items-center justify-center mb-6">
+              <div className="w-24 h-24 rounded-full bg-brand-primary flex items-center justify-center mb-6">
                 <span className="text-white text-4xl font-bold">HH</span>
               </div>
-              <h2 className="text-2xl font-bold text-brand-primary mb-2">
+              <h2 className="text-2xl font-bold text-brand-secondary mb-2">
                 {t('messages_welcome_title')}
               </h2>
               <p className="text-brand-text-secondary max-w-sm">{t('messages_welcome_desc')}</p>

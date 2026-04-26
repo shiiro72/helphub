@@ -38,7 +38,7 @@ export const Default: Story = {
     conversation: mockConversation,
     currentUserId: 'me',
     onSendMessage: (c) => console.log('Send', c),
-    onBlock: (id) => console.log('Block', id),
-    onReport: (id) => console.log('Report', id),
+    onBlock: async (id) => console.log('Block', id),
+    onUnblock: async (id) => console.log('Unblock', id), onReport: (id) => console.log('Report', id),
   },
 };

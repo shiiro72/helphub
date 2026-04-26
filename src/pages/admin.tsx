@@ -170,8 +170,8 @@ export default function AdminPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center gap-3 mb-8">
-          <div className="p-2 bg-brand-success/10 rounded-lg">
-            <Shield className="text-brand-success" size={28} />
+          <div className="p-2 bg-brand-primary/10 rounded-lg">
+            <Shield className="text-brand-primary" size={28} />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-brand-text-main">
             {t('admin_board')}
@@ -183,7 +183,7 @@ export default function AdminPage() {
             onClick={() => setActiveTab('reports')}
             className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
               activeTab === 'reports'
-                ? 'text-brand-success'
+                ? 'text-brand-primary'
                 : 'text-brand-text-secondary hover:text-brand-text-main'
             }`}
           >
@@ -195,14 +195,14 @@ export default function AdminPage() {
               </span>
             </div>
             {activeTab === 'reports' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary" />
             )}
           </button>
           <button
             onClick={() => setActiveTab('tickets')}
             className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
               activeTab === 'tickets'
-                ? 'text-brand-success'
+                ? 'text-brand-primary'
                 : 'text-brand-text-secondary hover:text-brand-text-main'
             }`}
           >
@@ -214,14 +214,14 @@ export default function AdminPage() {
               </span>
             </div>
             {activeTab === 'tickets' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary" />
             )}
           </button>
           <button
             onClick={() => setActiveTab('banned')}
             className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
               activeTab === 'banned'
-                ? 'text-brand-success'
+                ? 'text-brand-primary'
                 : 'text-brand-text-secondary hover:text-brand-text-main'
             }`}
           >
@@ -233,14 +233,14 @@ export default function AdminPage() {
               </span>
             </div>
             {activeTab === 'banned' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary" />
             )}
           </button>
           <button
             onClick={() => setActiveTab('flagged')}
             className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
               activeTab === 'flagged'
-                ? 'text-brand-success'
+                ? 'text-brand-primary'
                 : 'text-brand-text-secondary hover:text-brand-text-main'
             }`}
           >
@@ -252,14 +252,14 @@ export default function AdminPage() {
               </span>
             </div>
             {activeTab === 'flagged' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary" />
             )}
           </button>
           <button
             onClick={() => setActiveTab('users')}
             className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
               activeTab === 'users'
-                ? 'text-brand-success'
+                ? 'text-brand-primary'
                 : 'text-brand-text-secondary hover:text-brand-text-main'
             }`}
           >
@@ -271,14 +271,14 @@ export default function AdminPage() {
               </span>
             </div>
             {activeTab === 'users' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary" />
             )}
           </button>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-success"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
           </div>
         ) : activeTab === 'reports' ? (
           <div className="space-y-4">
@@ -306,7 +306,7 @@ export default function AdminPage() {
                           <span className="text-xs text-brand-text-secondary uppercase tracking-wider font-bold">
                             {t('reported_user')}
                           </span>
-                          <span className="font-medium text-red-600 dark:text-red-400">
+                          <span className="font-medium text-brand-error">
                             {report.reported?.username || 'Unknown'}
                           </span>
                         </div>
@@ -364,8 +364,8 @@ export default function AdminPage() {
                         <span
                           className={`px-2.5 py-1 text-[10px] font-black uppercase rounded-full border ${
                             ticket.status === 'open'
-                              ? 'bg-blue-50 text-blue-600 border-blue-100'
-                              : 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                              ? 'bg-brand-secondary/10 text-brand-secondary border-brand-secondary/20'
+                              : 'bg-brand-primary/10 text-brand-primary border-brand-primary/20'
                           }`}
                         >
                           {ticket.status}
@@ -423,7 +423,7 @@ export default function AdminPage() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-2">
-                        <Ban className="text-red-500" size={18} />
+                        <Ban className="text-brand-error" size={18} />
                         <span className="font-bold text-brand-text-main">
                           {user.username || 'Anonymous'}
                         </span>
@@ -467,7 +467,7 @@ export default function AdminPage() {
                         <span className="font-bold text-brand-text-main">
                           {user.username}
                         </span>
-                        <span className="text-xs text-red-500 font-medium uppercase tracking-wider">
+                        <span className="text-xs text-brand-error font-medium uppercase tracking-wider">
                           {t('automatically_restricted')}
                         </span>
                       </div>
