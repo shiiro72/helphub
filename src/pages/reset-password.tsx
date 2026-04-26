@@ -15,6 +15,7 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -86,11 +87,12 @@ export default function ResetPasswordPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className={!showPassword ? 'text-brand-outline-variant' : 'text-brand-text-main'}
                   required
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-8.5 text-brand-text-secondary hover:text-brand-text-main"
+                  className="absolute right-3 top-[34px] text-brand-text-secondary hover:text-brand-text-main"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
@@ -98,15 +100,26 @@ export default function ResetPasswordPage() {
                 </button>
               </div>
 
-              <FormField
-                id="confirmPassword"
-                label="Confirm New Password"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <FormField
+                  id="confirmPassword"
+                  label="Confirm New Password"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={!showConfirmPassword ? 'text-brand-outline-variant' : 'text-brand-text-main'}
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-[34px] text-brand-text-secondary hover:text-brand-text-main"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
 
               {error && <p className="text-sm text-red-500">{error}</p>}
 
