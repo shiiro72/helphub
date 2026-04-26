@@ -1,13 +1,24 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Conversation, Message, Profile, HelpRequest } from '@/lib/types';
 import { MessageBubble } from '../molecules/MessageBubble';
 import { ChatInput } from '../molecules/ChatInput';
-import { User, MoreVertical, Flag, Ban, Star, Users, ExternalLink } from 'lucide-react';
+import {
+  User,
+  MoreVertical,
+  Flag,
+  Ban,
+  Star,
+  Users,
+  ExternalLink,
+  X,
+  MessageSquare,
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VerificationBadge } from '../atoms/VerificationBadge';
-import { StarRating } from '../atoms/StarRating';
 import { RatingModal } from '../molecules/RatingModal';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/router';
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -27,6 +38,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   isOnline = false,
 }) => {
   const t = useTranslations();
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [request, setRequest] = useState<HelpRequest | null>(null);
@@ -46,14 +58,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   };
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [showMembersModal, setShowMembersModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingTarget, setRatingTarget] = useState<Profile | null>(null);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [supabase] = useState(() => createClient());
 
-  const markAsRead = async (messageId: string) => {
+  const markAsRead = useCallback(async (messageId: string) => {
     await supabase.from('messages').update({ is_read: true }).eq('id', messageId);
-  };
+  }, [supabase]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -88,7 +102,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         if (error) {
           console.error('Error fetching messages:', error);
         } else {
-          console.log(`Fetched ${data?.length || 0} messages for conversation ${conversation.id}`);
           setMessages(data || []);
         }
       } catch (err) {
@@ -102,7 +115,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
     // Subscribe to new messages
     const channelName = `messages:${conversation.id}:${Math.random().toString(36).slice(2)}`;
-    console.log('Subscribing to realtime messages for conversation:', conversation.id);
     const channel = supabase
       .channel(channelName)
       .on(
@@ -113,10 +125,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           table: 'messages',
           filter: `conversation_id=eq.${conversation.id}`,
         },
-        (payload: any) => {
+        (payload: RealtimePostgresChangesPayload<Message>) => {
           if (payload.eventType === 'INSERT') {
             const newMessage = payload.new as Message;
-            console.log('Received new message via realtime:', newMessage);
 
             setMessages((prev) => {
               const filtered =
@@ -139,15 +150,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           }
         },
       )
-      .subscribe((status: string) => {
-        console.log(`Realtime subscription status for ${channelName}:`, status);
-      });
+      .subscribe();
 
     return () => {
-      console.log('Unsubscribing from channel:', channelName);
       supabase.removeChannel(channel);
     };
-  }, [supabase, conversation.id, currentUserId]);
+  }, [supabase, conversation.id, conversation.request_id, currentUserId, markAsRead]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -156,20 +164,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [messages]);
 
   useEffect(() => {
-    // Mark all existing unread messages from the other person as read immediately
     const markAllRead = async () => {
-      const { error } = await supabase
+      await supabase
         .from('messages')
         .update({ is_read: true })
         .eq('conversation_id', conversation.id)
         .neq('sender_id', currentUserId)
         .eq('is_read', false);
-
-      if (error) {
-        console.error('Error marking messages as read:', error);
-      } else {
-        console.log(`Marked messages as read for conversation ${conversation.id}`);
-      }
     };
 
     markAllRead();
@@ -182,11 +183,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       : conversation.participant_1;
 
   const handleRateUser = async (rating: number, tags: string[], comment: string) => {
+    if (!ratingTarget && !otherParticipantId) return;
+    const targetId = ratingTarget?.id || otherParticipantId;
+
     setIsSubmittingRating(true);
     try {
       const { error } = await supabase.from('ratings').upsert({
         rater_id: currentUserId,
-        rated_id: otherParticipantId,
+        rated_id: targetId,
         rating,
         tags,
         comment,
@@ -194,6 +198,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
       if (error) throw error;
       setShowRatingModal(false);
+      setRatingTarget(null);
     } catch (error) {
       console.error('Error submitting rating:', error);
       alert('Failed to submit rating. Please try again.');
@@ -202,8 +207,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   };
 
+  const handleMessageUser = (userId: string) => {
+    router.push(`/messages?userId=${userId}`);
+    setShowMembersModal(false);
+  };
+
   return (
-    <div className="flex flex-col h-full w-full bg-chat-bg">
+    <div className="flex flex-col h-full w-full bg-chat-bg relative">
       {/* Header */}
       <div className="bg-chat-header p-3 flex justify-between items-center border-b border-brand-border">
         <div className="flex items-center gap-3">
@@ -228,7 +238,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             {conversation.is_group ? (
               <div className="flex items-center gap-1">
                 <span className="text-[10px] text-brand-text-secondary">
-                  {conversation.members?.length || 0} members
+                  {conversation.members?.length || 0} {t('members')}
                 </span>
               </div>
             ) : (
@@ -251,7 +261,20 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           </button>
           {showMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-brand-surface shadow-lg rounded-md overflow-hidden z-10 border border-brand-border">
-              {!conversation.is_group ? (
+              {conversation.is_group ? (
+                <>
+                  <button
+                    onClick={() => {
+                      setShowMembersModal(true);
+                      setShowMenu(false);
+                    }}
+                    className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
+                  >
+                    <Users size={16} />
+                    {t('see_members')}
+                  </button>
+                </>
+              ) : (
                 <>
                   <button
                     onClick={() => {
@@ -260,7 +283,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     }}
                     className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-error"
                   >
-                    Block User
+                    <Ban size={16} />
+                    {t('block_user')}
                   </button>
                   <button
                     onClick={() => {
@@ -269,19 +293,21 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     }}
                     className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
                   >
-                    Rate User
+                    <Star size={16} />
+                    {t('rate_user')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (otherParticipantId) onReport(otherParticipantId);
+                      setShowMenu(false);
+                    }}
+                    className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
+                  >
+                    <Flag size={16} />
+                    {t('report_user')}
                   </button>
                 </>
-              ) : null}
-              <button
-                onClick={() => {
-                  if (otherParticipantId) onReport(otherParticipantId);
-                  setShowMenu(false);
-                }}
-                className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
-              >
-                Report User
-              </button>
+              )}
             </div>
           )}
         </div>
@@ -292,7 +318,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         <div className="bg-brand-surface border-b border-brand-border px-4 py-2 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[10px] font-bold uppercase text-brand-text-secondary">
-              Linked Request
+              {t('linked_request')}
             </span>
             <span className="text-sm font-medium text-brand-text-main truncate max-w-md">
               {request.title}
@@ -301,7 +327,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           <a
             href={`/requests?id=${request.id}`}
             className="text-brand-primary hover:text-brand-primary/80 transition-colors"
-            title="View Request"
+            title={t('view_request')}
           >
             <ExternalLink size={18} />
           </a>
@@ -312,7 +338,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:px-12 md:py-8 space-y-1">
         {loading ? (
           <div className="flex justify-center items-center h-full">
-            <p className="text-brand-text-secondary">Loading messages...</p>
+            <p className="text-brand-text-secondary">{t('loading_messages')}</p>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex justify-center items-center h-full">
@@ -342,12 +368,67 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         )}
       </div>
 
+      {/* Members Modal */}
+      {showMembersModal && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-brand-surface w-full max-w-md rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="p-4 border-b border-brand-border flex justify-between items-center bg-brand-surface sticky top-0 z-10">
+              <h2 className="text-lg font-bold text-brand-text-main">{t('group_members')}</h2>
+              <button onClick={() => setShowMembersModal(false)} className="text-brand-text-secondary hover:text-brand-text-main">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="overflow-y-auto p-4 space-y-4">
+              {conversation.members?.map((member) => (
+                <div key={member.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-brand-background transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-brand-border/30 flex items-center justify-center overflow-hidden">
+                      <User size={20} className="text-brand-text-secondary" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1">
+                        <span className="font-semibold text-brand-text-main">{member.username}</span>
+                        <VerificationBadge isVerified={member.is_verified} size={14} className="text-brand-primary" />
+                      </div>
+                    </div>
+                  </div>
+                  {member.id !== currentUserId && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleMessageUser(member.id)}
+                        className="p-2 text-brand-primary hover:bg-brand-primary/10 rounded-full transition-colors"
+                        title={t('message_user')}
+                      >
+                        <MessageSquare size={18} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          onReport(member.id);
+                          setShowMembersModal(false);
+                        }}
+                        className="p-2 text-brand-text-secondary hover:bg-brand-error/10 hover:text-brand-error rounded-full transition-colors"
+                        title={t('report_user')}
+                      >
+                        <Flag size={18} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Rating Modal */}
       <RatingModal
         isOpen={showRatingModal}
-        onClose={() => setShowRatingModal(false)}
+        onClose={() => {
+          setShowRatingModal(false);
+          setRatingTarget(null);
+        }}
         onSubmit={handleRateUser}
-        userName={conversation.profiles?.username || 'User'}
+        userName={ratingTarget?.username || conversation.profiles?.username || 'User'}
         isSubmitting={isSubmittingRating}
       />
     </div>

@@ -162,5 +162,16 @@
   "start_date": "Start Date",
   "messages_welcome_title": "HelpHub Messaging",
   "messages_welcome_desc": "Connect with other users, coordinate help, and build your community. Here you can chat with other users.",
-  "start_chatting": "Start a conversation by sending a message."
+  "start_chatting": "Start a conversation by sending a message.",
+  "see_members": "See Members",
+  "group_members": "Group Members",
+  "linked_request": "Linked Request",
+  "view_request": "View Request",
+  "loading_messages": "Loading messages...",
+  "delete_group_confirmation": "Are you sure you want to delete this group?",
+  "delete_group": "Delete Group",
+  "members": "members",
+  "block_user": "Block User",
+  "report_user": "Report User",
+  "message_user": "Message User"
 }
