@@ -111,7 +111,7 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 hover:bg-brand-surface-container-low transition-colors"
                   onClick={onClose}
                   disabled={isSubmitting}
                 >

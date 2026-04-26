@@ -3,6 +3,7 @@ import type { Preview } from '@storybook/nextjs-vite';
 import { NextIntlClientProvider } from 'next-intl';
 import messages from '../messages/en.json';
 import '../src/styles/globals.css';
+import { ToastProvider } from '../src/lib/contexts/ToastContext';
 
 const preview: Preview = {
   parameters: {
@@ -25,7 +26,9 @@ const preview: Preview = {
       React.createElement(NextIntlClientProvider, {
         locale: 'en',
         messages,
-        children: React.createElement(Story),
+        children: React.createElement(ToastProvider, {
+          children: React.createElement(Story),
+        }),
       }),
   ],
 };

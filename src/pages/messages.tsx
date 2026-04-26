@@ -13,6 +13,7 @@ import { Button } from '@/components/atoms/Button';
 import { User, Check, X } from 'lucide-react';
 import { usePresence } from '@/lib/contexts/PresenceContext';
 import { useToast } from '@/lib/contexts/ToastContext';
+import { ReportModal } from '@/components/molecules/ReportModal';
 
 export default function MessagesPage() {
   const t = useTranslations();
@@ -22,6 +23,8 @@ export default function MessagesPage() {
   const [invitations, setInvitations] = useState<ConversationInvitation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
   const [blockedUserIds, setBlockedUserIds] = useState<Set<string>>(new Set());
+  const [reportingUserId, setReportingUserId] = useState<string | null>(null);
+  const [isReporting, setIsReporting] = useState(false);
   const { onlineUsers } = usePresence();
   const router = useRouter();
   const { userId, conversationId } = router.query;
@@ -358,21 +361,39 @@ export default function MessagesPage() {
       showToast(t('error_blocking_user'), 'error');
     } else {
       showToast(t('user_blocked'), 'success');
-      setActiveConversation(null);
       fetchConversations(user.id);
     }
   };
 
-  const handleReport = async (reportedId: string) => {
+  const handleUnblock = async (blockedId: string) => {
     if (!user) return;
-    const reason = prompt('Please enter the reason for reporting:');
-    if (!reason) return;
+    const { error } = await supabase
+      .from('blocks')
+      .delete()
+      .or(
+        `and(blocker_id.eq.${user.id},blocked_id.eq.${blockedId}),and(blocker_id.eq.${blockedId},blocked_id.eq.${user.id})`,
+      );
+
+    if (error) {
+      showToast(t('error_unblocking_user'), 'error');
+    } else {
+      showToast(t('user_unblocked'), 'success');
+      fetchConversations(user.id);
+    }
+  };
+
+  const handleReport = async (reason: string) => {
+    if (!user || !reportingUserId) return;
+    setIsReporting(true);
 
     const { error } = await supabase.from('reports').insert({
       reporter_id: user.id,
-      reported_id: reportedId,
+      reported_id: reportingUserId,
       reason: reason,
     });
+
+    setIsReporting(false);
+    setReportingUserId(null);
 
     if (error) {
       showToast(t('error_reporting_user'), 'error');
@@ -475,7 +496,8 @@ export default function MessagesPage() {
               currentUserId={user.id}
               onSendMessage={handleSendMessage}
               onBlock={handleBlock}
-              onReport={handleReport}
+              onUnblock={handleUnblock}
+              onReport={(id) => setReportingUserId(id)}
               isOnline={
                 !activeConversation.is_group &&
                 (activeConversation.participant_1 === user.id
@@ -496,6 +518,20 @@ export default function MessagesPage() {
           )}
         </div>
 
+        <ReportModal
+          isOpen={!!reportingUserId}
+          onClose={() => setReportingUserId(null)}
+          onConfirm={handleReport}
+          userName={
+            conversations.find(
+              (c) =>
+                !c.is_group &&
+                (c.participant_1 === reportingUserId || c.participant_2 === reportingUserId),
+            )?.profiles?.username || 'User'
+          }
+          isSubmitting={isReporting}
+        />
+
         {activeConversation && user && (
           <div className="fixed inset-0 z-[60] md:hidden bg-brand-surface overflow-hidden">
             <div className="h-[100dvh] flex flex-col">
@@ -511,7 +547,8 @@ export default function MessagesPage() {
                   currentUserId={user.id}
                   onSendMessage={handleSendMessage}
                   onBlock={handleBlock}
-                  onReport={handleReport}
+                  onUnblock={handleUnblock}
+              onReport={(id) => setReportingUserId(id)}
                   isOnline={
                     !activeConversation.is_group &&
                     (activeConversation.participant_1 === user.id

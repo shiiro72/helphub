@@ -2,25 +2,26 @@ import { useEffect, useState, useCallback } from 'react';
 import Head from 'next/head';
 import { Navbar } from '@/components/organisms/Navbar';
 import { createClient } from '@/lib/supabase/client';
-import { Report, SupportTicket, Profile, BannedUser } from '@/lib/types';
+import { Report, Profile, BannedUser } from '@/lib/types';
 import { useRouter } from 'next/router';
 import { GetStaticProps } from 'next';
 import { useTranslations } from 'next-intl';
-import { User, Flag, MessageSquare, Clock, CheckCircle, Shield, Ban, Mail } from 'lucide-react';
+import { User, Flag, MessageSquare, Clock, CheckCircle, Shield, Ban, Mail, Search } from 'lucide-react';
 import { useToast } from '@/lib/contexts/ToastContext';
 import { Button } from '@/components/atoms/Button';
+import { Input } from '@/components/atoms/Input';
 
 export default function AdminPage() {
   const t = useTranslations();
   const router = useRouter();
   const { showToast } = useToast();
   const [reports, setReports] = useState<Report[]>([]);
-  const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [bannedUsers, setBannedUsers] = useState<BannedUser[]>([]);
   const [flaggedUsers, setFlaggedUsers] = useState<Profile[]>([]);
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'reports' | 'tickets' | 'banned' | 'flagged' | 'users'>(
+  const [activeTab, setActiveTab] = useState<'reports' | 'banned' | 'flagged' | 'users'>(
     'reports',
   );
   const [supabase] = useState(() => createClient());
@@ -60,17 +61,6 @@ export default function AdminPage() {
       )
       .order('created_at', { ascending: false });
 
-    // Fetch support tickets with profiles
-    const { data: ticketsData } = await supabase
-      .from('support_tickets')
-      .select(
-        `
-        *,
-        profiles(*)
-      `,
-      )
-      .order('created_at', { ascending: false });
-
     // Fetch banned users
     const { data: bannedData } = await supabase
       .from('archived_users')
@@ -88,10 +78,10 @@ export default function AdminPage() {
     const { data: usersData } = await supabase
       .from('profiles')
       .select('*')
+      .neq('id', user.id) // Exclude current admin
       .order('created_at', { ascending: false });
 
     setReports(reportsData || []);
-    setTickets(ticketsData || []);
     setBannedUsers(bannedData || []);
     setFlaggedUsers(flaggedData || []);
     setAllUsers(usersData || []);
@@ -130,20 +120,6 @@ export default function AdminPage() {
     } else {
       showToast(t('user_unrestricted_success'), 'success');
       fetchData();
-    }
-  };
-
-  const handleUpdateTicketStatus = async (ticketId: string, newStatus: 'open' | 'closed') => {
-    const { error } = await supabase
-      .from('support_tickets')
-      .update({ status: newStatus })
-      .eq('id', ticketId);
-
-    if (error) {
-      showToast(t('error_updating_ticket'), 'error');
-    } else {
-      showToast(t('ticket_status_updated'), 'success');
-      setTickets((prev) => prev.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t)));
     }
   };
 
@@ -192,25 +168,6 @@ export default function AdminPage() {
               </span>
             </div>
             {activeTab === 'reports' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('tickets')}
-            className={`pb-4 px-4 text-sm font-medium transition-colors relative ${
-              activeTab === 'tickets'
-                ? 'text-brand-success'
-                : 'text-brand-text-secondary hover:text-brand-text-main'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <MessageSquare size={18} />
-              {t('support_tickets')}
-              <span className="ml-1 px-2 py-0.5 text-xs bg-brand-surface-container-low rounded-full">
-                {tickets.length}
-              </span>
-            </div>
-            {activeTab === 'tickets' && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-success" />
             )}
           </button>
@@ -342,71 +299,6 @@ export default function AdminPage() {
               ))
             )}
           </div>
-        ) : activeTab === 'tickets' ? (
-          <div className="space-y-4">
-            {tickets.length === 0 ? (
-              <div className="text-center py-12 text-brand-text-secondary">{t('no_tickets')}</div>
-            ) : (
-              tickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  className="bg-brand-surface-container-lowest border border-brand-border rounded-xl p-5 shadow-sm"
-                >
-                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div className="grow">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-lg font-bold text-brand-text-main">
-                          {ticket.subject}
-                        </h3>
-                        <span
-                          className={`px-2.5 py-1 text-[10px] font-black uppercase rounded-full border ${
-                            ticket.status === 'open'
-                              ? 'bg-blue-50 text-blue-600 border-blue-100'
-                              : 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                          }`}
-                        >
-                          {ticket.status}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-brand-text-secondary mb-4">
-                        <User size={14} />
-                        {ticket.profiles?.username || 'Unknown'}
-                        <span className="mx-1">•</span>
-                        <Clock size={14} />
-                        {new Date(ticket.created_at).toLocaleString()}
-                      </div>
-                      <p className="text-brand-text-main bg-brand-surface-container-low p-4 rounded-lg border border-brand-border/40">
-                        {ticket.message}
-                      </p>
-                    </div>
-                    <div className="shrink-0">
-                      {ticket.status === 'open' ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleUpdateTicketStatus(ticket.id, 'closed')}
-                          className="w-full"
-                        >
-                          <CheckCircle size={16} className="mr-2" />
-                          Close Ticket
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleUpdateTicketStatus(ticket.id, 'open')}
-                          className="w-full"
-                        >
-                          <Clock size={16} className="mr-2" />
-                          Reopen Ticket
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
         ) : activeTab === 'banned' ? (
           <div className="space-y-4">
             {bannedUsers.length === 0 ? (
@@ -495,10 +387,29 @@ export default function AdminPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {allUsers.length === 0 ? (
+            <div className="mb-6">
+              <div className="relative">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-text-secondary"
+                  size={18}
+                />
+                <Input
+                  placeholder={t('search_users_placeholder')}
+                  className="pl-10"
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {allUsers.filter((u) =>
+              u.username.toLowerCase().includes(userSearchQuery.toLowerCase()),
+            ).length === 0 ? (
               <div className="text-center py-12 text-brand-text-secondary">{t('no_users')}</div>
             ) : (
-              allUsers.map((user) => (
+              allUsers
+                .filter((u) => u.username.toLowerCase().includes(userSearchQuery.toLowerCase()))
+                .map((user) => (
                 <div
                   key={user.id}
                   className="bg-brand-surface-container-lowest border border-brand-border rounded-xl p-5 shadow-sm"

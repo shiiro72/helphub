@@ -12,6 +12,7 @@ interface ChatWindowProps {
   currentUserId: string;
   onSendMessage: (content: string) => void;
   onBlock: (userId: string) => void;
+  onUnblock: (userId: string) => void;
   onReport: (userId: string) => void;
   isOnline?: boolean;
 }
@@ -21,6 +22,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   currentUserId,
   onSendMessage,
   onBlock,
+  onUnblock,
   onReport,
   isOnline = false,
 }) => {
@@ -243,15 +245,27 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             <div className="absolute right-0 mt-2 w-48 bg-brand-surface shadow-lg rounded-md overflow-hidden z-10 border border-brand-border">
               {!conversation.is_group ? (
                 <>
-                  <button
-                    onClick={() => {
-                      if (otherParticipantId) onBlock(otherParticipantId);
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-error"
-                  >
-                    Block User
-                  </button>
+                  {isBlocked ? (
+                    <button
+                      onClick={() => {
+                        if (otherParticipantId) onUnblock(otherParticipantId);
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-success"
+                    >
+                      Unblock User
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (otherParticipantId) onBlock(otherParticipantId);
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-error"
+                    >
+                      Block User
+                    </button>
+                  )}
                 </>
               ) : null}
               <button
