@@ -62,9 +62,9 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
           </h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-brand-surface-container-low transition-colors group"
+            className="p-1 rounded-full hover:bg-brand-surface-container-low transition-colors"
           >
-            <X size={20} className="text-zinc-500 group-hover:text-zinc-500" />
+            <X size={20} className="text-zinc-500" />
           </button>
         </div>
 

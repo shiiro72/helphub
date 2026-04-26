@@ -191,7 +191,28 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       setIsBlocked(!!data);
     };
     checkBlock();
-  }, [supabase, currentUserId, otherParticipantId]);
+
+    if (!otherParticipantId) return;
+
+    const blocksChannel = supabase
+      .channel(`blocks:${conversation.id}:${Math.random().toString(36).slice(2)}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'blocks',
+        },
+        () => {
+          checkBlock();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(blocksChannel);
+    };
+  }, [supabase, currentUserId, otherParticipantId, conversation.id]);
 
   const handleMessageUser = (userId: string) => {
     router.push(`/messages?userId=${userId}`);
@@ -270,6 +291,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                       }}
                       className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-success"
                     >
+                      <User size={16} />
                       Unblock User
                     </button>
                   ) : (

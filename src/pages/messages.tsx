@@ -220,13 +220,18 @@ export default function MessagesPage() {
     [supabase],
   );
 
-  // Sync active conversation only when necessary
+  // Sync active conversation state from URL once on load or when query params change manually
+  const prevQueryRef = useRef<string>('');
   useEffect(() => {
-    if (!user || !router.isReady) return;
+    if (!user || !router.isReady || conversations.length === 0) return;
+
+    const currentQuery = JSON.stringify(router.query);
+    if (currentQuery === prevQueryRef.current) return;
+    prevQueryRef.current = currentQuery;
 
     if (conversationId && typeof conversationId === 'string') {
       const existing = conversations.find((c) => c.id === conversationId);
-      if (existing && existing.id !== activeConversation?.id) {
+      if (existing) {
         setActiveConversation(existing);
       }
     } else if (userId && typeof userId === 'string' && userId !== user.id) {
@@ -234,14 +239,12 @@ export default function MessagesPage() {
         (c) => !c.is_group && (c.participant_1 === userId || c.participant_2 === userId),
       );
       if (existing) {
-        if (existing.id !== activeConversation?.id) {
-          setActiveConversation(existing);
-        }
+        setActiveConversation(existing);
       } else {
         startNewConversation(user.id, userId);
       }
     }
-  }, [conversations.length, user, conversationId, userId, startNewConversation, router.isReady]);
+  }, [conversations.length, user, conversationId, userId, startNewConversation, router.isReady, router.query]);
 
   // Handle data updates for current active conversation without loop
   useEffect(() => {
