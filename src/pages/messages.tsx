@@ -25,9 +25,13 @@ export default function MessagesPage() {
   const [supabase] = useState(() => createClient());
 
   const initialSyncDone = useRef(false);
+  const isStartingConversation = useRef(false);
 
   const startNewConversation = useCallback(
     async (currentUserId: string, otherUserId: string) => {
+      if (isStartingConversation.current) return;
+      isStartingConversation.current = true;
+
       const [p1, p2] = [currentUserId, otherUserId].sort();
 
       const { data: existing } = await supabase
@@ -55,6 +59,7 @@ export default function MessagesPage() {
           return [conv, ...prev];
         });
         setActiveConversation(conv);
+        isStartingConversation.current = false;
         return;
       }
 
@@ -64,7 +69,10 @@ export default function MessagesPage() {
         .eq('id', otherUserId)
         .single();
 
-      if (!profile) return;
+      if (!profile) {
+        isStartingConversation.current = false;
+        return;
+      }
 
       const { data, error } = await supabase
         .from('conversations')
@@ -89,6 +97,7 @@ export default function MessagesPage() {
         setConversations((prev) => [newConv, ...prev]);
         setActiveConversation(newConv);
       }
+      isStartingConversation.current = false;
     },
     [supabase],
   );
@@ -191,33 +200,36 @@ export default function MessagesPage() {
     [supabase],
   );
 
+  // Sync active conversation when query params or conversations list updates
   useEffect(() => {
     if (!user) return;
 
-    if (!initialSyncDone.current) {
-      initialSyncDone.current = true;
-      if (conversationId && typeof conversationId === 'string') {
-        const existing = conversations.find((c) => c.id === conversationId);
-        if (existing) {
-          setActiveConversation(existing);
-        }
-      } else if (userId && typeof userId === 'string' && userId !== user.id) {
-        const existing = conversations.find(
-          (c) => !c.is_group && (c.participant_1 === userId || c.participant_2 === userId),
-        );
-        if (existing) {
-          setActiveConversation(existing);
-        } else {
-          startNewConversation(user.id, userId);
-        }
+    if (conversationId && typeof conversationId === 'string') {
+      const existing = conversations.find((c) => c.id === conversationId);
+      if (existing && existing.id !== activeConversation?.id) {
+        setActiveConversation(existing);
       }
-    } else if (activeConversation) {
+    } else if (userId && typeof userId === 'string' && userId !== user.id) {
+      const existing = conversations.find(
+        (c) => !c.is_group && (c.participant_1 === userId || c.participant_2 === userId),
+      );
+      if (existing) {
+        if (existing.id !== activeConversation?.id) {
+          setActiveConversation(existing);
+        }
+      } else {
+        startNewConversation(user.id, userId);
+      }
+    }
+
+    // Update active conversation with fresh data from the list if it exists
+    if (activeConversation) {
       const updated = conversations.find((c) => c.id === activeConversation.id);
       if (updated && JSON.stringify(updated) !== JSON.stringify(activeConversation)) {
         setActiveConversation(updated);
       }
     }
-  }, [conversations, user, conversationId, userId, startNewConversation, activeConversation]);
+  }, [conversations, user, conversationId, userId, startNewConversation, activeConversation?.id]);
 
   useEffect(() => {
     if (!router.isReady) return;

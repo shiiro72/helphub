@@ -11,12 +11,14 @@ import {
   Users,
   ExternalLink,
   X,
+  MessageSquare,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VerificationBadge } from '../atoms/VerificationBadge';
 import { StarRating } from '../atoms/StarRating';
 import { RatingModal } from '../molecules/RatingModal';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/router';
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -36,6 +38,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   isOnline = false,
 }) => {
   const t = useTranslations();
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [request, setRequest] = useState<HelpRequest | null>(null);
@@ -202,6 +205,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     } finally {
       setIsSubmittingRating(false);
     }
+  };
+
+  const handleMessageUser = (userId: string) => {
+    router.push(`/messages?userId=${userId}`);
+    setShowMembersModal(false);
   };
 
   return (
@@ -382,18 +390,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                         <span className="font-semibold text-brand-text-main">{member.username}</span>
                         <VerificationBadge isVerified={member.is_verified} size={14} className="text-brand-primary" />
                       </div>
-                      <StarRating rating={member.trust_rank || 0} totalRatings={member.total_ratings || 0} size={10} showCount />
                     </div>
                   </div>
                   {member.id !== currentUserId && (
                     <div className="flex gap-2">
+                      <button
+                        onClick={() => handleMessageUser(member.id)}
+                        className="p-2 text-brand-primary hover:bg-brand-primary/10 rounded-full transition-colors"
+                        title={t('message_user')}
+                      >
+                        <MessageSquare size={18} />
+                      </button>
                       <button
                         onClick={() => {
                           setRatingTarget(member);
                           setShowRatingModal(true);
                           setShowMembersModal(false);
                         }}
-                        className="p-2 text-brand-primary hover:bg-brand-primary/10 rounded-full transition-colors"
+                        className="p-2 text-brand-text-secondary hover:bg-brand-primary/10 hover:text-brand-primary rounded-full transition-colors"
                         title={t('rate_user')}
                       >
                         <Star size={18} />

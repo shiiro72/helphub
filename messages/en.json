@@ -156,5 +156,6 @@
   "delete_group": "Delete Group",
   "members": "members",
   "block_user": "Block User",
-  "report_user": "Report User"
+  "report_user": "Report User",
+  "message_user": "Message User"
 }

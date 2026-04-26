@@ -152,8 +152,10 @@
   "linked_request": "Cerere Asociată",
   "view_request": "Vezi Cererea",
   "loading_messages": "Se încarcă mesajele...",
+  "delete_group_confirmation": "Ești sigur că vrei să ștergi acest grup?",
+  "delete_group": "Șterge Grupul",
   "members": "membri",
   "block_user": "Blochează Utilizatorul",
   "report_user": "Raportează Utilizatorul",
-  "rate_user": "Evaluează Utilizatorul"
+  "message_user": "Trimite Mesaj"
 }
