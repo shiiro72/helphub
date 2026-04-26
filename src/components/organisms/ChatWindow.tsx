@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Conversation, Message, Profile, HelpRequest } from '@/lib/types';
 import { MessageBubble } from '../molecules/MessageBubble';
 import { ChatInput } from '../molecules/ChatInput';
@@ -15,10 +15,10 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VerificationBadge } from '../atoms/VerificationBadge';
-import { StarRating } from '../atoms/StarRating';
 import { RatingModal } from '../molecules/RatingModal';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/router';
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -65,9 +65,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [supabase] = useState(() => createClient());
 
-  const markAsRead = async (messageId: string) => {
+  const markAsRead = useCallback(async (messageId: string) => {
     await supabase.from('messages').update({ is_read: true }).eq('id', messageId);
-  };
+  }, [supabase]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -125,7 +125,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           table: 'messages',
           filter: `conversation_id=eq.${conversation.id}`,
         },
-        (payload: any) => {
+        (payload: RealtimePostgresChangesPayload<Message>) => {
           if (payload.eventType === 'INSERT') {
             const newMessage = payload.new as Message;
 
@@ -155,7 +155,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, conversation.id, currentUserId]);
+  }, [supabase, conversation.id, conversation.request_id, currentUserId, markAsRead]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -400,17 +400,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                         title={t('message_user')}
                       >
                         <MessageSquare size={18} />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setRatingTarget(member);
-                          setShowRatingModal(true);
-                          setShowMembersModal(false);
-                        }}
-                        className="p-2 text-brand-text-secondary hover:bg-brand-primary/10 hover:text-brand-primary rounded-full transition-colors"
-                        title={t('rate_user')}
-                      >
-                        <Star size={18} />
                       </button>
                       <button
                         onClick={() => {

@@ -24,7 +24,6 @@ export default function MessagesPage() {
   const { userId, conversationId } = router.query;
   const [supabase] = useState(() => createClient());
 
-  const initialSyncDone = useRef(false);
   const isStartingConversation = useRef(false);
 
   const startNewConversation = useCallback(
@@ -229,7 +228,7 @@ export default function MessagesPage() {
         setActiveConversation(updated);
       }
     }
-  }, [conversations, user, conversationId, userId, startNewConversation, activeConversation?.id]);
+  }, [conversations, user, conversationId, userId, startNewConversation, activeConversation]);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -246,7 +245,7 @@ export default function MessagesPage() {
       }
     };
     checkUser();
-  }, [supabase, router.isReady, fetchConversations]);
+  }, [supabase, router, fetchConversations]);
 
   useEffect(() => {
     if (!user) return;
