@@ -89,7 +89,7 @@ export default function MessagesPage() {
         participant_2_profile:profiles!participant_2(*)
       `,
         )
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error starting conversation:', error);
@@ -297,6 +297,15 @@ export default function MessagesPage() {
           event: '*',
           schema: 'public',
           table: 'conversations',
+        },
+        () => fetchConversations(user.id),
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'blocks',
         },
         () => fetchConversations(user.id),
       )
