@@ -22,7 +22,6 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [invitations, setInvitations] = useState<ConversationInvitation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
-  const [_blockedUserIds, setBlockedUserIds] = useState<Set<string>>(new Set());
   const [reportingUserId, setReportingUserId] = useState<string | null>(null);
   const [isReporting, setIsReporting] = useState(false);
   const { onlineUsers } = usePresence();

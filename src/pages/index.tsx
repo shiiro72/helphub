@@ -5,7 +5,6 @@ import { Button } from '@/components/atoms/Button';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useAuth } from '@/lib/hooks/useAuth';
 import { HelpRequest, HelpOffer } from '@/lib/types';
 import { RequestCard } from '@/components/molecules/RequestCard';
 import { OfferCard } from '@/components/molecules/OfferCard';
@@ -15,7 +14,6 @@ import { ConfirmationModal } from '@/components/molecules/ConfirmationModal';
 
 export default function Home() {
   const t = useTranslations();
-  const { user: _user } = useAuth();
   const [latestRequests, setLatestRequests] = useState<HelpRequest[]>([]);
   const [latestOffers, setLatestOffers] = useState<HelpOffer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,21 +30,48 @@ export default function Home() {
       setLoading(true);
       const supabase = createClient();
 
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+
+      // Fetch blocks if user is logged in
+      const bIds = new Set<string>();
+      if (currentUser) {
+        const { data: blocks } = await supabase
+          .from('blocks')
+          .select('blocked_id, blocker_id')
+          .or(`blocker_id.eq.${currentUser.id},blocked_id.eq.${currentUser.id}`);
+
+        if (blocks) {
+          blocks.forEach((b: { blocked_id: string; blocker_id: string }) => {
+            if (b.blocker_id === currentUser.id) bIds.add(b.blocked_id);
+            else bIds.add(b.blocker_id);
+          });
+        }
+      }
+
+
       const [requestsRes, offersRes] = await Promise.all([
         supabase
           .from('help_requests')
           .select('*, profiles(*)')
           .order('date_posted', { ascending: false })
-          .limit(3),
+          .limit(10), // Fetch more to allow for blocking filter
         supabase
           .from('help_offers')
           .select('*, profiles(*)')
           .order('date_posted', { ascending: false })
-          .limit(3),
+          .limit(10),
       ]);
 
-      if (requestsRes.data) setLatestRequests(requestsRes.data);
-      if (offersRes.data) setLatestOffers(offersRes.data);
+      if (requestsRes.data) {
+        const filtered = requestsRes.data.filter((r: { user_id: string }) => !bIds.has(r.user_id)).slice(0, 3);
+        setLatestRequests(filtered);
+      }
+      if (offersRes.data) {
+        const filtered = offersRes.data.filter((o: { user_id: string }) => !bIds.has(o.user_id)).slice(0, 3);
+        setLatestOffers(filtered);
+      }
       setLoading(false);
     };
 
