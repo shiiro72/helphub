@@ -19,6 +19,7 @@ import { VolunteerList } from './VolunteerList';
 import { useVolunteer } from '@/lib/hooks/useVolunteer';
 import { useUserReports } from '@/lib/hooks/useUserReports';
 import { AlertTriangle } from 'lucide-react';
+import { Portal } from '../atoms/Portal';
 
 interface RequestListItemProps {
   request: HelpRequest;
@@ -208,18 +209,20 @@ export const RequestListItem: React.FC<RequestListItemProps> = ({
       </div>
 
       {showVolunteerModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="bg-brand-surface rounded-2xl w-full max-w-md shadow-2xl p-6">
-            <VolunteerList
-              request={{ ...request, confirmed_count: confirmedCount }}
-              onClose={() => setShowVolunteerModal(false)}
-            />
+        <Portal>
+          <div
+            className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="bg-brand-surface rounded-2xl w-full max-w-md shadow-2xl p-6">
+              <VolunteerList
+                request={{ ...request, confirmed_count: confirmedCount }}
+                onClose={() => setShowVolunteerModal(false)}
+              />
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

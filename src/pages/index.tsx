@@ -10,6 +10,8 @@ import { HelpRequest, HelpOffer } from '@/lib/types';
 import { RequestCard } from '@/components/molecules/RequestCard';
 import { OfferCard } from '@/components/molecules/OfferCard';
 import { TriangularBoard } from '@/components/organisms/TriangularBoard';
+import { PostHelpModal } from '@/components/organisms/PostHelpModal';
+import { ConfirmationModal } from '@/components/molecules/ConfirmationModal';
 
 export default function Home() {
   const t = useTranslations();
@@ -17,9 +19,17 @@ export default function Home() {
   const [latestRequests, setLatestRequests] = useState<HelpRequest[]>([]);
   const [latestOffers, setLatestOffers] = useState<HelpOffer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Modal states
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<(HelpRequest | HelpOffer) & { type: 'request' | 'offer' } | null>(null);
+  const [deletingItem, setDeletingItem] = useState<(HelpRequest | HelpOffer) & { type: 'request' | 'offer' } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchLatestData = async () => {
+      setLoading(true);
       const supabase = createClient();
 
       const [requestsRes, offersRes] = await Promise.all([
@@ -41,7 +51,32 @@ export default function Home() {
     };
 
     fetchLatestData();
-  }, []);
+  }, [refreshTrigger]);
+
+  const handleEdit = (item: HelpRequest | HelpOffer, type: 'request' | 'offer') => {
+    setEditingItem({ ...item, type });
+    setIsPostModalOpen(true);
+  };
+
+  const handleDelete = (item: HelpRequest | HelpOffer, type: 'request' | 'offer') => {
+    setDeletingItem({ ...item, type });
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingItem) return;
+    setIsDeleting(true);
+    const supabase = createClient();
+    const table = deletingItem.type === 'request' ? 'help_requests' : 'help_offers';
+    const { error } = await supabase.from(table).delete().eq('id', deletingItem.id);
+
+    if (error) {
+      console.error('Error deleting item:', error);
+    } else {
+      setRefreshTrigger((prev) => prev + 1);
+      setDeletingItem(null);
+    }
+    setIsDeleting(false);
+  };
 
   return (
     <div className="min-h-screen bg-brand-background">
@@ -51,7 +86,13 @@ export default function Home() {
         <div className="space-y-12">
           {/* Desktop View: Triangular Board */}
           <div className="hidden lg:block">
-            <TriangularBoard requests={latestRequests} offers={latestOffers} loading={loading} />
+            <TriangularBoard
+              requests={latestRequests}
+              offers={latestOffers}
+              loading={loading}
+              onEdit={(item, type) => handleEdit(item, type)}
+              onDelete={(item, type) => handleDelete(item, type)}
+            />
           </div>
 
           {/* Mobile View: Traditional Grids */}
@@ -79,7 +120,12 @@ export default function Home() {
               ) : latestRequests.length > 0 ? (
                 <div className="grid grid-cols-1 gap-6">
                   {latestRequests.map((request) => (
-                    <RequestCard key={request.id} request={request} />
+                    <RequestCard
+                      key={request.id}
+                      request={request}
+                      onEdit={(r) => handleEdit(r, 'request')}
+                      onDelete={(r) => handleDelete(r, 'request')}
+                    />
                   ))}
                 </div>
               ) : (
@@ -112,7 +158,12 @@ export default function Home() {
               ) : latestOffers.length > 0 ? (
                 <div className="grid grid-cols-1 gap-6">
                   {latestOffers.map((offer) => (
-                    <OfferCard key={offer.id} offer={offer} />
+                    <OfferCard
+                      key={offer.id}
+                      offer={offer}
+                      onEdit={(o) => handleEdit(o, 'offer')}
+                      onDelete={(o) => handleDelete(o, 'offer')}
+                    />
                   ))}
                 </div>
               ) : (
@@ -124,6 +175,30 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {editingItem && (
+        <PostHelpModal
+          type={editingItem.type}
+          isOpen={isPostModalOpen}
+          initialData={editingItem}
+          onClose={() => {
+            setIsPostModalOpen(false);
+            setEditingItem(null);
+          }}
+          onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+        />
+      )}
+
+      <ConfirmationModal
+        isOpen={!!deletingItem}
+        onClose={() => setDeletingItem(null)}
+        onConfirm={confirmDelete}
+        title={deletingItem?.type === 'request' ? t('delete_request') : t('delete_offer')}
+        message={t('delete_post_confirmation')}
+        confirmText={t('delete')}
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

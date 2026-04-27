@@ -11,9 +11,17 @@ interface TriangularBoardProps {
   requests: HelpRequest[];
   offers: HelpOffer[];
   loading?: boolean;
+  onEdit?: (item: HelpRequest | HelpOffer, type: 'request' | 'offer') => void;
+  onDelete?: (item: HelpRequest | HelpOffer, type: 'request' | 'offer') => void;
 }
 
-export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offers, loading }) => {
+export const TriangularBoard: React.FC<TriangularBoardProps> = ({
+  requests,
+  offers,
+  loading,
+  onEdit,
+  onDelete,
+}) => {
   const t = useTranslations();
 
   if (loading) {
@@ -70,7 +78,11 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
                     opacity: opacity,
                   }}
                 >
-                  <RequestCard request={request} />
+                  <RequestCard
+                    request={request}
+                    onEdit={(r) => onEdit?.(r, 'request')}
+                    onDelete={(r) => onDelete?.(r, 'request')}
+                  />
                 </div>
               );
             })
@@ -136,7 +148,11 @@ export const TriangularBoard: React.FC<TriangularBoardProps> = ({ requests, offe
                       opacity: opacity,
                     }}
                   >
-                    <OfferCard offer={offer} />
+                    <OfferCard
+                      offer={offer}
+                      onEdit={(o) => onEdit?.(o, 'offer')}
+                      onDelete={(o) => onDelete?.(o, 'offer')}
+                    />
                   </div>
                 );
               })

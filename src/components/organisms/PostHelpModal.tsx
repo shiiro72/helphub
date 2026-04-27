@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '../atoms/Button';
+import { Portal } from '../atoms/Portal';
 import { Input } from '../atoms/Input';
 import { Label } from '../atoms/Label';
 import { Textarea } from '../atoms/Textarea';
@@ -183,162 +184,164 @@ export const PostHelpModal: React.FC<PostHelpModalProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto pt-8 md:pt-16"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className="bg-brand-surface-container-lowest border border-brand-outline-variant rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden mb-8">
-        <div className="flex items-center justify-between p-6 border-b border-brand-outline-variant">
-          <h2 className="text-xl font-bold text-brand-text-main">
-            {initialData
-              ? isRequest
-                ? t('edit_request')
-                : t('edit_offer')
-              : isRequest
-                ? t('post_request')
-                : t('post_offer')}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
-            aria-label="Close modal"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
-
-          <div className="space-y-2">
-            <Label htmlFor="title" required className="text-brand-text-main">
-              {t('title')}
-            </Label>
-            <Input
-              id="title"
-              placeholder={
-                isRequest ? t('request_title_placeholder') : t('offer_title_placeholder')
-              }
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
+    <Portal>
+      <div
+        className="fixed inset-0 z-[140] flex items-start justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto pt-8 md:pt-16"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className="bg-brand-surface-container-lowest border border-brand-outline-variant rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden mb-8">
+          <div className="flex items-center justify-between p-6 border-b border-brand-outline-variant">
+            <h2 className="text-xl font-bold text-brand-text-main">
+              {initialData
+                ? isRequest
+                  ? t('edit_request')
+                  : t('edit_offer')
+                : isRequest
+                  ? t('post_request')
+                  : t('post_offer')}
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+              aria-label="Close modal"
+            >
+              <X size={24} />
+            </button>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="content">{t('description')}</Label>
-            <Textarea
-              id="content"
-              placeholder={isRequest ? t('request_desc_placeholder') : t('offer_desc_placeholder')}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <ErrorBanner message={error || ''} onDismiss={() => setError(null)} />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="city" required>
-                {t('city')}
+              <Label htmlFor="title" required className="text-brand-text-main">
+                {t('title')}
               </Label>
               <Input
-                id="city"
-                placeholder="e.g. Bucharest"
-                value={city}
-                onChange={(e) => handleCityChange(e.target.value)}
-                list="cities-list"
-                required
-              />
-              <datalist id="cities-list">
-                {romanianCities.map((c) => (
-                  <option key={`${c.name}-${c.county}`} value={`${c.name} (${c.county})`} />
-                ))}
-              </datalist>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="address" required>
-                {t('address')}
-              </Label>
-              <Input
-                id="address"
+                id="title"
                 placeholder={
-                  isRequest ? 'e.g. 123 Main St or Downtown' : 'e.g. Can meet in City Center'
+                  isRequest ? t('request_title_placeholder') : t('offer_title_placeholder')
                 }
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 required
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="reward">{t('reward')}</Label>
-              <Input
-                id="reward"
-                placeholder="e.g. Coffee, $20"
-                value={reward}
-                onChange={(e) => setReward(e.target.value)}
+              <Label htmlFor="content">{t('description')}</Label>
+              <Textarea
+                id="content"
+                placeholder={isRequest ? t('request_desc_placeholder') : t('offer_desc_placeholder')}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
               />
             </div>
-            {isRequest && (
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="maxVolunteers">{t('max_volunteers_field')}</Label>
+                <Label htmlFor="city" required>
+                  {t('city')}
+                </Label>
                 <Input
-                  id="maxVolunteers"
-                  type="number"
-                  min="1"
-                  placeholder="e.g. 5"
-                  value={maxVolunteers}
-                  onChange={(e) => setMaxVolunteers(e.target.value)}
+                  id="city"
+                  placeholder="e.g. Bucharest"
+                  value={city}
+                  onChange={(e) => handleCityChange(e.target.value)}
+                  list="cities-list"
+                  required
+                />
+                <datalist id="cities-list">
+                  {romanianCities.map((c) => (
+                    <option key={`${c.name}-${c.county}`} value={`${c.name} (${c.county})`} />
+                  ))}
+                </datalist>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="address" required>
+                  {t('address')}
+                </Label>
+                <Input
+                  id="address"
+                  placeholder={
+                    isRequest ? 'e.g. 123 Main St or Downtown' : 'e.g. Can meet in City Center'
+                  }
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  required
                 />
               </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="start_datetime">
-                {t('start_datetime_label')}
-              </Label>
-              <Input
-                id="start_datetime"
-                type="datetime-local"
-                value={startDatetime}
-                onChange={(e) => setStartDatetime(e.target.value)}
-                onClick={(e) => e.currentTarget.showPicker?.()}
-              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="end_datetime">{t('end_datetime_label')}</Label>
-              <Input
-                id="end_datetime"
-                type="datetime-local"
-                value={endDatetime}
-                onChange={(e) => setEndDatetime(e.target.value)}
-                onClick={(e) => e.currentTarget.showPicker?.()}
-              />
-            </div>
-          </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
-              {t('cancel')}
-            </Button>
-            <Button type="submit" className="flex-1" disabled={loading}>
-              {loading
-                ? t('processing')
-                : initialData
-                  ? isRequest
-                    ? t('update_request')
-                    : t('update_offer')
-                  : isRequest
-                    ? t('post_request_btn')
-                    : t('post_offer_btn')}
-            </Button>
-          </div>
-        </form>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="reward">{t('reward')}</Label>
+                <Input
+                  id="reward"
+                  placeholder="e.g. Coffee, $20"
+                  value={reward}
+                  onChange={(e) => setReward(e.target.value)}
+                />
+              </div>
+              {isRequest && (
+                <div className="space-y-2">
+                  <Label htmlFor="maxVolunteers">{t('max_volunteers_field')}</Label>
+                  <Input
+                    id="maxVolunteers"
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 5"
+                    value={maxVolunteers}
+                    onChange={(e) => setMaxVolunteers(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="start_datetime">
+                  {t('start_datetime_label')}
+                </Label>
+                <Input
+                  id="start_datetime"
+                  type="datetime-local"
+                  value={startDatetime}
+                  onChange={(e) => setStartDatetime(e.target.value)}
+                  onClick={(e) => e.currentTarget.showPicker?.()}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="end_datetime">{t('end_datetime_label')}</Label>
+                <Input
+                  id="end_datetime"
+                  type="datetime-local"
+                  value={endDatetime}
+                  onChange={(e) => setEndDatetime(e.target.value)}
+                  onClick={(e) => e.currentTarget.showPicker?.()}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+                {t('cancel')}
+              </Button>
+              <Button type="submit" className="flex-1" disabled={loading}>
+                {loading
+                  ? t('processing')
+                  : initialData
+                    ? isRequest
+                      ? t('update_request')
+                      : t('update_offer')
+                    : isRequest
+                      ? t('post_request_btn')
+                      : t('post_offer_btn')}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </Portal>
   );
 };
