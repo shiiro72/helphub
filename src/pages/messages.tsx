@@ -146,10 +146,11 @@ export default function MessagesPage() {
       }
 
       const allConversations = (data || []).sort(
-        (a: any, b: any) => new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime(),
+        (a: Conversation, b: Conversation) =>
+          new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime(),
       );
 
-      const processed = allConversations.map((conv: any) => {
+      const processed = allConversations.map((conv: Conversation) => {
         const lastMessage = conv.messages?.[0];
 
         if (conv.is_group) {
@@ -160,7 +161,7 @@ export default function MessagesPage() {
           const p2 = conv.participant_2_profile as unknown as Profile;
 
           const membersMap = new Map<string, Profile>();
-          joinedMembers.forEach(m => membersMap.set(m.id, m));
+          joinedMembers.forEach((m) => membersMap.set(m.id, m));
           if (p1) membersMap.set(p1.id, p1);
           if (p2) membersMap.set(p2.id, p2);
 
@@ -194,7 +195,7 @@ export default function MessagesPage() {
         unreadCounts[m.conversation_id] = (unreadCounts[m.conversation_id] || 0) + 1;
       });
 
-      const withUnread = processed.map((conv: any) => ({
+      const withUnread = processed.map((conv: Conversation) => ({
         ...conv,
         unreadCount: unreadCounts[conv.id] || 0,
       }));

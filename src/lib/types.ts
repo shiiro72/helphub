@@ -74,6 +74,9 @@ export interface Conversation {
     is_read: boolean;
   };
   unreadCount?: number;
+  messages?: Message[];
+  participant_1_profile?: Profile;
+  participant_2_profile?: Profile;
 }
 
 export interface ConversationMember {
