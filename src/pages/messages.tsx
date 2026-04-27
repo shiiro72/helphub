@@ -245,14 +245,26 @@ export default function MessagesPage() {
         startNewConversation(user.id, userId);
       }
     }
-  }, [conversations.length, user, conversationId, userId, startNewConversation, router.isReady, router.query]);
+  }, [
+    conversations.length,
+    user,
+    conversationId,
+    userId,
+    startNewConversation,
+    router.isReady,
+    router.query,
+  ]);
 
   // Handle data updates for current active conversation without loop
   useEffect(() => {
     if (activeConversation) {
       const updated = conversations.find((c) => c.id === activeConversation.id);
-      if (updated && (updated.unreadCount !== activeConversation.unreadCount || updated.last_message_at !== activeConversation.last_message_at)) {
-         setActiveConversation(updated);
+      if (
+        updated &&
+        (updated.unreadCount !== activeConversation.unreadCount ||
+          updated.last_message_at !== activeConversation.last_message_at)
+      ) {
+        setActiveConversation(updated);
       }
     }
   }, [conversations, activeConversation?.id]);
@@ -551,7 +563,7 @@ export default function MessagesPage() {
                   onSendMessage={handleSendMessage}
                   onBlock={handleBlock}
                   onUnblock={handleUnblock}
-              onReport={(id) => setReportingUserId(id)}
+                  onReport={(id) => setReportingUserId(id)}
                   isOnline={
                     !activeConversation.is_group &&
                     (activeConversation.participant_1 === user.id

@@ -284,6 +284,21 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 </>
               ) : (
                 <>
+                  <button
+                    onClick={() => {
+                      setShowMembersModal(true);
+                      setShowMenu(false);
+                    }}
+                    className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
+                  >
+                    <Users size={16} />
+                    {t('see_members')}
+                    <Ban size={16} />
+                    {t('block_user')}
+                  </button>
+                </>
+              ) : (
+                <>
                   {isBlocked ? (
                     <button
                       onClick={async () => {
@@ -391,7 +406,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* Members Modal */}
       {showMembersModal && (
-        <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-130 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-brand-surface w-full max-w-md rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]">
             <div className="p-4 border-b border-brand-border flex justify-between items-center bg-brand-surface sticky top-0 z-10">
               <h2 className="text-lg font-bold text-brand-text-main">{t('group_members')}</h2>
