@@ -312,7 +312,7 @@ export default function AdminPage() {
                         </div>
                       </div>
                       <div className="bg-brand-surface-container-low p-4 rounded-lg border border-brand-border/40">
-                        <p className="text-brand-text-main italic">"{report.reason}"</p>
+                        <p className="text-brand-text-main italic">&quot;{report.reason}&quot;</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end shrink-0 gap-3">

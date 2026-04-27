@@ -15,7 +15,7 @@ import { ConfirmationModal } from '@/components/molecules/ConfirmationModal';
 
 export default function Home() {
   const t = useTranslations();
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [latestRequests, setLatestRequests] = useState<HelpRequest[]>([]);
   const [latestOffers, setLatestOffers] = useState<HelpOffer[]>([]);
   const [loading, setLoading] = useState(true);
