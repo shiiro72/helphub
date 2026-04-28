@@ -5,6 +5,7 @@ import { FormField } from '../molecules/FormField';
 import { createClient } from '@/lib/supabase/client';
 import { LogIn, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useToast } from '@/lib/contexts/ToastContext';
 
 interface AuthFormProps {
   mode: 'login' | 'register';
@@ -12,6 +13,7 @@ interface AuthFormProps {
 
 export function AuthForm({ mode }: AuthFormProps) {
   const t = useTranslations();
+  const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -42,7 +44,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     if (error) {
       setError(error.message);
     } else if (mode === 'register') {
-      alert(t('check_email'));
+      showToast(t('check_email'), 'success');
     } else {
       window.location.href = '/';
     }
@@ -69,7 +71,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         setError(error.message);
       }
     } else {
-      alert('Password reset email sent! Check your inbox.');
+      showToast('Password reset email sent! Check your inbox.', 'success');
     }
     setLoading(false);
   };

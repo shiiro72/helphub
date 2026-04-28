@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { useRouter } from 'next/router';
 import { Plus_Jakarta_Sans, Be_Vietnam_Pro } from 'next/font/google';
 import { PresenceProvider } from '@/lib/contexts/PresenceContext';
+import { ToastProvider } from '@/lib/contexts/ToastContext';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -24,11 +25,13 @@ export default function App({ Component, pageProps }: AppProps) {
       locale={router.locale || 'en'}
       messages={pageProps.messages}
     >
-      <PresenceProvider>
-        <div className={`${plusJakartaSans.variable} ${beVietnamPro.variable} font-sans`}>
-          <Component {...pageProps} />
-        </div>
-      </PresenceProvider>
+      <ToastProvider>
+        <PresenceProvider>
+          <div className={`${plusJakartaSans.variable} ${beVietnamPro.variable} font-sans`}>
+            <Component {...pageProps} />
+          </div>
+        </PresenceProvider>
+      </ToastProvider>
     </NextIntlClientProvider>
   );
 }

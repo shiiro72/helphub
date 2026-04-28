@@ -3,9 +3,10 @@ import { MapPin, User, MessageSquare, Clock, Edit2, Trash2 } from 'lucide-react'
 import { HelpOffer } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
-import { StarRating } from '../atoms/StarRating';
 import { Highlight } from '../atoms/Highlight';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useUserReports } from '@/lib/hooks/useUserReports';
+import { AlertTriangle } from 'lucide-react';
 
 interface OfferCardProps {
   offer: HelpOffer;
@@ -21,6 +22,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
   onDelete,
 }) => {
   const { user } = useAuth();
+  const { isFlagged } = useUserReports(offer.user_id);
 
   const isOwner = user?.id === offer.user_id;
 
@@ -109,13 +111,15 @@ export const OfferCard: React.FC<OfferCardProps> = ({
               size={12}
               className="text-brand-primary ml-1"
             />
+            {isFlagged && (
+              <span title="This user has multiple reports">
+                <AlertTriangle
+                  size={14}
+                  className="text-amber-500 ml-1.5"
+                />
+              </span>
+            )}
           </div>
-          <StarRating
-            rating={offer.profiles?.trust_rank || 0}
-            totalRatings={offer.profiles?.total_ratings || 0}
-            size={12}
-            showCount
-          />
         </div>
 
         {startStr && (

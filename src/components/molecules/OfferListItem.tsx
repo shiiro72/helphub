@@ -6,6 +6,8 @@ import { VerificationBadge } from '../atoms/VerificationBadge';
 import { Highlight } from '../atoms/Highlight';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useUserReports } from '@/lib/hooks/useUserReports';
+import { AlertTriangle } from 'lucide-react';
 
 interface OfferListItemProps {
   offer: HelpOffer;
@@ -22,6 +24,7 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
 }) => {
   const t = useTranslations();
   const { user } = useAuth();
+  const { isFlagged } = useUserReports(offer.user_id);
 
   const isOwner = user?.id === offer.user_id;
 
@@ -85,6 +88,14 @@ export const OfferListItem: React.FC<OfferListItemProps> = ({
               size={10}
               className="text-brand-primary"
             />
+            {isFlagged && (
+              <span title="This user has multiple reports">
+                <AlertTriangle
+                  size={12}
+                  className="text-amber-500 ml-1"
+                />
+              </span>
+            )}
           </div>
 
           {startStr && (

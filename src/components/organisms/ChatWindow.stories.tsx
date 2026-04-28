@@ -27,8 +27,6 @@ const mockConversation = {
     username: 'john_doe',
     is_verified: true,
     image_url: null,
-    trust_rank: 4.5,
-    total_ratings: 10,
     created_at: new Date().toISOString(),
     role: 'user' as const,
     is_restricted: false,
@@ -40,7 +38,7 @@ export const Default: Story = {
     conversation: mockConversation,
     currentUserId: 'me',
     onSendMessage: (c) => console.log('Send', c),
-    onBlock: (id) => console.log('Block', id),
-    onReport: (id) => console.log('Report', id),
+    onBlock: async (id) => console.log('Block', id),
+    onUnblock: async (id) => console.log('Unblock', id), onReport: (id) => console.log('Report', id),
   },
 };

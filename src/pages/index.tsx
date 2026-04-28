@@ -5,43 +5,103 @@ import { Button } from '@/components/atoms/Button';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useAuth } from '@/lib/hooks/useAuth';
 import { HelpRequest, HelpOffer } from '@/lib/types';
 import { RequestCard } from '@/components/molecules/RequestCard';
 import { OfferCard } from '@/components/molecules/OfferCard';
 import { TriangularBoard } from '@/components/organisms/TriangularBoard';
+import { PostHelpModal } from '@/components/organisms/PostHelpModal';
+import { ConfirmationModal } from '@/components/molecules/ConfirmationModal';
 
 export default function Home() {
   const t = useTranslations();
-  const { user } = useAuth();
   const [latestRequests, setLatestRequests] = useState<HelpRequest[]>([]);
   const [latestOffers, setLatestOffers] = useState<HelpOffer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Modal states
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<(HelpRequest | HelpOffer) & { type: 'request' | 'offer' } | null>(null);
+  const [deletingItem, setDeletingItem] = useState<(HelpRequest | HelpOffer) & { type: 'request' | 'offer' } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchLatestData = async () => {
+      setLoading(true);
       const supabase = createClient();
+
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+
+      // Fetch blocks if user is logged in
+      const bIds = new Set<string>();
+      if (currentUser) {
+        const { data: blocks } = await supabase
+          .from('blocks')
+          .select('blocked_id, blocker_id')
+          .or(`blocker_id.eq.${currentUser.id},blocked_id.eq.${currentUser.id}`);
+
+        if (blocks) {
+          blocks.forEach((b: { blocked_id: string; blocker_id: string }) => {
+            if (b.blocker_id === currentUser.id) bIds.add(b.blocked_id);
+            else bIds.add(b.blocker_id);
+          });
+        }
+      }
+
 
       const [requestsRes, offersRes] = await Promise.all([
         supabase
           .from('help_requests')
           .select('*, profiles(*)')
           .order('date_posted', { ascending: false })
-          .limit(3),
+          .limit(10), // Fetch more to allow for blocking filter
         supabase
           .from('help_offers')
           .select('*, profiles(*)')
           .order('date_posted', { ascending: false })
-          .limit(3),
+          .limit(10),
       ]);
 
-      if (requestsRes.data) setLatestRequests(requestsRes.data);
-      if (offersRes.data) setLatestOffers(offersRes.data);
+      if (requestsRes.data) {
+        const filtered = requestsRes.data.filter((r: { user_id: string }) => !bIds.has(r.user_id)).slice(0, 3);
+        setLatestRequests(filtered);
+      }
+      if (offersRes.data) {
+        const filtered = offersRes.data.filter((o: { user_id: string }) => !bIds.has(o.user_id)).slice(0, 3);
+        setLatestOffers(filtered);
+      }
       setLoading(false);
     };
 
     fetchLatestData();
-  }, []);
+  }, [refreshTrigger]);
+
+  const handleEdit = (item: HelpRequest | HelpOffer, type: 'request' | 'offer') => {
+    setEditingItem({ ...item, type });
+    setIsPostModalOpen(true);
+  };
+
+  const handleDelete = (item: HelpRequest | HelpOffer, type: 'request' | 'offer') => {
+    setDeletingItem({ ...item, type });
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingItem) return;
+    setIsDeleting(true);
+    const supabase = createClient();
+    const table = deletingItem.type === 'request' ? 'help_requests' : 'help_offers';
+    const { error } = await supabase.from(table).delete().eq('id', deletingItem.id);
+
+    if (error) {
+      console.error('Error deleting item:', error);
+    } else {
+      setRefreshTrigger((prev) => prev + 1);
+      setDeletingItem(null);
+    }
+    setIsDeleting(false);
+  };
 
   return (
     <div className="min-h-screen bg-brand-background">
@@ -51,7 +111,13 @@ export default function Home() {
         <div className="space-y-12">
           {/* Desktop View: Triangular Board */}
           <div className="hidden lg:block">
-            <TriangularBoard requests={latestRequests} offers={latestOffers} loading={loading} />
+            <TriangularBoard
+              requests={latestRequests}
+              offers={latestOffers}
+              loading={loading}
+              onEdit={(item, type) => handleEdit(item, type)}
+              onDelete={(item, type) => handleDelete(item, type)}
+            />
           </div>
 
           {/* Mobile View: Traditional Grids */}
@@ -79,7 +145,12 @@ export default function Home() {
               ) : latestRequests.length > 0 ? (
                 <div className="grid grid-cols-1 gap-6">
                   {latestRequests.map((request) => (
-                    <RequestCard key={request.id} request={request} />
+                    <RequestCard
+                      key={request.id}
+                      request={request}
+                      onEdit={(r) => handleEdit(r, 'request')}
+                      onDelete={(r) => handleDelete(r, 'request')}
+                    />
                   ))}
                 </div>
               ) : (
@@ -112,7 +183,12 @@ export default function Home() {
               ) : latestOffers.length > 0 ? (
                 <div className="grid grid-cols-1 gap-6">
                   {latestOffers.map((offer) => (
-                    <OfferCard key={offer.id} offer={offer} />
+                    <OfferCard
+                      key={offer.id}
+                      offer={offer}
+                      onEdit={(o) => handleEdit(o, 'offer')}
+                      onDelete={(o) => handleDelete(o, 'offer')}
+                    />
                   ))}
                 </div>
               ) : (
@@ -124,6 +200,30 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {editingItem && (
+        <PostHelpModal
+          type={editingItem.type}
+          isOpen={isPostModalOpen}
+          initialData={editingItem}
+          onClose={() => {
+            setIsPostModalOpen(false);
+            setEditingItem(null);
+          }}
+          onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+        />
+      )}
+
+      <ConfirmationModal
+        isOpen={!!deletingItem}
+        onClose={() => setDeletingItem(null)}
+        onConfirm={confirmDelete}
+        title={deletingItem?.type === 'request' ? t('delete_request') : t('delete_offer')}
+        message={t('delete_post_confirmation')}
+        confirmText={t('delete')}
+        variant="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

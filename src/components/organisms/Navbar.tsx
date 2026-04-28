@@ -106,10 +106,12 @@ export function Navbar() {
                       </span>
                     </button>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => setIsSupportOpen(true)}>
-                    <MessageCircle size={16} className="mr-2" />
-                    {t('support')}
-                  </Button>
+                  {profile?.role !== 'admin' && (
+                    <Button variant="outline" size="sm" onClick={() => setIsSupportOpen(true)}>
+                      <MessageCircle size={16} className="mr-2" />
+                      {t('support')}
+                    </Button>
+                  )}
                   <Button variant="outline" size="sm" onClick={handleLogout}>
                     <LogOut size={16} className="mr-2" />
                     {t('logout')}
@@ -209,17 +211,19 @@ export function Navbar() {
                       />
                     </span>
                   </button>
-                  <Button
-                    variant="outline"
-                    size="full"
-                    onClick={() => {
-                      setIsSupportOpen(true);
-                      setIsMenuOpen(false);
-                    }}
-                  >
-                    <MessageCircle size={16} className="mr-2" />
-                    {t('support')}
-                  </Button>
+                  {profile?.role !== 'admin' && (
+                    <Button
+                      variant="outline"
+                      size="full"
+                      onClick={() => {
+                        setIsSupportOpen(true);
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <MessageCircle size={16} className="mr-2" />
+                      {t('support')}
+                    </Button>
+                  )}
                   <Button variant="outline" size="full" onClick={handleLogout}>
                     <LogOut size={16} className="mr-2" />
                     {t('logout')}

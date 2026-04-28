@@ -7,7 +7,6 @@ import {
   MoreVertical,
   Flag,
   Ban,
-  Star,
   Users,
   ExternalLink,
   X,
@@ -15,7 +14,6 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { VerificationBadge } from '../atoms/VerificationBadge';
-import { RatingModal } from '../molecules/RatingModal';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/router';
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
@@ -24,7 +22,8 @@ interface ChatWindowProps {
   conversation: Conversation;
   currentUserId: string;
   onSendMessage: (content: string) => void;
-  onBlock: (userId: string) => void;
+  onBlock: (userId: string) => Promise<void>;
+  onUnblock: (userId: string) => Promise<void>;
   onReport: (userId: string) => void;
   isOnline?: boolean;
 }
@@ -34,6 +33,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   currentUserId,
   onSendMessage,
   onBlock,
+  onUnblock,
   onReport,
   isOnline = false,
 }) => {
@@ -58,24 +58,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   };
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
-  const [showRatingModal, setShowRatingModal] = useState(false);
-  const [ratingTarget, setRatingTarget] = useState<Profile | null>(null);
-  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [supabase] = useState(() => createClient());
 
   const markAsRead = useCallback(async (messageId: string) => {
     await supabase.from('messages').update({ is_read: true }).eq('id', messageId);
   }, [supabase]);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const { data } = await supabase.from('profiles').select('*').eq('id', currentUserId).single();
-      setCurrentUserProfile(data);
-    };
-    fetchProfile();
-  }, [supabase, currentUserId]);
 
   useEffect(() => {
     const fetchRequest = async () => {
@@ -182,30 +172,48 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       ? conversation.participant_2
       : conversation.participant_1;
 
-  const handleRateUser = async (rating: number, tags: string[], comment: string) => {
-    if (!ratingTarget && !otherParticipantId) return;
-    const targetId = ratingTarget?.id || otherParticipantId;
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data } = await supabase.from('profiles').select('*').eq('id', currentUserId).single();
+      setCurrentUserProfile(data);
+    };
+    fetchProfile();
 
-    setIsSubmittingRating(true);
-    try {
-      const { error } = await supabase.from('ratings').upsert({
-        rater_id: currentUserId,
-        rated_id: targetId,
-        rating,
-        tags,
-        comment,
-      });
+    const checkBlock = async () => {
+      if (!otherParticipantId) return;
+      const { data } = await supabase
+        .from('blocks')
+        .select('*')
+        .or(
+          `and(blocker_id.eq.${currentUserId},blocked_id.eq.${otherParticipantId}),and(blocker_id.eq.${otherParticipantId},blocked_id.eq.${currentUserId})`,
+        )
+        .maybeSingle();
+      setIsBlocked(!!data);
+    };
+    checkBlock();
 
-      if (error) throw error;
-      setShowRatingModal(false);
-      setRatingTarget(null);
-    } catch (error) {
-      console.error('Error submitting rating:', error);
-      alert('Failed to submit rating. Please try again.');
-    } finally {
-      setIsSubmittingRating(false);
-    }
-  };
+    if (!otherParticipantId) return;
+
+    const blocksChannel = supabase
+      .channel(`blocks:${conversation.id}:${Math.random().toString(36).slice(2)}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'blocks',
+        },
+        () => {
+          // Add a small delay to allow database synchronization
+          setTimeout(() => checkBlock(), 500);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(blocksChannel);
+    };
+  }, [supabase, currentUserId, otherParticipantId, conversation.id]);
 
   const handleMessageUser = (userId: string) => {
     router.push(`/messages?userId=${userId}`);
@@ -244,7 +252,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             ) : (
               <div className="flex items-center gap-2">
                 <span
-                  className={`text-[10px] ${isOnline ? 'text-brand-success font-medium' : 'text-brand-text-secondary'}`}
+                  className={`text-[10px] ${isOnline ? 'text-brand-primary font-medium' : 'text-brand-text-secondary'}`}
                 >
                   {isOnline ? 'online' : 'offline'}
                 </span>
@@ -276,26 +284,35 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 </>
               ) : (
                 <>
-                  <button
-                    onClick={() => {
-                      if (otherParticipantId) onBlock(otherParticipantId);
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-error"
-                  >
-                    <Ban size={16} />
-                    {t('block_user')}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowRatingModal(true);
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-text-main"
-                  >
-                    <Star size={16} />
-                    {t('rate_user')}
-                  </button>
+                  {isBlocked ? (
+                    <button
+                      onClick={async () => {
+                        if (otherParticipantId) {
+                          setIsBlocked(false);
+                          await onUnblock(otherParticipantId);
+                        }
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-primary"
+                    >
+                      <User size={16} />
+                      Unblock User
+                    </button>
+                  ) : (
+                    <button
+                      onClick={async () => {
+                        if (otherParticipantId) {
+                          setIsBlocked(true);
+                          await onBlock(otherParticipantId);
+                        }
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-3 text-left text-sm hover:bg-brand-background flex items-center gap-2 text-brand-error"
+                    >
+                      <Ban size={16} />
+                      {t('block_user')}
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       if (otherParticipantId) onReport(otherParticipantId);
@@ -359,7 +376,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* Input */}
       <div className="shrink-0 bg-chat-header border-t border-brand-border pb-safe">
-        {currentUserProfile?.is_restricted ? (
+        {isBlocked ? (
+          <div className="px-4 py-3 text-center text-sm text-brand-text-secondary italic">
+            {t('cannot_message_blocked')}
+          </div>
+        ) : currentUserProfile?.is_restricted ? (
           <div className="px-4 py-3 text-center text-sm text-brand-error">
             {t('messaging_restricted')}
           </div>
@@ -419,18 +440,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           </div>
         </div>
       )}
-
-      {/* Rating Modal */}
-      <RatingModal
-        isOpen={showRatingModal}
-        onClose={() => {
-          setShowRatingModal(false);
-          setRatingTarget(null);
-        }}
-        onSubmit={handleRateUser}
-        userName={ratingTarget?.username || conversation.profiles?.username || 'User'}
-        isSubmitting={isSubmittingRating}
-      />
     </div>
   );
 };

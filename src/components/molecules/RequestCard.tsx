@@ -13,12 +13,14 @@ import {
 import { HelpRequest } from '@/lib/types';
 import Link from 'next/link';
 import { VerificationBadge } from '../atoms/VerificationBadge';
-import { StarRating } from '../atoms/StarRating';
 import { Highlight } from '../atoms/Highlight';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { VolunteerList } from './VolunteerList';
 import { useVolunteer } from '@/lib/hooks/useVolunteer';
+import { useUserReports } from '@/lib/hooks/useUserReports';
+import { AlertTriangle } from 'lucide-react';
+import { Portal } from '../atoms/Portal';
 
 interface RequestCardProps {
   request: HelpRequest;
@@ -35,6 +37,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
 }) => {
   const t = useTranslations();
   const { user } = useAuth();
+  const { isFlagged } = useUserReports(request.user_id);
   const [showVolunteerModal, setShowVolunteerModal] = useState(false);
 
   const isOwner = user?.id === request.user_id;
@@ -168,13 +171,15 @@ export const RequestCard: React.FC<RequestCardProps> = ({
               size={12}
               className="text-brand-primary ml-1"
             />
+            {isFlagged && (
+              <span title="This user has multiple reports">
+                <AlertTriangle
+                  size={14}
+                  className="text-amber-500 ml-1.5"
+                />
+              </span>
+            )}
           </div>
-          <StarRating
-            rating={request.profiles?.trust_rank || 0}
-            totalRatings={request.profiles?.total_ratings || 0}
-            size={12}
-            showCount
-          />
         </div>
 
         {startStr && (
@@ -216,18 +221,20 @@ export const RequestCard: React.FC<RequestCardProps> = ({
       </div>
 
       {showVolunteerModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="bg-brand-surface rounded-2xl w-full max-w-md shadow-2xl p-6">
-            <VolunteerList
-              request={{ ...request, confirmed_count: confirmedCount }}
-              onClose={() => setShowVolunteerModal(false)}
-            />
+        <Portal>
+          <div
+            className="fixed inset-0 z-[140] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="bg-brand-surface rounded-2xl w-full max-w-md shadow-2xl p-6">
+              <VolunteerList
+                request={{ ...request, confirmed_count: confirmedCount }}
+                onClose={() => setShowVolunteerModal(false)}
+              />
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

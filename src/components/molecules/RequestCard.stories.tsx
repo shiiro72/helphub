@@ -28,8 +28,6 @@ const mockRequest = {
     username: 'john_doe',
     is_verified: true,
     image_url: null,
-    trust_rank: 4.5,
-    total_ratings: 10,
     created_at: new Date().toISOString(),
     role: 'user' as const,
     is_restricted: false,

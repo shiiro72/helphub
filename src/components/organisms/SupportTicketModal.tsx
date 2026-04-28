@@ -62,7 +62,7 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
           </h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="p-1 rounded-full hover:bg-brand-surface-container-low transition-colors"
           >
             <X size={20} className="text-zinc-500" />
           </button>
@@ -111,7 +111,7 @@ export function SupportTicketModal({ isOpen, onClose, userId }: SupportTicketMod
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 hover:bg-brand-surface-container-low transition-colors"
                   onClick={onClose}
                   disabled={isSubmitting}
                 >

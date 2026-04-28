@@ -12,13 +12,19 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/atoms/Button';
 import { User, Check, X } from 'lucide-react';
 import { usePresence } from '@/lib/contexts/PresenceContext';
+import { useToast } from '@/lib/contexts/ToastContext';
+import { ReportModal } from '@/components/molecules/ReportModal';
 
 export default function MessagesPage() {
   const t = useTranslations();
+  const { showToast } = useToast();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [invitations, setInvitations] = useState<ConversationInvitation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
+  const [_blockedUserIds, setBlockedUserIds] = useState<Set<string>>(new Set());
+  const [reportingUserId, setReportingUserId] = useState<string | null>(null);
+  const [isReporting, setIsReporting] = useState(false);
   const { onlineUsers } = usePresence();
   const router = useRouter();
   const { userId, conversationId } = router.query;
@@ -83,7 +89,7 @@ export default function MessagesPage() {
         participant_2_profile:profiles!participant_2(*)
       `,
         )
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error starting conversation:', error);
@@ -103,6 +109,21 @@ export default function MessagesPage() {
 
   const fetchConversations = useCallback(
     async (currentUserId: string) => {
+      // 0. Fetch blocked users
+      const { data: blocks } = await supabase
+        .from('blocks')
+        .select('blocked_id, blocker_id')
+        .or(`blocker_id.eq.${currentUserId},blocked_id.eq.${currentUserId}`);
+
+      const bIds = new Set<string>();
+      if (blocks) {
+        blocks.forEach((b: { blocked_id: string; blocker_id: string }) => {
+          if (b.blocker_id === currentUserId) bIds.add(b.blocked_id);
+          else bIds.add(b.blocker_id);
+        });
+      }
+      setBlockedUserIds(bIds);
+
       const { data, error } = await supabase
         .from('conversations')
         .select(
@@ -200,13 +221,18 @@ export default function MessagesPage() {
     [supabase],
   );
 
-  // Sync active conversation when query params or conversations list updates
+  // Sync active conversation state from URL once on load or when query params change manually
+  const prevQueryRef = useRef<string>('');
   useEffect(() => {
-    if (!user) return;
+    if (!user || !router.isReady || conversations.length === 0) return;
+
+    const currentQuery = JSON.stringify(router.query);
+    if (currentQuery === prevQueryRef.current) return;
+    prevQueryRef.current = currentQuery;
 
     if (conversationId && typeof conversationId === 'string') {
       const existing = conversations.find((c) => c.id === conversationId);
-      if (existing && existing.id !== activeConversation?.id) {
+      if (existing) {
         setActiveConversation(existing);
       }
     } else if (userId && typeof userId === 'string' && userId !== user.id) {
@@ -214,22 +240,22 @@ export default function MessagesPage() {
         (c) => !c.is_group && (c.participant_1 === userId || c.participant_2 === userId),
       );
       if (existing) {
-        if (existing.id !== activeConversation?.id) {
-          setActiveConversation(existing);
-        }
+        setActiveConversation(existing);
       } else {
         startNewConversation(user.id, userId);
       }
     }
+  }, [conversations.length, user, conversationId, userId, startNewConversation, router.isReady, router.query]);
 
-    // Update active conversation with fresh data from the list if it exists
+  // Handle data updates for current active conversation without loop
+  useEffect(() => {
     if (activeConversation) {
       const updated = conversations.find((c) => c.id === activeConversation.id);
-      if (updated && JSON.stringify(updated) !== JSON.stringify(activeConversation)) {
-        setActiveConversation(updated);
+      if (updated && (updated.unreadCount !== activeConversation.unreadCount || updated.last_message_at !== activeConversation.last_message_at)) {
+         setActiveConversation(updated);
       }
     }
-  }, [conversations, user, conversationId, userId, startNewConversation, activeConversation]);
+  }, [conversations, activeConversation?.id]);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -246,7 +272,7 @@ export default function MessagesPage() {
       }
     };
     checkUser();
-  }, [supabase, router, fetchConversations]);
+  }, [supabase, router.isReady, fetchConversations]);
 
   useEffect(() => {
     if (!user) return;
@@ -272,6 +298,15 @@ export default function MessagesPage() {
           event: '*',
           schema: 'public',
           table: 'conversations',
+        },
+        () => fetchConversations(user.id),
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'blocks',
         },
         () => fetchConversations(user.id),
       )
@@ -326,29 +361,47 @@ export default function MessagesPage() {
       .insert({ blocker_id: user.id, blocked_id: blockedId });
 
     if (error) {
-      alert('Error blocking user');
+      showToast(t('error_blocking_user'), 'error');
     } else {
-      alert('User blocked');
-      setActiveConversation(null);
+      showToast(t('user_blocked'), 'success');
       fetchConversations(user.id);
     }
   };
 
-  const handleReport = async (reportedId: string) => {
+  const handleUnblock = async (blockedId: string) => {
     if (!user) return;
-    const reason = prompt('Please enter the reason for reporting:');
-    if (!reason) return;
+    const { error } = await supabase
+      .from('blocks')
+      .delete()
+      .or(
+        `and(blocker_id.eq.${user.id},blocked_id.eq.${blockedId}),and(blocker_id.eq.${blockedId},blocked_id.eq.${user.id})`,
+      );
+
+    if (error) {
+      showToast(t('error_unblocking_user'), 'error');
+    } else {
+      showToast(t('user_unblocked'), 'success');
+      fetchConversations(user.id);
+    }
+  };
+
+  const handleReport = async (reason: string) => {
+    if (!user || !reportingUserId) return;
+    setIsReporting(true);
 
     const { error } = await supabase.from('reports').insert({
       reporter_id: user.id,
-      reported_id: reportedId,
+      reported_id: reportingUserId,
       reason: reason,
     });
 
+    setIsReporting(false);
+    setReportingUserId(null);
+
     if (error) {
-      alert('Error reporting user');
+      showToast(t('error_reporting_user'), 'error');
     } else {
-      alert('User reported');
+      showToast(t('user_reported'), 'success');
     }
   };
 
@@ -389,14 +442,14 @@ export default function MessagesPage() {
                 {invitations.map((inv) => (
                   <div
                     key={inv.id}
-                    className="bg-white dark:bg-zinc-900 p-3 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800"
+                    className="bg-brand-surface-container-lowest p-3 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800"
                   >
                     <div className="flex items-start gap-3 mb-2">
-                      <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden">
-                        <User size={16} className="text-zinc-500" />
+                      <div className="w-8 h-8 rounded-full bg-brand-surface-container flex items-center justify-center shrink-0 overflow-hidden">
+                        <User size={16} className="text-brand-text-secondary" />
                       </div>
-                      <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-tight">
-                        <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                      <p className="text-xs text-brand-text-secondary leading-tight">
+                        <span className="font-bold text-brand-text-main">
                           {inv.inviter?.username}
                         </span>{' '}
                         {t('group_chat_invitation')}{' '}
@@ -446,7 +499,8 @@ export default function MessagesPage() {
               currentUserId={user.id}
               onSendMessage={handleSendMessage}
               onBlock={handleBlock}
-              onReport={handleReport}
+              onUnblock={handleUnblock}
+              onReport={(id) => setReportingUserId(id)}
               isOnline={
                 !activeConversation.is_group &&
                 (activeConversation.participant_1 === user.id
@@ -456,23 +510,37 @@ export default function MessagesPage() {
             />
           ) : (
             <div className="flex flex-col items-center justify-center w-full text-center p-8">
-              <div className="w-24 h-24 rounded-full bg-brand-success flex items-center justify-center mb-6">
+              <div className="w-24 h-24 rounded-full bg-brand-primary flex items-center justify-center mb-6">
                 <span className="text-white text-4xl font-bold">HH</span>
               </div>
-              <h2 className="text-2xl font-light text-zinc-900 dark:text-zinc-100 mb-2">
+              <h2 className="text-2xl font-bold text-brand-secondary mb-2">
                 {t('messages_welcome_title')}
               </h2>
-              <p className="text-zinc-500 max-w-sm">{t('messages_welcome_desc')}</p>
+              <p className="text-brand-text-secondary max-w-sm">{t('messages_welcome_desc')}</p>
             </div>
           )}
         </div>
 
+        <ReportModal
+          isOpen={!!reportingUserId}
+          onClose={() => setReportingUserId(null)}
+          onConfirm={handleReport}
+          userName={
+            conversations.find(
+              (c) =>
+                !c.is_group &&
+                (c.participant_1 === reportingUserId || c.participant_2 === reportingUserId),
+            )?.profiles?.username || 'User'
+          }
+          isSubmitting={isReporting}
+        />
+
         {activeConversation && user && (
-          <div className="fixed inset-0 z-[60] md:hidden bg-white dark:bg-black overflow-hidden">
+          <div className="fixed inset-0 z-[60] md:hidden bg-brand-surface overflow-hidden">
             <div className="h-[100dvh] flex flex-col">
               <button
                 onClick={() => setActiveConversation(null)}
-                className="p-4 text-sm font-medium text-blue-600 flex items-center bg-white dark:bg-black border-b border-brand-border shrink-0"
+                className="p-4 text-sm font-medium text-brand-primary flex items-center bg-brand-surface border-b border-brand-border shrink-0"
               >
                 ← Back
               </button>
@@ -482,7 +550,8 @@ export default function MessagesPage() {
                   currentUserId={user.id}
                   onSendMessage={handleSendMessage}
                   onBlock={handleBlock}
-                  onReport={handleReport}
+                  onUnblock={handleUnblock}
+              onReport={(id) => setReportingUserId(id)}
                   isOnline={
                     !activeConversation.is_group &&
                     (activeConversation.participant_1 === user.id

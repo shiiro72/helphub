@@ -5,18 +5,6 @@ export interface Profile {
   image_url: string | null;
   role: 'user' | 'admin';
   is_restricted: boolean;
-  trust_rank: number;
-  total_ratings: number;
-  created_at: string;
-}
-
-export interface Rating {
-  id: string;
-  rater_id: string;
-  rated_id: string;
-  rating: number;
-  tags: string[];
-  comment: string | null;
   created_at: string;
 }
 
