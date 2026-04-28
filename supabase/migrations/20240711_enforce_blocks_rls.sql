@@ -10,7 +10,7 @@ BEGIN
     OR (blocker_id = user_b AND blocked_id = user_a)
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- 2. Update messages INSERT policy to strictly prevent messaging blocked users
 DROP POLICY IF EXISTS "Participants can insert messages." ON messages;
@@ -29,8 +29,8 @@ CREATE POLICY "Participants can insert messages." ON messages
             (auth.uid() = participant_2 AND NOT public.is_blocked(participant_2, participant_1))
           )
         ) OR
-        -- For group chats, rely on membership (future: could also check blocks from group members)
-        (is_group = true AND public.is_member_of_conversation(id))
+        -- For group chats, rely on membership
+        (is_group = true AND public.is_member_of_conversation(conversations.id))
       )
     )
   );
@@ -45,7 +45,7 @@ CREATE POLICY "Participants can view messages." ON messages
       AND (
         participant_1 = auth.uid() OR
         participant_2 = auth.uid() OR
-        public.is_member_of_conversation(id)
+        public.is_member_of_conversation(conversations.id)
       )
     ) AND
     NOT public.is_blocked(auth.uid(), sender_id)
