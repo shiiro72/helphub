@@ -35,7 +35,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
         size="icon"
         disabled={!message.trim() || disabled}
         className={`${
-          message.trim() ? 'text-brand-success' : 'text-zinc-500'
+          message.trim() ? 'text-brand-primary' : 'text-zinc-500'
         } hover:bg-transparent`}
       >
         <Send size={24} />

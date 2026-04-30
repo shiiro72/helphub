@@ -109,8 +109,8 @@ export default function MessagesPage() {
   );
 
   const fetchConversations = useCallback(
-    async (currentUserId: string) => {
-      setIsLoadingConversations(true);
+    async (currentUserId: string, silent = false) => {
+      if (!silent) setIsLoadingConversations(true);
       // 0. Fetch blocked users
       const { data: blocks } = await supabase
         .from('blocks')
@@ -144,7 +144,7 @@ export default function MessagesPage() {
 
       if (error) {
         console.error('Error fetching conversations:', error);
-        setIsLoadingConversations(false);
+        if (!silent) setIsLoadingConversations(false);
         return;
       }
 
@@ -212,7 +212,7 @@ export default function MessagesPage() {
       }));
 
       setConversations(withUnread);
-      setIsLoadingConversations(false);
+      if (!silent) setIsLoadingConversations(false);
 
       const { data: invData } = await supabase
         .from('conversation_invitations')
@@ -267,7 +267,7 @@ export default function MessagesPage() {
          setActiveConversation(updated);
       }
     }
-  }, [conversations, activeConversation]);
+  }, [conversations, activeConversation?.id]);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -284,7 +284,8 @@ export default function MessagesPage() {
       }
     };
     checkUser();
-  }, [supabase, router, fetchConversations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase, router.isReady, fetchConversations]);
 
   useEffect(() => {
     if (!user) return;
@@ -297,7 +298,7 @@ export default function MessagesPage() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'conversation_invitations' },
         () => {
-          fetchConversations(user.id);
+          fetchConversations(user.id, true);
         },
       )
       .subscribe();
@@ -311,7 +312,7 @@ export default function MessagesPage() {
           schema: 'public',
           table: 'conversations',
         },
-        () => fetchConversations(user.id),
+        () => fetchConversations(user.id, true),
       )
       .on(
         'postgres_changes',
@@ -320,7 +321,7 @@ export default function MessagesPage() {
           schema: 'public',
           table: 'blocks',
         },
-        () => fetchConversations(user.id),
+        () => fetchConversations(user.id, true),
       )
       .on(
         'postgres_changes',
@@ -329,7 +330,7 @@ export default function MessagesPage() {
           schema: 'public',
           table: 'conversation_members',
         },
-        () => fetchConversations(user.id),
+        () => fetchConversations(user.id, true),
       )
       .on(
         'postgres_changes',
@@ -340,7 +341,7 @@ export default function MessagesPage() {
         },
         (payload: RealtimePostgresChangesPayload<Message>) => {
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-            setTimeout(() => fetchConversations(user.id), 500);
+            fetchConversations(user.id, true);
           }
         },
       )
@@ -426,7 +427,7 @@ export default function MessagesPage() {
       user_id: user.id,
     });
 
-    fetchConversations(user.id);
+    fetchConversations(user.id, true);
     router.push(`/messages?conversationId=${inv.conversation_id}`);
   };
 
@@ -434,7 +435,7 @@ export default function MessagesPage() {
     if (!user) return;
     await supabase.from('conversation_invitations').update({ status: 'rejected' }).eq('id', inv.id);
 
-    fetchConversations(user.id);
+    fetchConversations(user.id, true);
   };
 
   return (
