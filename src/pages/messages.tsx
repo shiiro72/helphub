@@ -20,9 +20,10 @@ export default function MessagesPage() {
   const { showToast } = useToast();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const [invitations, setInvitations] = useState<ConversationInvitation[]>([]);
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
-  const [_blockedUserIds, setBlockedUserIds] = useState<Set<string>>(new Set());
+  const [, setBlockedUserIds] = useState<Set<string>>(new Set());
   const [reportingUserId, setReportingUserId] = useState<string | null>(null);
   const [isReporting, setIsReporting] = useState(false);
   const { onlineUsers } = usePresence();
@@ -109,6 +110,7 @@ export default function MessagesPage() {
 
   const fetchConversations = useCallback(
     async (currentUserId: string) => {
+      setIsLoadingConversations(true);
       // 0. Fetch blocked users
       const { data: blocks } = await supabase
         .from('blocks')
@@ -142,6 +144,7 @@ export default function MessagesPage() {
 
       if (error) {
         console.error('Error fetching conversations:', error);
+        setIsLoadingConversations(false);
         return;
       }
 
@@ -150,39 +153,47 @@ export default function MessagesPage() {
           new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime(),
       );
 
-      const processed = allConversations.map((conv: Conversation) => {
-        const lastMessage = conv.messages?.[0];
+      let processed: Conversation[] = [];
+      try {
+        processed = allConversations.map((conv: Conversation) => {
+          const lastMessage = conv.messages?.[0];
 
-        if (conv.is_group) {
-          const joinedMembers =
-            (conv.members as unknown as { profiles: Profile }[])?.map((m) => m.profiles) || [];
+          if (conv.is_group) {
+            const joinedMembers =
+              (conv.members as unknown as { profiles: Profile }[])?.map((m) => m.profiles) || [];
 
-          const p1 = conv.participant_1_profile as unknown as Profile;
-          const p2 = conv.participant_2_profile as unknown as Profile;
+            const p1 = conv.participant_1_profile as unknown as Profile;
+            const p2 = conv.participant_2_profile as unknown as Profile;
 
-          const membersMap = new Map<string, Profile>();
-          joinedMembers.forEach((m) => membersMap.set(m.id, m));
-          if (p1) membersMap.set(p1.id, p1);
-          if (p2) membersMap.set(p2.id, p2);
+            const membersMap = new Map<string, Profile>();
+            joinedMembers.forEach((m) => {
+              if (m?.id) membersMap.set(m.id, m);
+            });
+            if (p1?.id) membersMap.set(p1.id, p1);
+            if (p2?.id) membersMap.set(p2.id, p2);
 
-          const members = Array.from(membersMap.values());
+            const members = Array.from(membersMap.values());
 
+            return {
+              ...conv,
+              members,
+              lastMessage,
+            } as Conversation;
+          }
+          const otherProfile =
+            conv.participant_1 === currentUserId
+              ? conv.participant_2_profile
+              : conv.participant_1_profile;
           return {
             ...conv,
-            members,
+            profiles: otherProfile,
             lastMessage,
           } as Conversation;
-        }
-        const otherProfile =
-          conv.participant_1 === currentUserId
-            ? conv.participant_2_profile
-            : conv.participant_1_profile;
-        return {
-          ...conv,
-          profiles: otherProfile,
-          lastMessage,
-        } as Conversation;
-      });
+        });
+      } catch (err) {
+        console.error('Error processing conversations:', err);
+        processed = allConversations as unknown as Conversation[];
+      }
 
       const { data: unreadData } = await supabase
         .from('messages')
@@ -201,6 +212,7 @@ export default function MessagesPage() {
       }));
 
       setConversations(withUnread);
+      setIsLoadingConversations(false);
 
       const { data: invData } = await supabase
         .from('conversation_invitations')
@@ -224,7 +236,7 @@ export default function MessagesPage() {
   // Sync active conversation state from URL once on load or when query params change manually
   const prevQueryRef = useRef<string>('');
   useEffect(() => {
-    if (!user || !router.isReady || conversations.length === 0) return;
+    if (!user || !router.isReady || isLoadingConversations) return;
 
     const currentQuery = JSON.stringify(router.query);
     if (currentQuery === prevQueryRef.current) return;
@@ -245,7 +257,7 @@ export default function MessagesPage() {
         startNewConversation(user.id, userId);
       }
     }
-  }, [conversations.length, user, conversationId, userId, startNewConversation, router.isReady, router.query]);
+  }, [conversations, isLoadingConversations, user, conversationId, userId, startNewConversation, router.isReady, router.query]);
 
   // Handle data updates for current active conversation without loop
   useEffect(() => {
@@ -255,7 +267,7 @@ export default function MessagesPage() {
          setActiveConversation(updated);
       }
     }
-  }, [conversations, activeConversation?.id]);
+  }, [conversations, activeConversation]);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -272,7 +284,7 @@ export default function MessagesPage() {
       }
     };
     checkUser();
-  }, [supabase, router.isReady, fetchConversations]);
+  }, [supabase, router, fetchConversations]);
 
   useEffect(() => {
     if (!user) return;
@@ -489,6 +501,7 @@ export default function MessagesPage() {
                 router.push(`/messages?conversationId=${conv.id}`, undefined, { shallow: true });
               }}
               onlineUsers={onlineUsers}
+              loading={isLoadingConversations}
             />
           </div>
         </div>
@@ -504,8 +517,8 @@ export default function MessagesPage() {
               isOnline={
                 !activeConversation.is_group &&
                 (activeConversation.participant_1 === user.id
-                  ? onlineUsers.has(activeConversation.participant_2!)
-                  : onlineUsers.has(activeConversation.participant_1!))
+                  ? (activeConversation.participant_2 ? onlineUsers.has(activeConversation.participant_2) : false)
+                  : (activeConversation.participant_1 ? onlineUsers.has(activeConversation.participant_1) : false))
               }
             />
           ) : (
@@ -555,8 +568,8 @@ export default function MessagesPage() {
                   isOnline={
                     !activeConversation.is_group &&
                     (activeConversation.participant_1 === user.id
-                      ? onlineUsers.has(activeConversation.participant_2!)
-                      : onlineUsers.has(activeConversation.participant_1!))
+                      ? (activeConversation.participant_2 ? onlineUsers.has(activeConversation.participant_2) : false)
+                      : (activeConversation.participant_1 ? onlineUsers.has(activeConversation.participant_1) : false))
                   }
                 />
               </div>

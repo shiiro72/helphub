@@ -8,6 +8,7 @@ interface ChatListProps {
   activeId?: string;
   onSelect: (conversation: Conversation) => void;
   onlineUsers?: Set<string>;
+  loading?: boolean;
 }
 
 export const ChatList: React.FC<ChatListProps> = ({
@@ -15,6 +16,7 @@ export const ChatList: React.FC<ChatListProps> = ({
   activeId,
   onSelect,
   onlineUsers,
+  loading = false,
 }) => {
   return (
     <div className="flex flex-col h-full bg-chat-sidebar overflow-y-auto border-r border-brand-border">
@@ -22,7 +24,11 @@ export const ChatList: React.FC<ChatListProps> = ({
         <h2 className="text-xl font-bold text-brand-text-main">Chats</h2>
       </div>
       <div className="grow overflow-y-auto">
-        {conversations.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div>
+          </div>
+        ) : conversations.length === 0 ? (
           <div className="p-8 text-center text-brand-text-secondary">No conversations yet.</div>
         ) : (
           conversations.map((conv) => (
